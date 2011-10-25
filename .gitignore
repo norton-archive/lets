@@ -1,0 +1,10 @@
+*.o
+.eunit/
+c_src/perftools-*/
+c_src/perftools/
+c_src/snappy-*/
+c_src/snappy/
+c_src/leveldb-*/
+c_src/leveldb/
+ebin/
+priv/lib/

@@ -1,0 +1,318 @@
+%% -*- Doc -*-
+%% vim: set syntax=asciidoc:
+@author Joseph Wayne Norton <norton@alum.mit.edu>
+@copyright 2011 by Joseph Wayne Norton
+@title LETS - LevelDB-based Erlang Term Storage
+@doc
+LETS is an alternative Erlang Term Storage using LevelDB as the
+storage implementation.  LETS tries to address some bad properties of
+ETS and DETS.  ETS is limited by physical memory.  DETS is limited by
+a 2 GB file size limitation and does not implement ordered sets.  LETS
+has neither of these limitations.
+
+For testing and comparison purposes, LETS supports three
+implementations:
+
+- +drv+ C\+\+ Driver with LevelDB backend _(default)_
+- +nif+ C\+\+ NIF with LevelDB backend
+- +ets+ Erlang ETS backend
+
+LETS is not intended to be an exact clone of ETS.  The currently
+supported APIs are:
+
+- +new/2+
+- +destroy/2+ _only driver and nif implementations_
+- +repair/2+  _only driver and nif implementations_
+- +insert/2+
+- +insert_new/2+ _only the ets implementation_
+- +delete/1+
+- +delete/2+
+- +delete_all_objects/1+ _only the ets implementation_
+- +lookup/2+
+- +first/1+
+- +next/2+
+- +info/2+ _only a subset of items_
+- +tab2list/1+
+
+_This repository is experimental in nature - use at your own risk and
+please contribute if you find LETS useful._
+
+== Quick Start Recipe
+
+To download and build the lets application in one shot, please follow
+this recipe:
+
+------
+$ mkdir working-directory-name
+$ cd working-directory-name
+$ git clone git://github.com/norton/snappy.git snappy
+$ git clone git://github.com/norton/leveldb.git leveldb
+$ git clone git://github.com/norton/lets.git lets
+$ cd lets
+$ ./rebar get-deps
+$ ./rebar clean
+$ ./rebar compile
+------
+
+For an alternative recipe with other "features" albeit more complex,
+please read further.
+
+== Documentation
+
+=== Where should I start?
+
+This README is the only bit of documentation right now.
+
+The QC (a.k.a. QuickCheck, Proper, etc.) tests underneath the
+"tests/qc" directory should be helpful for understanding the
+specification and behavior of ETS and LETS.  These QC tests also
+illustrate several strategies for testing Erlang Driver-based and
+NIF-based implementations.
+
+=== What is ETS and DETS?
+
+ETS and DETS are Erlang/OTP\'s standard library modules for Erlang
+term storage.  ETS is a memory-based implementation.  DETS is a
+disk-based implementation.
+
+See http://www.erlang.org/doc/man/ets.html and
+http://www.erlang.org/doc/man/dets.html for further details.
+
+=== What is LevelDB?
+
+LevelDB is a fast key-value storage library written at Google that
+provides an ordered mapping from string keys to string values.
+
+See http://code.google.com/p/leveldb/ for further details.
+
+== To download
+
+1. Configure your e-mail and name for Git
++
+------
+$ git config \--global user.email "you@example.com"
+$ git config \--global user.name "Your Name"
+------
+
+2. Install Repo
++
+------
+$ mkdir -p ~/bin
+$ wget -O - https://github.com/android/tools_repo/raw/master/repo > ~/bin/repo
+$ perl -i.bak -pe 's!git://android.git.kernel.org/tools/repo.git!git://github.com/android/tools_repo.git!;' ~/bin/repo
+$ chmod a+x ~/bin/repo
+------
++
+CAUTION: Since access to kernel.org has been shutdown due to hackers,
+fetch and replace repo tool with android\'s GitHub repository mirror.
+
+3. Create working directory
++
+------
+$ mkdir working-directory-name
+$ cd working-directory-name
+$ repo init -u git://github.com/norton/manifests.git -m lets-default.xml
+------
++
+NOTE: Your "Git" identity is needed during the init step.  Please
+enter the name and email of your GitHub account if you have one.  Team
+members having read-write access are recommended to use "repo init -u
+git@github.com:norton/manifests.git -m lets-default-rw.xml".
++
+TIP: If you want to checkout the latest development version, please
+append " -b dev" to the repo init command.
+
+4. Download Git repositories
++
+------
+$ cd working-directory-name
+$ repo sync
+------
+
+For futher information and help for related tools, please refer to the
+following links:
+
+- Erlang - http://www.erlang.org/
+  * *R14B03 or newer, R14B04 has been tested most recently*
+- Git - http://git-scm.com/
+  * *Git 1.5.4 or newer, Git 1.7.7 has been tested recently*
+  * _required for Repo and GitHub_
+- GitHub - https://github.com
+- Python - http://www.python.org
+  * *Python 2.4 or newer, Python 2.7.1 has been tested most recently
+    (CAUTION: Python 3.x might be too new)*
+* _required for Repo_
+  - Rebar - https://github.com/basho/rebar/wiki
+  - Repo - http://source.android.com/source/git-repo.html
+
+== To build - basic recipe
+
+1. Get and install an erlang system http://www.erlang.org
+
+2. Build
++
+------
+$ cd working-directory-name/src
+$ make compile
+------
+
+== To build - optional features
+
+A. Dialyzer Testing _basic recipe_
+   1. Build Dialyzer\'s PLT _(required once)_
++
+------
+$ cd working-directory-name/src
+$ make build-plt
+------
++
+TIP: Check Makefile and dialyzer\'s documentation for further
+information.
+
+   2. Dialyze with specs
++
+------
+$ cd working-directory-name/src
+$ make dialyze
+------
++
+CAUTION: If you manually run dialyzer with the "-r" option, execute
+"make clean compile" first to avoid finding duplicate beam files
+underneath rebar\'s .eunit directory.  Check Makefile for further
+information.
+
+   3. Dialyze without specs
++
+------
+$ cd working-directory-name/src
+$ make dialyze-nospec
+------
+
+== To test - QuickCheck
+
+1. Make sure QuickCheck is in your Erlang code path.  One simple way
+   to accomplish this is by adding the code path to your +~/.erlang+
+   resource file.
++
+------
+true = code:add_pathz(os:getenv("HOME")++"/.erlang.d/lib/quviq/eqc-X.Y.Z/ebin").
+------
+
+2. Compile for QuickCheck
++
+------
+$ cd working-directory-name/src
+$ make clean
+$ make compile-eqc eqc-compile
+------
+
+3. Run 5,000 QuickCheck tests
++
+------
+$ cd working-directory-name/src/lib/lets/.eunit
+$ erl -smp +A 5 -pz ../../sext/ebin -pz ../../qc/ebin
+
+1> qc_statem_lets:run(5000).
+.......
+------
++
+TIP: For testing LevelDB directly using the C bindings, try
+     +qc_statemc_lets:run(5000)+.
+
+== To test - Proper
+
+1. Make sure Proper is in your Erlang code path.  One simple way to
+   accomplish this is by adding the code path to your +~/.erlang+
+   resource file.
++
+------
+true = code:add_pathz(os:getenv("HOME")++"/.erlang.d/lib/proper/ebin").
+------
+
+2. Compile for Proper
++
+------
+$ cd working-directory-name/src
+$ make clean
+$ make compile-proper proper-compile
+------
+
+3. Run 5,000 Proper tests
++
+------
+$ cd working-directory-name/src/lib/lets/.eunit
+$ erl -smp +A 5 -pz ../../sext/ebin -pz ../../qc/ebin
+
+1> qc_statem_lets:run(5000).
+.......
+------
+
+== Roadmap
+
+- Documentation
+  * Explain how to run QuickCheck/Proper tests using a new rebar
+    plugin.
+  * Explain how to build and to run lets with valgrind enabled
+    OTP/Erlang virtual machine
+
+- Bugs
+  * LevelDB - Reappearing "ghost" key after 17 steps
+    (http://code.google.com/p/leveldb/issues/detail?id=44)
+    +
+    NOTE: LET\'s QC tests are hard-coded not to close and then to
+    reopen a LevelDB database until this bug has been fixed.
+
+- Performance
+  * Update driver implementation to use Erlang\'s asynchronous driver
+    thread pool for all LevelDB operations.
+
+- Testing
+  * Functional
+    ** Update test model to include LevelDB\'s database, read, and
+       write options.  These options have not undergone any explicit
+       testing.
+  * Performance (TBD)
+  * Stability (TBD)
+
+- New APIs (TBD)
+  * +insert_new/2+
+    (http://code.google.com/p/leveldb/issues/detail?id=42)
+
+  * +delete_all_objects/1+
+    (http://code.google.com/p/leveldb/issues/detail?id=43)
+
+- Existing APIs (TBD)
+  * +new/2+ - automatically detect and prevent multiple callers of the
+    same Erlang virtual machine from simultaneously opening the same
+    LevelDB.  Excerpt from the Google leveldb mailing list:
+    +
+------
+Sanjay Ghemawat
+View profile
+ More options Sep 30, 1:04 am
+On Thu, Sep 29, 2011 at 8:30 AM, Joseph Wayne Norton wrote:
+> Hans -
+> Thanks.  Is is correct to assume that it is the caller's responsibility to
+> ensure this does not happen?
+
+leveldb guarantees that it will catch when two distinct processes
+try to open the db concurrently. However it doesn't guarantee what happens
+if the same process tries to do so and therefore it is the caller's
+responsibility
+to check for concurrent opens from the same process.
+This is ugly, but the unix file locking primitives are very annoying in
+this regard. I'll think about whether or not we should clean up the spec
+by doing extra checks inside the leveldb implementation.
+------
+
+  * +new/2+ - investigate if LevelDB\'s snapshot feature is useful (or
+    not) for LETS
+
+  * +info/2+ - investigate if LevelDB\'s implementation can (easily)
+    support size and memory info items
+
+  * consider adding explicit read_options and write_options for LET\'s
+    operations (rather than just +new/2+, +destroy/2+, and +repair/2+
+    operations).
+
+@end
