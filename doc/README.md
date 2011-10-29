@@ -585,35 +585,16 @@ Existing APIs (TBD)
 <ul>
 <li>
 <p>
-<tt>new/2</tt> - automatically detect and prevent multiple callers of the
-    same Erlang virtual machine from simultaneously opening the same
-    LevelDB.  Excerpt from the Google leveldb mailing list:
-   <br>
+<tt>delete/1</tt>
+    (<a href="http://code.google.com/p/leveldb/issues/detail?id=48">http://code.google.com/p/leveldb/issues/detail?id=48</a>)
 </p>
 </li>
-</ul>
+<li>
+<p>
+<tt>new/2</tt> -
+    (<a href="http://code.google.com/p/leveldb/issues/detail?id=49">http://code.google.com/p/leveldb/issues/detail?id=49</a>)
+</p>
 </li>
-</ul>
-
-
-<pre><tt>Sanjay Ghemawat
-View profile
- More options Sep 30, 1:04 am
-On Thu, Sep 29, 2011 at 8:30 AM, Joseph Wayne Norton wrote:
-> Hans -
-> Thanks.  Is is correct to assume that it is the caller's responsibility to
-> ensure this does not happen?
-
-leveldb guarantees that it will catch when two distinct processes
-try to open the db concurrently. However it doesn't guarantee what happens
-if the same process tries to do so and therefore it is the caller's
-responsibility
-to check for concurrent opens from the same process.
-This is ugly, but the unix file locking primitives are very annoying in
-this regard. I'll think about whether or not we should clean up the spec
-by doing extra checks inside the leveldb implementation.</tt></pre>
-
-<ul>
 <li>
 <p>
 <tt>new/2</tt> - investigate if LevelDB's snapshot feature is useful (or
@@ -632,6 +613,8 @@ consider adding explicit read_options and write_options for LET's
     operations (rather than just <tt>new/2</tt>, <tt>destroy/2</tt>, and <tt>repair/2</tt>
     operations).
 </p>
+</li>
+</ul>
 </li>
 </ul>
 

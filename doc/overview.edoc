@@ -282,28 +282,11 @@ $ erl -smp +A 5 -pz ../../sext/ebin -pz ../../qc/ebin
     (http://code.google.com/p/leveldb/issues/detail?id=43)
 
 - Existing APIs (TBD)
-  * +new/2+ - automatically detect and prevent multiple callers of the
-    same Erlang virtual machine from simultaneously opening the same
-    LevelDB.  Excerpt from the Google leveldb mailing list:
-    +
-------
-Sanjay Ghemawat
-View profile
- More options Sep 30, 1:04 am
-On Thu, Sep 29, 2011 at 8:30 AM, Joseph Wayne Norton wrote:
-> Hans -
-> Thanks.  Is is correct to assume that it is the caller's responsibility to
-> ensure this does not happen?
+  * +delete/1+
+    (http://code.google.com/p/leveldb/issues/detail?id=48)
 
-leveldb guarantees that it will catch when two distinct processes
-try to open the db concurrently. However it doesn't guarantee what happens
-if the same process tries to do so and therefore it is the caller's
-responsibility
-to check for concurrent opens from the same process.
-This is ugly, but the unix file locking primitives are very annoying in
-this regard. I'll think about whether or not we should clean up the spec
-by doing extra checks inside the leveldb implementation.
-------
+  * +new/2+ -
+    (http://code.google.com/p/leveldb/issues/detail?id=49)
 
   * +new/2+ - investigate if LevelDB\'s snapshot feature is useful (or
     not) for LETS
