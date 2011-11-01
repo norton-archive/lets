@@ -1,0 +1,3 @@
+*.o
+qc_leveldb_issue44
+qc_leveldb/

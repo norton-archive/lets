@@ -48,7 +48,11 @@ setup() ->
     Options = [{c_src,"../c_src/leveldb/include/leveldb/c.h"},
                {additional_files, ["../c_src/leveldb/lib/libleveldb.a", "../c_src/snappy/lib/libsnappy.a"]},
                {cflags, "-lstdc++ -lpthread"}],
-    eqc_c:start(leveldb, Options).
+    DebugOptions = [%% verbose
+                    %% valgrind , {exec_command_line, fun(Exe) -> {os:find_executable("valgrind"), [Exe]} end}
+                   ],
+    eqc_c:start(leveldb, Options ++ DebugOptions).
+    %% eqc_c:start(leveldb, Options).
 
 teardown() ->
     os:cmd("rm -rf " ++ ?MODULE_STRING).

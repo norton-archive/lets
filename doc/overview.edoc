@@ -255,13 +255,6 @@ $ erl -smp +A 5 -pz ../../sext/ebin -pz ../../qc/ebin
   * Explain how to build and to run lets with valgrind enabled
     OTP/Erlang virtual machine
 
-- Bugs
-  * LevelDB - Reappearing "ghost" key after 17 steps
-    (http://code.google.com/p/leveldb/issues/detail?id=44)
-    +
-    NOTE: LET\'s QC tests are hard-coded not to close and then to
-    reopen a LevelDB database until this bug has been fixed.
-
 - Performance
   * Update driver implementation to use Erlang\'s asynchronous driver
     thread pool for all LevelDB operations.

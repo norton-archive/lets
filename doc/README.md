@@ -101,9 +101,7 @@ supported APIs are:</p>
 <p><em>This repository is experimental in nature - use at your own risk and
 please contribute if you find LETS useful.</em></p>
 
-
-##Quick Start Recipe##
-
+<h2 id="_quick_start_recipe">Quick Start Recipe</h2>
 
 <p>To download and build the lets application in one shot, please follow
 this recipe:</p>
@@ -124,7 +122,7 @@ please read further.</p>
 
 
 
-##Documentation##
+<h2 id="_documentation">Documentation</h2>
 
 
 <h3 id="_where_should_i_start">Where should I start?</h3>
@@ -134,12 +132,16 @@ please read further.</p>
 specification and behavior of ETS and LETS.  These QC tests also
 illustrate several strategies for testing Erlang Driver-based and
 NIF-based implementations.</p>
+
+
 <h3 id="_what_is_ets_and_dets">What is ETS and DETS?</h3>
 <p>ETS and DETS are Erlang/OTP's standard library modules for Erlang
 term storage.  ETS is a memory-based implementation.  DETS is a
 disk-based implementation.</p>
 <p>See <a href="http://www.erlang.org/doc/man/ets.html">http://www.erlang.org/doc/man/ets.html</a> and
 <a href="http://www.erlang.org/doc/man/dets.html">http://www.erlang.org/doc/man/dets.html</a> for further details.</p>
+
+
 <h3 id="_what_is_leveldb">What is LevelDB?</h3>
 <p>LevelDB is a fast key-value storage library written at Google that
 provides an ordered mapping from string keys to string values.</p>
@@ -147,8 +149,8 @@ provides an ordered mapping from string keys to string values.</p>
 
 
 
-##To download##
 
+<h2 id="_to_download">To download</h2>
 
 <ol class="arabic">
 <li>
@@ -293,8 +295,7 @@ Repo - <a href="http://source.android.com/source/git-repo.md">http://source.andr
 
 
 
-##To build - basic recipe##
-
+<h2 id="_to_build_basic_recipe">To build - basic recipe</h2>
 
 <ol class="arabic">
 <li>
@@ -316,8 +317,7 @@ $ make compile</tt></pre>
 
 
 
-##To build - optional features##
-
+<h2 id="_to_build_optional_features">To build - optional features</h2>
 
 <ol class="upperalpha">
 <li>
@@ -381,8 +381,7 @@ $ make dialyze-nospec</tt></pre>
 
 
 
-##To test - QuickCheck##
-
+<h2 id="_to_test_quickcheck">To test - QuickCheck</h2>
 
 <ol class="arabic">
 <li>
@@ -433,8 +432,7 @@ Tip
 
 
 
-##To test - Proper##
-
+<h2 id="_to_test_proper">To test - Proper</h2>
 
 <ol class="arabic">
 <li>
@@ -476,8 +474,7 @@ $ erl -smp +A 5 -pz ../../sext/ebin -pz ../../qc/ebin
 
 
 
-##Roadmap##
-
+<h2 id="_roadmap">Roadmap</h2>
 
 <ul>
 <li>
@@ -495,22 +492,6 @@ Explain how to run QuickCheck/Proper tests using a new rebar
 <p>
 Explain how to build and to run lets with valgrind enabled
     OTP/Erlang virtual machine
-</p>
-</li>
-</ul>
-</li>
-<li>
-<p>
-Bugs
-</p>
-<ul>
-<li>
-<p>
-LevelDB - Reappearing "ghost" key after 17 steps
-    (<a href="http://code.google.com/p/leveldb/issues/detail?id=44">http://code.google.com/p/leveldb/issues/detail?id=44</a>)
-   <br>
-    NOTE: LET's QC tests are hard-coded not to close and then to
-    reopen a LevelDB database until this bug has been fixed.
 </p>
 </li>
 </ul>
@@ -617,6 +598,7 @@ consider adding explicit read_options and write_options for LET's
 </ul>
 </li>
 </ul>
+
 
 
 

@@ -82,6 +82,7 @@ serial_command_gen(_Mod,#state{tab=Tab, type=Type}=S) ->
     oneof([{call,?IMPL,insert,[Tab,oneof([gen_obj(S),gen_objs(S)])]}]
           ++ [{call,?IMPL,insert_new,[Tab,oneof([gen_obj(S),gen_objs(S)])]} || Type == ets]
           %% @TODO ++ [{call,?IMPL,delete,[Tab]}]
+          ++ [{call,?IMPL,delete,[Tab]}]
           ++ [{call,?IMPL,delete,[Tab,gen_key(S)]}]
           ++ [{call,?IMPL,delete_all_objs,[Tab]} || Type == ets]
           ++ [{call,?IMPL,lookup,[Tab,gen_key(S)]}]
