@@ -60,7 +60,8 @@ extern "C" {
 
     typedef struct
     {
-        char alive;
+        bool async;
+        bool alive;
         char type;
         char privacy;
         std::string* name;
@@ -91,6 +92,7 @@ extern "C" {
     extern ERL_NIF_TERM lets_atom_compression;
     extern ERL_NIF_TERM lets_atom_no;
     extern ERL_NIF_TERM lets_atom_snappy;
+    extern ERL_NIF_TERM lets_atom_async;
     extern ERL_NIF_TERM lets_atom_block_restart_interval;
     extern ERL_NIF_TERM lets_atom_verify_checksums;
     extern ERL_NIF_TERM lets_atom_fill_cache;

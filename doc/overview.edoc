@@ -255,15 +255,12 @@ $ erl -smp +A 5 -pz ../../sext/ebin -pz ../../qc/ebin
   * Explain how to build and to run lets with valgrind enabled
     OTP/Erlang virtual machine
 
-- Performance
-  * Update driver implementation to use Erlang\'s asynchronous driver
-    thread pool for all LevelDB operations.
-
 - Testing
   * Functional
     ** Update test model to include LevelDB\'s database, read, and
-       write options.  These options have not undergone any explicit
-       testing.
+       write options.  These options have not been tested.
+    ** Update test model to include LevelDB\'s destroy and repair
+       operations.  These operations have not been tested.
   * Performance (TBD)
   * Stability (TBD)
 

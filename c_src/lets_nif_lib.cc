@@ -52,6 +52,7 @@ ERL_NIF_TERM lets_atom_block_size = 0;
 ERL_NIF_TERM lets_atom_compression = 0;
 ERL_NIF_TERM lets_atom_no = 0;
 ERL_NIF_TERM lets_atom_snappy = 0;
+ERL_NIF_TERM lets_atom_async = 0;
 ERL_NIF_TERM lets_atom_block_restart_interval = 0;
 ERL_NIF_TERM lets_atom_verify_checksums = 0;
 ERL_NIF_TERM lets_atom_fill_cache = 0;
@@ -78,6 +79,7 @@ lets_nif_lib_init(ErlNifEnv* env)
     lets_atom_compression = enif_make_atom(env, "compression");
     lets_atom_no = enif_make_atom(env, "no");
     lets_atom_snappy = enif_make_atom(env, "snappy");
+    lets_atom_async = enif_make_atom(env, "async");
     lets_atom_block_restart_interval = enif_make_atom(env, "block_restart_interval");
     lets_atom_verify_checksums = enif_make_atom(env, "verify_checksums");
     lets_atom_fill_cache = enif_make_atom(env, "fill_cache");
@@ -208,6 +210,14 @@ lets_parse_options(ErlNifEnv* env, lets_impl& impl,
                     impl.db_options.compression = leveldb::kNoCompression;
                 } else if (enif_is_identical(tuple[1], lets_atom_snappy)) {
                     impl.db_options.compression = leveldb::kSnappyCompression;
+                } else {
+                    return FALSE;
+                }
+            } else if (enif_is_identical(tuple[0], lets_atom_async)) {
+                if (enif_is_identical(tuple[1], lets_atom_true)) {
+                    impl.async = true;
+                } else if (enif_is_identical(tuple[1], lets_atom_false)) {
+                    impl.async = false;
                 } else {
                     return FALSE;
                 }

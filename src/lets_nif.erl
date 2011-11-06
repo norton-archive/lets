@@ -67,9 +67,9 @@ init() ->
 
 open(#tab{name=_Name, named_table=_Named, type=Type, protection=Protection}=Tab, Options, ReadOptions, WriteOptions) ->
     {value, {path,Path}, NewOptions} = lists:keytake(path, 1, Options),
-    Nif = impl_open(Type, Protection, Path, NewOptions, ReadOptions, WriteOptions),
-    %% @TODO implement named Nif (of sorts)
-    Tab#tab{nif=Nif}.
+    Impl = impl_open(Type, Protection, Path, NewOptions, ReadOptions, WriteOptions),
+    %% @TODO implement named Impl (of sorts)
+    Tab#tab{nif=Impl}.
 
 destroy(#tab{type=Type, protection=Protection}, Options, ReadOptions, WriteOptions) ->
     {value, {path,Path}, NewOptions} = lists:keytake(path, 1, Options),
@@ -79,81 +79,81 @@ repair(#tab{type=Type, protection=Protection}, Options, ReadOptions, WriteOption
     {value, {path,Path}, NewOptions} = lists:keytake(path, 1, Options),
     impl_repair(Type, Protection, Path, NewOptions, ReadOptions, WriteOptions).
 
-insert(#tab{keypos=KeyPos, type=Type}, Nif, Object) when is_tuple(Object) ->
+insert(#tab{keypos=KeyPos, type=Type}, Impl, Object) when is_tuple(Object) ->
     Key = element(KeyPos,Object),
     Val = Object,
-    impl_insert(Nif, encode(Type, Key), encode(Type, Val));
-insert(#tab{keypos=KeyPos, type=Type}, Nif, Objects) when is_list(Objects) ->
+    impl_insert(Impl, encode(Type, Key), encode(Type, Val));
+insert(#tab{keypos=KeyPos, type=Type}, Impl, Objects) when is_list(Objects) ->
     List = [{encode(Type, element(KeyPos,Object)), encode(Type, Object)} || Object <- Objects ],
-    impl_insert(Nif, List).
+    impl_insert(Impl, List).
 
-insert_new(#tab{keypos=KeyPos, type=Type}, Nif, Object) when is_tuple(Object) ->
+insert_new(#tab{keypos=KeyPos, type=Type}, Impl, Object) when is_tuple(Object) ->
     Key = element(KeyPos,Object),
     Val = Object,
-    impl_insert_new(Nif, encode(Type, Key), encode(Type, Val));
-insert_new(#tab{keypos=KeyPos, type=Type}, Nif, Objects) when is_list(Objects) ->
+    impl_insert_new(Impl, encode(Type, Key), encode(Type, Val));
+insert_new(#tab{keypos=KeyPos, type=Type}, Impl, Objects) when is_list(Objects) ->
     List = [{encode(Type, element(KeyPos,Object)), encode(Type, Object)} || Object <- Objects ],
-    impl_insert_new(Nif, List).
+    impl_insert_new(Impl, List).
 
-delete(_Tab, Nif) ->
-    impl_delete(Nif).
+delete(_Tab, Impl) ->
+    impl_delete(Impl).
 
-delete(#tab{type=Type}, Nif, Key) ->
-    impl_delete(Nif, encode(Type, Key)).
+delete(#tab{type=Type}, Impl, Key) ->
+    impl_delete(Impl, encode(Type, Key)).
 
-delete_all_objects(_Tab, Nif) ->
-    impl_delete_all_objects(Nif).
+delete_all_objects(_Tab, Impl) ->
+    impl_delete_all_objects(Impl).
 
-lookup(#tab{type=Type}, Nif, Key) ->
-    case impl_lookup(Nif, encode(Type, Key)) of
-        true ->
+lookup(#tab{type=Type}, Impl, Key) ->
+    case impl_lookup(Impl, encode(Type, Key)) of
+        '$end_of_table' ->
             [];
         Object when is_binary(Object) ->
             [decode(Type, Object)]
     end.
 
-first(#tab{type=Type}, Nif) ->
-    case impl_first(Nif) of
+first(#tab{type=Type}, Impl) ->
+    case impl_first(Impl) of
         '$end_of_table' ->
             '$end_of_table';
         Key ->
             decode(Type, Key)
     end.
 
-next(#tab{type=Type}, Nif, Key) ->
-    case impl_next(Nif, encode(Type, Key)) of
+next(#tab{type=Type}, Impl, Key) ->
+    case impl_next(Impl, encode(Type, Key)) of
         '$end_of_table' ->
             '$end_of_table';
         Next ->
             decode(Type, Next)
     end.
 
-info_memory(_Tab, Nif) ->
-    case impl_info_memory(Nif) of
+info_memory(_Tab, Impl) ->
+    case impl_info_memory(Impl) of
         Memory when is_integer(Memory) ->
             erlang:round(Memory / erlang:system_info(wordsize));
         Else ->
             Else
     end.
 
-info_size(_Tab, Nif) ->
-    impl_info_size(Nif).
+info_size(_Tab, Impl) ->
+    impl_info_size(Impl).
 
-tab2list(Tab, Nif) ->
-    tab2list(Tab, Nif, impl_first(Nif), []).
+tab2list(Tab, Impl) ->
+    tab2list(Tab, Impl, impl_first(Impl), []).
 
-tab2list(_Tab, _Nif, '$end_of_table', Acc) ->
+tab2list(_Tab, _Impl, '$end_of_table', Acc) ->
     lists:reverse(Acc);
-tab2list(#tab{type=Type}=Tab, Nif, Key, Acc) ->
+tab2list(#tab{type=Type}=Tab, Impl, Key, Acc) ->
     NewAcc =
-        case impl_lookup(Nif, Key) of
-            true ->
+        case impl_lookup(Impl, Key) of
+            '$end_of_table' ->
                 %% @NOTE This is not an atomic operation
                 Acc;
             Object when is_binary(Object) ->
                 [decode(Type, Object)|Acc]
         end,
-    tab2list(Tab, Nif, impl_next(Nif, Key), NewAcc).
+    tab2list(Tab, Impl, impl_next(Impl, Key), NewAcc).
 
 
 %%%----------------------------------------------------------------------
@@ -182,38 +182,38 @@ impl_destroy(_Type, _Protection, _Path, _Options, _ReadOptions, _WriteOptions) -
 impl_repair(_Type, _Protection, _Path, _Options, _ReadOptions, _WriteOptions) ->
     ?NIF_STUB.
 
-impl_insert(_Nif, _Key, _Object) ->
+impl_insert(_Impl, _Key, _Object) ->
     ?NIF_STUB.
 
-impl_insert(_Nif, _List) ->
+impl_insert(_Impl, _List) ->
     ?NIF_STUB.
 
-impl_insert_new(_Nif, _Key, _Object) ->
+impl_insert_new(_Impl, _Key, _Object) ->
     ?NIF_STUB.
 
-impl_insert_new(_Nif, _List) ->
+impl_insert_new(_Impl, _List) ->
     ?NIF_STUB.
 
-impl_delete(_Nif) ->
+impl_delete(_Impl) ->
     ?NIF_STUB.
 
-impl_delete(_Nif, _Key) ->
+impl_delete(_Impl, _Key) ->
     ?NIF_STUB.
 
-impl_delete_all_objects(_Nif) ->
+impl_delete_all_objects(_Impl) ->
     ?NIF_STUB.
 
-impl_lookup(_Nif, _Key) ->
+impl_lookup(_Impl, _Key) ->
     ?NIF_STUB.
 
-impl_first(_Nif) ->
+impl_first(_Impl) ->
     ?NIF_STUB.
 
-impl_next(_Nif, _Key) ->
+impl_next(_Impl, _Key) ->
     ?NIF_STUB.
 
-impl_info_memory(_Nif) ->
+impl_info_memory(_Impl) ->
     ?NIF_STUB.
 
-impl_info_size(_Nif) ->
+impl_info_size(_Impl) ->
     ?NIF_STUB.

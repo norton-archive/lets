@@ -32,6 +32,7 @@
               keypos=1 :: pos_integer(),
               protection=protected :: public|protected|private,
               compressed=false :: boolean(),
+              async=false :: boolean(),
               drv :: port() | undefined,
               nif :: nif() | undefined,
               ets :: ets:tab() | undefined

@@ -203,6 +203,16 @@ lets_parse_options(lets_impl& impl,
                 } else {
                     return FALSE;
                 }
+            } else if (strcmp(atom, "async") == 0) {
+                ng = ei_decode_atom(buf, &index, atom);
+                if (ng) return FALSE;
+                if (strcmp(atom, "true") == 0) {
+                    impl.async = true;
+                } else if (strcmp(atom, "false") == 0) {
+                    impl.async = false;
+                } else {
+                    return FALSE;
+                }
             } else {
                 return FALSE;
             }

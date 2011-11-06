@@ -60,7 +60,8 @@ extern "C" {
 
     typedef struct
     {
-        char alive;
+        bool async;
+        bool alive;
         char type;
         char privacy;
         std::string* name;

@@ -30,6 +30,8 @@
          %% lets
          , open/0, open/1
          , reopen/0, reopen/1
+         , destroy/0, destroy/1
+         , repair/0, repair/1
          , close/1
          , put/2, put/3
          , delete/2, delete/3
@@ -102,6 +104,40 @@ reopen(Options) ->
             {ptr, {struct, leveldb_t}, _}=Db ->
                 Db
         end
+    after
+        free_ptr(ErrPtr)
+    end.
+
+destroy() ->
+    Options = leveldb:leveldb_options_create(),
+    try
+        destroy(Options)
+    after
+        leveldb:leveldb_options_destroy(Options)
+    end.
+
+destroy(Options) ->
+    ErrPtr = errptr(),
+    try
+        leveldb:leveldb_destroy(Options, ?MODULE_STRING, ErrPtr),
+        read_errptr(ErrPtr)
+    after
+        free_ptr(ErrPtr)
+    end.
+
+repair() ->
+    Options = leveldb:leveldb_options_create(),
+    try
+        repair(Options)
+    after
+        leveldb:leveldb_options_repair(Options)
+    end.
+
+repair(Options) ->
+    ErrPtr = errptr(),
+    try
+        leveldb:leveldb_repair(Options, ?MODULE_STRING, ErrPtr),
+        read_errptr(ErrPtr)
     after
         free_ptr(ErrPtr)
     end.

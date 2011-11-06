@@ -49,6 +49,7 @@
 -define(LETS_BADARG,              16#00).
 -define(LETS_TRUE,                16#01).
 -define(LETS_END_OF_TABLE,        16#02).
+-define(LETS_BINARY,              16#03).
 
 -define(LETS_OPEN6,               16#00).
 -define(LETS_DESTROY6,            16#01).
@@ -96,9 +97,9 @@ init() ->
 
 open(#tab{name=_Name, named_table=_Named, type=Type, protection=Protection}=Tab, Options, ReadOptions, WriteOptions) ->
     {value, {path,Path}, NewOptions} = lists:keytake(path, 1, Options),
-    Drv = impl_open(Type, Protection, Path, NewOptions, ReadOptions, WriteOptions),
-    %% @TODO implement named Drv (of sorts)
-    Tab#tab{drv=Drv}.
+    Impl = impl_open(Type, Protection, Path, NewOptions, ReadOptions, WriteOptions),
+    %% @TODO implement named Impl (of sorts)
+    Tab#tab{drv=Impl}.
 
 destroy(#tab{type=Type, protection=Protection}, Options, ReadOptions, WriteOptions) ->
     {value, {path,Path}, NewOptions} = lists:keytake(path, 1, Options),
@@ -108,81 +109,81 @@ repair(#tab{type=Type, protection=Protection}, Options, ReadOptions, WriteOption
     {value, {path,Path}, NewOptions} = lists:keytake(path, 1, Options),
     impl_repair(Type, Protection, Path, NewOptions, ReadOptions, WriteOptions).
 
-insert(#tab{keypos=KeyPos, type=Type}, Drv, Object) when is_tuple(Object) ->
+insert(#tab{keypos=KeyPos, type=Type}, Impl, Object) when is_tuple(Object) ->
     Key = element(KeyPos,Object),
     Val = Object,
-    impl_insert(Drv, encode(Type, Key), encode(Type, Val));
-insert(#tab{keypos=KeyPos, type=Type}, Drv, Objects) when is_list(Objects) ->
+    impl_insert(Impl, encode(Type, Key), encode(Type, Val));
+insert(#tab{keypos=KeyPos, type=Type}, Impl, Objects) when is_list(Objects) ->
     List = [{encode(Type, element(KeyPos,Object)), encode(Type, Object)} || Object <- Objects ],
-    impl_insert(Drv, List).
+    impl_insert(Impl, List).
 
-insert_new(#tab{keypos=KeyPos, type=Type}, Drv, Object) when is_tuple(Object) ->
+insert_new(#tab{keypos=KeyPos, type=Type}, Impl, Object) when is_tuple(Object) ->
     Key = element(KeyPos,Object),
     Val = Object,
-    impl_insert_new(Drv, encode(Type, Key), encode(Type, Val));
-insert_new(#tab{keypos=KeyPos, type=Type}, Drv, Objects) when is_list(Objects) ->
+    impl_insert_new(Impl, encode(Type, Key), encode(Type, Val));
+insert_new(#tab{keypos=KeyPos, type=Type}, Impl, Objects) when is_list(Objects) ->
     List = [{encode(Type, element(KeyPos,Object)), encode(Type, Object)} || Object <- Objects ],
-    impl_insert_new(Drv, List).
+    impl_insert_new(Impl, List).
 
-delete(_Tab, Drv) ->
-    impl_delete(Drv).
+delete(_Tab, Impl) ->
+    impl_delete(Impl).
 
-delete(#tab{type=Type}, Drv, Key) ->
-    impl_delete(Drv, encode(Type, Key)).
+delete(#tab{type=Type}, Impl, Key) ->
+    impl_delete(Impl, encode(Type, Key)).
 
-delete_all_objects(_Tab, Drv) ->
-    impl_delete_all_objects(Drv).
+delete_all_objects(_Tab, Impl) ->
+    impl_delete_all_objects(Impl).
 
-lookup(#tab{type=Type}, Drv, Key) ->
-    case impl_lookup(Drv, encode(Type, Key)) of
-        true ->
+lookup(#tab{type=Type}, Impl, Key) ->
+    case impl_lookup(Impl, encode(Type, Key)) of
+        '$end_of_table' ->
             [];
         Object when is_binary(Object) ->
             [decode(Type, Object)]
     end.
 
-first(#tab{type=Type}, Drv) ->
-    case impl_first(Drv) of
+first(#tab{type=Type}, Impl) ->
+    case impl_first(Impl) of
         '$end_of_table' ->
             '$end_of_table';
         Key ->
             decode(Type, Key)
     end.
 
-next(#tab{type=Type}, Drv, Key) ->
-    case impl_next(Drv, encode(Type, Key)) of
+next(#tab{type=Type}, Impl, Key) ->
+    case impl_next(Impl, encode(Type, Key)) of
         '$end_of_table' ->
             '$end_of_table';
         Next ->
             decode(Type, Next)
     end.
 
-info_memory(_Tab, Drv) ->
-    case impl_info_memory(Drv) of
+info_memory(_Tab, Impl) ->
+    case impl_info_memory(Impl) of
         Memory when is_integer(Memory) ->
             erlang:round(Memory / erlang:system_info(wordsize));
         Else ->
             Else
     end.
 
-info_size(_Tab, Drv) ->
-    impl_info_size(Drv).
+info_size(_Tab, Impl) ->
+    impl_info_size(Impl).
 
-tab2list(Tab, Drv) ->
-    tab2list(Tab, Drv, impl_first(Drv), []).
+tab2list(Tab, Impl) ->
+    tab2list(Tab, Impl, impl_first(Impl), []).
 
-tab2list(_Tab, _Drv, '$end_of_table', Acc) ->
+tab2list(_Tab, _Impl, '$end_of_table', Acc) ->
     lists:reverse(Acc);
-tab2list(#tab{type=Type}=Tab, Drv, Key, Acc) ->
+tab2list(#tab{type=Type}=Tab, Impl, Key, Acc) ->
     NewAcc =
-        case impl_lookup(Drv, Key) of
-            true ->
+        case impl_lookup(Impl, Key) of
+            '$end_of_table' ->
                 %% @NOTE This is not an atomic operation
                 Acc;
             Object when is_binary(Object) ->
                 [decode(Type, Object)|Acc]
         end,
-    tab2list(Tab, Drv, impl_next(Drv, Key), NewAcc).
+    tab2list(Tab, Impl, impl_next(Impl, Key), NewAcc).
 
 
 %%%----------------------------------------------------------------------
@@ -200,79 +201,73 @@ decode(ordered_set, Term) ->
     sext:decode(Term).
 
 impl_open(Type, Protection, Path, Options, ReadOptions, WriteOptions) ->
-    Drv = init(),
-    true = call(Drv, {?LETS_OPEN6, Type, Protection, Path, Options, ReadOptions, WriteOptions}),
-    Drv.
+    Impl = init(),
+    true = call(Impl, {?LETS_OPEN6, Type, Protection, Path, Options, ReadOptions, WriteOptions}),
+    Impl.
 
 impl_destroy(Type, Protection, Path, Options, ReadOptions, WriteOptions) ->
-    Drv = init(),
-    true = call(Drv, {?LETS_OPEN6, Type, Protection, Path, Options, ReadOptions, WriteOptions}),
-    _ = port_close(Drv),
+    Impl = init(),
+    true = call(Impl, {?LETS_OPEN6, Type, Protection, Path, Options, ReadOptions, WriteOptions}),
+    _ = port_close(Impl),
     _ = erl_ddll:unload(lets_drv),
     true.
 
 impl_repair(Type, Protection, Path, Options, ReadOptions, WriteOptions) ->
-    Drv = init(),
-    true = call(Drv, {?LETS_REPAIR6, Type, Protection, Path, Options, ReadOptions, WriteOptions}),
-    _ = port_close(Drv),
+    Impl = init(),
+    true = call(Impl, {?LETS_REPAIR6, Type, Protection, Path, Options, ReadOptions, WriteOptions}),
+    _ = port_close(Impl),
     _ = erl_ddll:unload(lets_drv),
     true.
 
-impl_insert(Drv, Key, Object) ->
-    call(Drv, {?LETS_INSERT3, Key, Object}).
+impl_insert(Impl, Key, Object) ->
+    call(Impl, {?LETS_INSERT3, Key, Object}).
 
-impl_insert(Drv, List) ->
-    call(Drv, {?LETS_INSERT2, List}).
+impl_insert(Impl, List) ->
+    call(Impl, {?LETS_INSERT2, List}).
 
-impl_insert_new(Drv, Key, Object) ->
-    call(Drv, {?LETS_INSERT_NEW3, Key, Object}).
+impl_insert_new(Impl, Key, Object) ->
+    call(Impl, {?LETS_INSERT_NEW3, Key, Object}).
 
-impl_insert_new(Drv, List) ->
-    call(Drv, {?LETS_INSERT_NEW2, List}).
+impl_insert_new(Impl, List) ->
+    call(Impl, {?LETS_INSERT_NEW2, List}).
 
-impl_delete(Drv) ->
-    Res = call(Drv, {?LETS_DELETE1}),
-    _ = port_close(Drv),
+impl_delete(Impl) ->
+    Res = call(Impl, {?LETS_DELETE1}),
+    _ = port_close(Impl),
     _ = erl_ddll:unload(lets_drv),
     Res.
 
-impl_delete(Drv, Key) ->
-    call(Drv, {?LETS_DELETE2, Key}).
+impl_delete(Impl, Key) ->
+    call(Impl, {?LETS_DELETE2, Key}).
 
-impl_delete_all_objects(Drv) ->
-    call(Drv, {?LETS_DELETE_ALL_OBJECTS1}).
+impl_delete_all_objects(Impl) ->
+    call(Impl, {?LETS_DELETE_ALL_OBJECTS1}).
 
-impl_lookup(Drv, Key) ->
-    call(Drv, {?LETS_LOOKUP2, Key}).
+impl_lookup(Impl, Key) ->
+    call(Impl, {?LETS_LOOKUP2, Key}).
 
-impl_first(Drv) ->
-    call(Drv, {?LETS_FIRST1}).
+impl_first(Impl) ->
+    call(Impl, {?LETS_FIRST1}).
 
-impl_next(Drv, Key) ->
-    call(Drv, {?LETS_NEXT2, Key}).
+impl_next(Impl, Key) ->
+    call(Impl, {?LETS_NEXT2, Key}).
 
-impl_info_memory(Drv) ->
-    call(Drv, {?LETS_INFO_MEMORY1}).
+impl_info_memory(Impl) ->
+    call(Impl, {?LETS_INFO_MEMORY1}).
 
-impl_info_size(Drv) ->
-    call(Drv, {?LETS_INFO_SIZE1}).
+impl_info_size(Impl) ->
+    call(Impl, {?LETS_INFO_SIZE1}).
 
-call(Drv, Tuple) ->
+call(Impl, Tuple) ->
     Data = term_to_binary(Tuple),
-    port_command(Drv, Data),
+    port_command(Impl, Data),
     receive
-        {Drv, ?LETS_TRUE, Reply} ->
+        {Impl, ?LETS_BINARY, Reply} ->
             Reply;
-        {Drv, ?LETS_TRUE} ->
+        {Impl, ?LETS_TRUE} ->
             true;
-        {Drv, ?LETS_END_OF_TABLE} ->
+        {Impl, ?LETS_END_OF_TABLE} ->
             '$end_of_table';
-        {Drv, ?LETS_BADARG} ->
-            erlang:error(badarg, [Drv])
-            %% after 1000 ->
-            %%         receive X ->
-            %%                 erlang:error(timeout, [Drv, X])
-            %%         after 0 ->
-            %%                 erlang:error(timeout, [Drv])
-            %%         end
+        {Impl, ?LETS_BADARG} ->
+            erlang:error(badarg, [Impl])
     end.

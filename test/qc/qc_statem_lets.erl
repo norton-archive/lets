@@ -30,6 +30,9 @@
 -export([initial_state/0, state_is_sane/1, next_state/3, precondition/2, postcondition/3]).
 -export([commands_setup/1, commands_teardown/1, commands_teardown/2]).
 
+%% @TODO remove at time of db, db_read, db_write options testing
+-compile(export_all).
+
 %% @NOTE For boilerplate exports, see "qc_statem.hrl"
 -include_lib("qc/include/qc_statem.hrl").
 
@@ -75,16 +78,18 @@ command_gen(Mod,#state{parallel=true}=S) ->
 serial_command_gen(_Mod,#state{tab=undefined, type=undefined, impl=undefined}=S) ->
     {call,?IMPL,new,[?TAB,gen_options(new,S)]};
 serial_command_gen(_Mod,#state{tab=undefined}=S) ->
-    {call,?IMPL,new,[undefined,?TAB,gen_options(new,S)]};
+    oneof([{call,?IMPL,new,[undefined,?TAB,gen_options(new,S)]}]
+          %% @TODO ++ [{call,?IMPL,destroy,[undefined,?TAB,gen_options(destroy,S)]}]
+          %% @TODO ++ [{call,?IMPL,repair,[undefined,?TAB,gen_options(repair,S)]}]
+         );
 serial_command_gen(_Mod,#state{tab=Tab, type=Type}=S) ->
     %% @TODO insert/3, insert_new/3, delete/3, delete_all_objs/2 write_gen_options
     %% @TODO lookup/3 read_gen_options
     oneof([{call,?IMPL,insert,[Tab,oneof([gen_obj(S),gen_objs(S)])]}]
-          ++ [{call,?IMPL,insert_new,[Tab,oneof([gen_obj(S),gen_objs(S)])]} || Type == ets]
-          %% @TODO ++ [{call,?IMPL,delete,[Tab]}]
+          ++ [{call,?IMPL,insert_new,[Tab,oneof([gen_obj(S),gen_objs(S)])]} || Type =:= ets]
           ++ [{call,?IMPL,delete,[Tab]}]
           ++ [{call,?IMPL,delete,[Tab,gen_key(S)]}]
-          ++ [{call,?IMPL,delete_all_objs,[Tab]} || Type == ets]
+          ++ [{call,?IMPL,delete_all_objs,[Tab]} || Type =:= ets]
           ++ [{call,?IMPL,lookup,[Tab,gen_key(S)]}]
           ++ [{call,?IMPL,first,[Tab]}]
           ++ [{call,?IMPL,next,[Tab,gen_key(S)]}]
@@ -98,9 +103,9 @@ parallel_command_gen(_Mod,#state{tab=Tab, type=Type}=S) ->
     %% @TODO insert/3, insert_new/3, delete_all_objs/2 write_gen_options
     %% @TODO lookup/3 read_gen_options
     oneof([{call,?IMPL,insert,[Tab,oneof([gen_obj(S),gen_objs(S)])]}]
-          ++ [{call,?IMPL,insert_new,[Tab,oneof([gen_obj(S),gen_objs(S)])]} || Type == ets]
+          ++ [{call,?IMPL,insert_new,[Tab,oneof([gen_obj(S),gen_objs(S)])]} || Type =:= ets]
           ++ [{call,?IMPL,delete,[Tab,gen_key(S)]}]
-          ++ [{call,?IMPL,delete_all_objs,[Tab]} || Type == ets]
+          ++ [{call,?IMPL,delete_all_objs,[Tab]} || Type =:= ets]
           ++ [{call,?IMPL,lookup,[Tab,gen_key(S)]}]
           ++ [{call,?IMPL,first,[Tab]}]
           ++ [{call,?IMPL,next,[Tab,gen_key(S)]}]
@@ -152,7 +157,7 @@ next_state(#state{tab=undefined}=S, V, {call,_,new,[_Tab,?TAB,Options]}) ->
     end,
     S#state{type=Type, impl=Impl, exists=true, tab=V};
 next_state(#state{impl=Impl}=S, _V, {call,_,destroy,[_Tab,?TAB,_Options]})
-  when Impl /= ets ->
+  when Impl =/= ets ->
     S#state{tab=undefined, exists=false, objs=[]};
 next_state(S, _V, {call,_,insert,[_Tab,Objs]}) when is_list(Objs) ->
     insert_objs(S, Objs);
@@ -181,12 +186,18 @@ next_state(S, _V, {call,_,_,_}) ->
 precondition(#state{tab=undefined, type=undefined, impl=undefined}, {call,_,new,[?TAB,Options]}) ->
     L = proplists:get_value(db, Options, []),
     proplists:get_bool(create_if_missing, L) andalso proplists:get_bool(error_if_exists, L);
+precondition(#state{tab=Tab}, {call,_,new,[?TAB,_Options]}) ->
+    Tab =:= undefined;
 precondition(#state{tab=undefined, type=undefined, impl=undefined}, {call,_,new,[_Tab,?TAB,Options]}) ->
     L = proplists:get_value(db, Options, []),
     proplists:get_bool(create_if_missing, L) andalso proplists:get_bool(error_if_exists, L);
-precondition(#state{tab=Tab}, {call,_,new,[?TAB,_Options]}) when Tab /= undefined ->
+precondition(#state{tab=Tab}, {call,_,new,[_Tab,?TAB,_Options]}) ->
+    Tab =:= undefined;
+precondition(#state{tab=undefined, type=undefined, impl=undefined}, {call,_,new,[_Tab,?TAB,_Options]}) ->
     false;
-precondition(#state{tab=Tab}, {call,_,new,[_Tab,?TAB,_Options]}) when Tab /= undefined ->
+precondition(#state{tab=undefined, type=undefined, impl=undefined}, {call,_,destroy,[_Tab,?TAB,_Options]}) ->
+    false;
+precondition(#state{tab=undefined, type=undefined, impl=undefined}, {call,_,repair,[_Tab,?TAB,_Options]}) ->
     false;
 precondition(_S, {call,_,_,_}) ->
     true.
@@ -252,7 +263,7 @@ postcondition(#state{type=ordered_set}=S, {call,_,next,[_Tab, Key]}, Res) ->
             Res =:= K
     end;
 postcondition(#state{type=set}=S, {call,_,tab2list,[_Tab]}, Res) ->
-    [] == (S#state.objs -- Res);
+    [] =:= (S#state.objs -- Res);
 postcondition(#state{type=ordered_set}=S, {call,_,tab2list,[_Tab]}, Res) ->
     sort(S) =:= Res;
 postcondition(_S, {call,_,_,_}, _Res) ->
@@ -281,28 +292,35 @@ gen_options(Op,#state{tab=undefined, type=undefined, impl=undefined}=S) ->
     ?LET({Type,Impl}, {gen_ets_type(), gen_ets_impl()},
          gen_options(Op,S#state{type=Type, impl=Impl}));
 gen_options(Op,#state{type=Type, impl=drv=Impl}=S) ->
-    [Type, public, named_table, {keypos,#obj.key}, Impl]
+    [Type, public, named_table, {keypos,#obj.key},
+     {compressed, gen_boolean()}, {async, gen_boolean()}, Impl]
         ++ gen_leveldb_options(Op,S);
 gen_options(Op,#state{type=Type, impl=nif=Impl}=S) ->
-    [Type, public, named_table, {keypos,#obj.key}, Impl]
+    [Type, public, named_table, {keypos,#obj.key},
+     {compressed, gen_boolean()}, {async, gen_boolean()}, Impl]
         ++ gen_leveldb_options(Op,S);
 gen_options(_Op,#state{type=Type, impl=ets=Impl}) ->
-    [Type, public, named_table, {keypos,#obj.key}, Impl].
+    [Type, public, named_table, {keypos,#obj.key},
+     {compressed, gen_boolean()}, Impl].
 
 gen_leveldb_options(Op,S) ->
     [gen_db_options(Op,S), gen_db_read_options(Op,S), gen_db_write_options(Op,S)].
 
 gen_db_options(new,#state{exists=Exists}) ->
     ExistsOptions = if Exists -> []; true -> [create_if_missing, error_if_exists] end,
-    ?LET(Options, ulist(gen_db_options()), {db, Options ++ ExistsOptions});
+    %% @TODO ?LET(Options, ulist(gen_db_options()), {db, Options ++ ExistsOptions});
+    {db, ExistsOptions};
 gen_db_options(_Op,_S) ->
-    ?LET(Options, ulist(gen_db_options()), {db, Options}).
+    %% @TODO ?LET(Options, ulist(gen_db_options()), {db, Options}).
+    {db, []} .
 
 gen_db_read_options(_Op,_S) ->
-    ?LET(Options, ulist(gen_db_read_options()), {db_read, Options}).
+    %% @TODO ?LET(Options, ulist(gen_db_read_options()), {db_read, Options}).
+    {db_read, []}.
 
 gen_db_write_options(_Op,_S) ->
-    ?LET(Options, ulist(gen_db_write_options()), {db_write, Options}).
+    %% @TODO ?LET(Options, ulist(gen_db_write_options()), {db_write, Options}).
+    {db_write, []}.
 
 gen_db_options() ->
     oneof([paranoid_checks, {paranoid_checks,gen_boolean()}, {write_buffer_size,gen_pos_integer()}, {max_open_files,gen_pos_integer()}, {block_cache_size,gen_pos_integer()}, {block_size,gen_pos_integer()}, {block_restart_interval,gen_pos_integer()}]).
@@ -412,7 +430,7 @@ keyfind(X, #state{objs=L}=S) ->
     lists:filter(fun(#obj{key=K}) -> eq(X, K, S) end, L).
 
 keymember(X, S) ->
-    [] /= keyfind(X, S).
+    [] =/= keyfind(X, S).
 
 eq(X, Y, #state{type=set, impl=ets}) ->
     X =:= Y;

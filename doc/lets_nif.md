@@ -26,7 +26,7 @@
 
 
 
-`delete(Tab, Nif) -> any()`
+`delete(Tab, Impl) -> any()`
 
 <a name="delete-3"></a>
 
@@ -35,7 +35,7 @@
 
 
 
-`delete(Tab, Nif, Key) -> any()`
+`delete(Tab, Impl, Key) -> any()`
 
 <a name="delete_all_objects-2"></a>
 
@@ -44,7 +44,7 @@
 
 
 
-`delete_all_objects(Tab, Nif) -> any()`
+`delete_all_objects(Tab, Impl) -> any()`
 
 <a name="destroy-4"></a>
 
@@ -62,7 +62,7 @@
 
 
 
-`first(Tab, Nif) -> any()`
+`first(Tab, Impl) -> any()`
 
 <a name="info_memory-2"></a>
 
@@ -71,7 +71,7 @@
 
 
 
-`info_memory(Tab, Nif) -> any()`
+`info_memory(Tab, Impl) -> any()`
 
 <a name="info_size-2"></a>
 
@@ -80,7 +80,7 @@
 
 
 
-`info_size(Tab, Nif) -> any()`
+`info_size(Tab, Impl) -> any()`
 
 <a name="insert-3"></a>
 
@@ -89,7 +89,7 @@
 
 
 
-`insert(Tab, Nif, Object) -> any()`
+`insert(Tab, Impl, Object) -> any()`
 
 <a name="insert_new-3"></a>
 
@@ -98,7 +98,7 @@
 
 
 
-`insert_new(Tab, Nif, Object) -> any()`
+`insert_new(Tab, Impl, Object) -> any()`
 
 <a name="lookup-3"></a>
 
@@ -107,7 +107,7 @@
 
 
 
-`lookup(Tab, Nif, Key) -> any()`
+`lookup(Tab, Impl, Key) -> any()`
 
 <a name="next-3"></a>
 
@@ -116,7 +116,7 @@
 
 
 
-`next(Tab, Nif, Key) -> any()`
+`next(Tab, Impl, Key) -> any()`
 
 <a name="open-4"></a>
 
@@ -143,5 +143,5 @@
 
 
 
-`tab2list(Tab, Nif) -> any()`
+`tab2list(Tab, Impl) -> any()`
 

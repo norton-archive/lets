@@ -50,7 +50,7 @@
 -opaque tab()         :: #tab{}.
 
 -type opts()          :: [ets_opt() | impl_opt() | db_opts() | db_read_opts() | db_write_opts()].
--type ets_opt()       :: set | ordered_set | named_table | {key_pos,pos_integer()} | public | protected | private | compressed.
+-type ets_opt()       :: set | ordered_set | named_table | {key_pos,pos_integer()} | public | protected | private | compressed | async.
 -type impl_opt()      :: drv | nif | ets.
 
 -type db_opts()       :: {db, [{path,file:filename()} | create_if_missing | {create_if_missing,boolean()} | error_if_exists | {error_if_exists,boolean()} | paranoid_checks | {paranoid_checks,boolean()} | {write_buffer_size,pos_integer()} | {max_open_files,pos_integer()} | {block_cache_size,pos_integer()} | {block_size,pos_integer()} | {block_restart_interval,pos_integer()}]}.
@@ -97,6 +97,10 @@
 %%
 %% - +compressed+ If this option is present, the table data will be
 %%   stored in a compressed format.
+%%
+%% - +async+ If this option is present, the emulator\'s async thread
+%%   pool will be used when accessing the table data.  _only the drv
+%%   implementation_
 %%
 %% - +drv+ If this option is present, the table data will be stored
 %%   with LevelDB backend via an Erlang Driver.  This is the default
@@ -310,6 +314,7 @@ next(Tab, Key) ->
 %% - +keypos+
 %% - +protection+
 %% - +compressed+
+%% - +async+ _only the drv implementation_
 %% - +memory+ _only the ets implementation_
 %% - +size+ _only the ets implementation_
 %%
@@ -337,6 +342,8 @@ info(Tab, Item) ->
                     Tab#tab.protection;
                 compressed ->
                     Tab#tab.compressed;
+                async ->
+                    Tab#tab.async;
                 memory ->
                     Mod:info_memory(Tab, Impl);
                 size ->
@@ -414,6 +421,7 @@ create(Op, Name, Opts) ->
                 end
         end,
     Compressed = proplists:get_bool(compressed, POpts),
+    Async = proplists:get_bool(async, POpts),
     Drv = proplists:get_bool(drv, POpts),
     Nif = proplists:get_bool(nif, POpts),
     Ets = proplists:get_bool(ets, POpts),
@@ -424,7 +432,8 @@ create(Op, Name, Opts) ->
                type=Type,
                keypos=KeyPos,
                protection=Protection,
-               compressed=Compressed},
+               compressed=Compressed,
+               async=Async},
 
     DBOptions = fix_db_options(Tab, proplists:get_value(db, POpts, [])),
     DBReadOptions = proplists:get_value(db_read, POpts, []),
@@ -440,8 +449,11 @@ create(Op, Name, Opts) ->
             lets_drv:Op(Tab, DBOptions, DBReadOptions, DBWriteOptions)
     end.
 
-fix_db_options(#tab{name=Name, compressed=Compressed}, Options) ->
-    fix_db_options_compression(Compressed, fix_db_options_path(Name, Options)).
+fix_db_options(#tab{name=Name, compressed=Compressed, async=Async}, Options0) ->
+    Options1 = fix_db_options_path(Name, Options0),
+    Options2 = fix_db_options_compression(Compressed, Options1),
+    Options3 = fix_db_options_async(Async, Options2),
+    Options3.
 
 fix_db_options_path(Name, Options) ->
     case proplists:lookup(path, Options) of
@@ -456,6 +468,11 @@ fix_db_options_compression(false, Options) ->
 fix_db_options_compression(true, Options) ->
     [{compression, snappy}|Options].
 
+fix_db_options_async(false, Options) ->
+    [{async, false}|Options];
+fix_db_options_async(true, Options) ->
+    [{async, true}|Options].
+
 binify(X) when is_atom(X) ->
     list_to_binary(atom_to_list(X));
 binify(X) when is_list(X) ->
@@ -464,7 +481,7 @@ binify(X) when is_binary(X) ->
     X.
 
 options(Options) ->
-    Keys = [set, ordered_set, named_table, keypos, public, protected, private, compressed, drv, nif, ets, db, db_read, db_write],
+    Keys = [set, ordered_set, named_table, keypos, public, protected, private, compressed, async, drv, nif, ets, db, db_read, db_write],
     options(Options, Keys).
 
 options(Options, Keys) when is_list(Options) ->

@@ -347,6 +347,10 @@ lets_nif_delete1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         return MAKEBADARG(env, status);
     }
 
+    if (!h->impl.alive) {
+        return MAKEBADARG(env, status);
+    }
+
     // alive
     h->impl.alive = 0;
 
@@ -429,7 +433,7 @@ lets_nif_lookup2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     it->Seek(skey);
     if (!it->Valid() || it->key().compare(skey) != 0) {
         delete it;
-        return lets_atom_true;
+        return lets_atom_end_of_table;
     }
 
     size_t size = it->value().size();

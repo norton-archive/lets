@@ -44,7 +44,7 @@
 
 
 
-<pre>ets_opt() = set | ordered_set | named_table | {key_pos, pos_integer()} | public | protected | private | compressed</pre>
+<pre>ets_opt() = set | ordered_set | named_table | {key_pos, pos_integer()} | public | protected | private | compressed | async</pre>
 
 
 
@@ -138,6 +138,11 @@ is empty, <tt><em>$end_of_table</em></tt> will be returned.</p>.</td></tr><tr><t
 </li>
 <li>
 <p>
+<tt>async</tt> <em>only the drv implementation</em>
+</p>
+</li>
+<li>
+<p>
 <tt>memory</tt> <em>only the ets implementation</em>
 </p>
 </li>
@@ -208,6 +213,13 @@ setting for the access rights.
 <p>
 <tt>compressed</tt> If this option is present, the table data will be
 stored in a compressed format.
+</p>
+</li>
+<li>
+<p>
+<tt>async</tt> If this option is present, the emulator's async thread
+pool will be used when accessing the table data.  <em>only the drv
+implementation</em>
 </p>
 </li>
 <li>
@@ -482,6 +494,11 @@ __See also:__ [ets:first/1](ets.md#first-1).<a name="info-2"></a>
 </li>
 <li>
 <p>
+<tt>async</tt> <em>only the drv implementation</em>
+</p>
+</li>
+<li>
+<p>
 <tt>memory</tt> <em>only the ets implementation</em>
 </p>
 </li>
@@ -616,6 +633,13 @@ setting for the access rights.
 <p>
 <tt>compressed</tt> If this option is present, the table data will be
 stored in a compressed format.
+</p>
+</li>
+<li>
+<p>
+<tt>async</tt> If this option is present, the emulator's async thread
+pool will be used when accessing the table data.  <em>only the drv
+implementation</em>
 </p>
 </li>
 <li>

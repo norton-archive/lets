@@ -66,7 +66,10 @@ command_gen(Mod,#state{parallel=true}=S) ->
 serial_command_gen(_Mod,#state{db=undefined, exists=false}) ->
     {call,?IMPL,open,[]};
 serial_command_gen(_Mod,#state{db=undefined, exists=true}) ->
-    {call,?IMPL,reopen,[]};
+    oneof([{call,?IMPL,reopen,[]}
+           %% @TODO {call,?IMPL,destroy,[]},
+           %% @TODO {call,?IMPL,repair,[]}
+          ]);
 serial_command_gen(_Mod,#state{db=Db}=S) ->
     oneof([{call,?IMPL,close,[Db]},
            {call,?IMPL,put,[Db,gen_obj(S)]},
@@ -100,6 +103,8 @@ next_state(#state{db=undefined, exists=false}=S, V, {call,_,open,[]}) ->
     S#state{db=V, exists=true};
 next_state(#state{db=undefined, exists=true}=S, V, {call,_,reopen,[]}) ->
     S#state{db=V, exists=true};
+next_state(#state{db=undefined, exists=true}=S, V, {call,_,destroy,[]}) ->
+    S#state{db=V, exists=false, objs=[]};
 next_state(#state{db=Db}=S, _V, {call,_,close,[Db]}) when Db /= undefined ->
     S#state{db=undefined};
 next_state(S, _V, {call,_,put,[_Db,Obj]}) ->
@@ -114,9 +119,17 @@ precondition(#state{exists=true}, {call,_,open,[]}) ->
     false;
 precondition(#state{exists=false}, {call,_,reopen,[]}) ->
     false;
+precondition(#state{exists=false}, {call,_,destroy,[]}) ->
+    false;
+precondition(#state{exists=false}, {call,_,repair,[]}) ->
+    false;
 precondition(#state{db=Db}, {call,_,open,[]}) when Db /= undefined->
     false;
 precondition(#state{db=Db}, {call,_,reopen,[]}) when Db /= undefined->
+    false;
+precondition(#state{db=Db}, {call,_,destroy,[]}) when Db /= undefined->
+    false;
+precondition(#state{db=Db}, {call,_,repair,[]}) when Db /= undefined->
     false;
 precondition(_S, {call,_,_,_}) ->
     true.
@@ -126,6 +139,10 @@ postcondition(#state{exists=false}, {call,_,open,[]}, Res) ->
     ?IMPL:is_db(Res);
 postcondition(#state{exists=true}, {call,_,reopen,[]}, Res) ->
     ?IMPL:is_db(Res);
+postcondition(#state{exists=true}, {call,_,destroy,[]}, Res) ->
+    Res;
+postcondition(#state{exists=true}, {call,_,repair,[]}, Res) ->
+    Res;
 postcondition(#state{db=Db}, {call,_,close,[_Db]}, Res) ->
     Res andalso Db /= undefined;
 postcondition(_S, {call,_,put,[_Db,_]}, Res) ->

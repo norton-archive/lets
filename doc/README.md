@@ -498,19 +498,6 @@ Explain how to build and to run lets with valgrind enabled
 </li>
 <li>
 <p>
-Performance
-</p>
-<ul>
-<li>
-<p>
-Update driver implementation to use Erlang's asynchronous driver
-    thread pool for all LevelDB operations.
-</p>
-</li>
-</ul>
-</li>
-<li>
-<p>
 Testing
 </p>
 <ul>
@@ -522,8 +509,13 @@ Functional
 <li>
 <p>
 Update test model to include LevelDB's database, read, and
-       write options.  These options have not undergone any explicit
-       testing.
+       write options.  These options have not been tested.
+</p>
+</li>
+<li>
+<p>
+Update test model to include LevelDB's destroy and repair
+       operations.  These operations have not been tested.
 </p>
 </li>
 </ul>
