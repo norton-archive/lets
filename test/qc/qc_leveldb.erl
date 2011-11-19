@@ -39,6 +39,7 @@
          , first/1, first/2
          , last/1, last/2
          , next/2, next/3
+         , prev/2, prev/3
         ]).
 
 
@@ -283,6 +284,39 @@ next(Db, Key, Options) ->
                                 KeyPtr1 = leveldb:leveldb_iter_key(Iter, LenPtr1),
                                 read_binary(KeyPtr1, LenPtr1)
                         end
+                end
+        end
+    after
+        leveldb:leveldb_iter_destroy(Iter),
+        free_ptr(LenPtr),
+        free_ptr(LenPtr1)
+    end.
+
+prev(Db, Key) ->
+    Options = leveldb:leveldb_readoptions_create(),
+    try
+        prev(Db, Key, Options)
+    after
+        leveldb:leveldb_readoptions_destroy(Options)
+    end.
+
+prev(Db, Key, Options) ->
+    Iter = leveldb:leveldb_create_iterator(Db, Options),
+    LenPtr = lenptr(),
+    LenPtr1 = lenptr(),
+    try
+        leveldb:leveldb_iter_seek(Iter, binary_to_list(Key), byte_size(Key)),
+        case leveldb:leveldb_iter_valid(Iter) of
+            0 ->
+                last(Db, Options);
+            1 ->
+                leveldb:leveldb_iter_prev(Iter),
+                case leveldb:leveldb_iter_valid(Iter) of
+                    0 ->
+                        true;
+                    1 ->
+                        KeyPtr1 = leveldb:leveldb_iter_key(Iter, LenPtr1),
+                        read_binary(KeyPtr1, LenPtr1)
                 end
         end
     after

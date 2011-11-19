@@ -16,6 +16,14 @@
 
 
 
+###<a name="type-cont">cont()</a>##
+
+
+
+__abstract datatype__: `cont()`
+
+
+
 ###<a name="type-db_opts">db_opts()</a>##
 
 
@@ -56,11 +64,43 @@
 
 
 
+###<a name="type-item">item()</a>##
+
+
+
+<pre>item() = owner | name | named_table | type | keypos | protection | compressed | async | memory | size</pre>
+
+
+
 ###<a name="type-key">key()</a>##
 
 
 
 <pre>key() = binary()</pre>
+
+
+
+###<a name="type-limit">limit()</a>##
+
+
+
+<pre>limit() = pos_integer()</pre>
+
+
+
+###<a name="type-match">match()</a>##
+
+
+
+<pre>match() = term()</pre>
+
+
+
+###<a name="type-name">name()</a>##
+
+
+
+<pre>name() = atom()</pre>
 
 
 
@@ -80,6 +120,36 @@
 
 
 
+###<a name="type-pattern">pattern()</a>##
+
+
+
+<pre>pattern() = atom() | tuple()</pre>
+
+
+
+
+<pre><tt>ets:match_pattern() is not exported!</tt></pre>
+
+
+
+
+###<a name="type-pos">pos()</a>##
+
+
+
+<pre>pos() = pos_integer()</pre>
+
+
+
+###<a name="type-spec">spec()</a>##
+
+
+
+<pre>spec() = [ets:match_spec()](ets.md#type-match_spec)</pre>
+
+
+
 ###<a name="type-tab">tab()</a>##
 
 
@@ -94,8 +164,8 @@ __abstract datatype__: `tab()`
 guaranteed to be atomic and isolated.  This function only applies
 to the <tt>ets</tt> implementation.</p>.</td></tr><tr><td valign="top"><a href="#destroy-2">destroy/2</a></td><td><p>Destroy the contents of the specified table.  This function
 only applies to <tt>driver</tt> and <tt>nif</tt> implementations.</p>.</td></tr><tr><td valign="top"><a href="#first-1">first/1</a></td><td><p>Returns the first key <tt>Key</tt> in the table <tt>Tab</tt>.  If the table
-is empty, <tt><em>$end_of_table</em></tt> will be returned.</p>.</td></tr><tr><td valign="top"><a href="#info-2">info/2</a></td><td><p>Returns information about the table <tt>Tab</tt> as a list of <tt>{Item,
-  Value}</tt> tuples.</p>
+is empty, <tt><em>$end_of_table</em></tt> will be returned.</p>.</td></tr><tr><td valign="top"><a href="#foldl-3">foldl/3</a></td><td><p>Fold from left to right over the elements of the table.</p>.</td></tr><tr><td valign="top"><a href="#foldr-3">foldr/3</a></td><td><p>Fold from right to left over the elements of the table.</p>.</td></tr><tr><td valign="top"><a href="#info-1">info/1</a></td><td><p>Returns information about the table <tt>Tab</tt> as a list of <tt>{Item,
+  Value}</tt> tuples.</p>.</td></tr><tr><td valign="top"><a href="#info-2">info/2</a></td><td><p>Returns the information associated with <tt>Item</tt> for the table <tt>Tab</tt>.</p>
 
 
 <pre><tt>Valid +Item+ options are:</tt></pre>
@@ -152,11 +222,21 @@ is empty, <tt><em>$end_of_table</em></tt> will be returned.</p>.</td></tr><tr><t
 </p>
 </li>
 </ul>.</td></tr><tr><td valign="top"><a href="#insert-2">insert/2</a></td><td><p>Inserts the object or all of the objects in the list
-<tt>ObjectOrObjects</tt> into the table <tt>Tab</tt>.</p>.</td></tr><tr><td valign="top"><a href="#insert_new-2">insert_new/2</a></td><td><p>This function works exactly like <tt>insert/2</tt>, with the
+<tt>ObjOrObjs</tt> into the table <tt>Tab</tt>.</p>.</td></tr><tr><td valign="top"><a href="#insert_new-2">insert_new/2</a></td><td><p>This function works exactly like <tt>insert/2</tt>, with the
 exception that instead of overwriting objects with the same key, it
 simply returns false.  This function only applies to the <tt>ets</tt>
-implementation.</p>.</td></tr><tr><td valign="top"><a href="#lookup-2">lookup/2</a></td><td><p>Returns a list of all objects with the key <tt>Key</tt> in the table
-<tt>Tab</tt>.</p>.</td></tr><tr><td valign="top"><a href="#new-2">new/2</a></td><td><p>Creates a new table and returns a table identifier which can
+implementation.</p>.</td></tr><tr><td valign="top"><a href="#last-1">last/1</a></td><td><p>Returns the last key <tt>Key</tt> in the table <tt>Tab</tt>.  If the table
+is empty, <tt><em>$end_of_table</em></tt> will be returned.</p>.</td></tr><tr><td valign="top"><a href="#lookup-2">lookup/2</a></td><td><p>Returns a list of all objects with the key <tt>Key</tt> in the table
+<tt>Tab</tt>.</p>.</td></tr><tr><td valign="top"><a href="#lookup_element-3">lookup_element/3</a></td><td><p>Returns the <tt>Pos</tt>:th element of the object with the key <tt>Key</tt>
+in the table <tt>Tab</tt>.</p>.</td></tr><tr><td valign="top"><a href="#match-1">match/1</a></td><td><p>Continues a match started with <tt>match/3</tt>.</p>.</td></tr><tr><td valign="top"><a href="#match-2">match/2</a></td><td><p>Matches the objects in the table <tt>Tab</tt> against the pattern
+<tt>Pattern</tt>.</p>.</td></tr><tr><td valign="top"><a href="#match-3">match/3</a></td><td><p>Matches the objects in the table <tt>Tab</tt> against the pattern
+<tt>Pattern</tt> and returns a limited (<tt>Limit</tt>) number of matching
+objects.</p>.</td></tr><tr><td valign="top"><a href="#match_delete-2">match_delete/2</a></td><td><p>Deletes all objects which match the pattern <tt>Pattern</tt> from the
+table <tt>Tab</tt>.</p>.</td></tr><tr><td valign="top"><a href="#match_object-1">match_object/1</a></td><td><p>Continues a match started with <tt>match_object/3</tt>.</p>.</td></tr><tr><td valign="top"><a href="#match_object-2">match_object/2</a></td><td><p>Matches the objects in the table <tt>Tab</tt> against the pattern
+<tt>Pattern</tt>.</p>.</td></tr><tr><td valign="top"><a href="#match_object-3">match_object/3</a></td><td><p>Matches the objects in the table <tt>Tab</tt> against the pattern
+<tt>Pattern</tt> and returns a limited (<tt>Limit</tt>) number of matching
+objects.</p>.</td></tr><tr><td valign="top"><a href="#member-2">member/2</a></td><td><p>Returns <tt>true</tt> if one or more elements in the table <tt>Tab</tt> has
+the key <tt>Key</tt>, <tt>false</tt> otherwise.</p>.</td></tr><tr><td valign="top"><a href="#new-2">new/2</a></td><td><p>Creates a new table and returns a table identifier which can
 be used in subsequent operations.  The table identifier can be sent
 to other processes so that a table can be shared between different
 processes within a node.</p>
@@ -343,11 +423,20 @@ considered complete. The default is <tt>false</tt>.
 </li>
 </ul>.</td></tr><tr><td valign="top"><a href="#next-2">next/2</a></td><td><p>Returns the next key <tt>Key2</tt>, following the key <tt>Key1</tt> in the
 table <tt>Tab</tt>.  If there is no next key, <tt><em>$end_of_table</em></tt> is
+returned.</p>.</td></tr><tr><td valign="top"><a href="#prev-2">prev/2</a></td><td><p>Returns the previous key <tt>Key2</tt>, following the key <tt>Key1</tt> in
+the table <tt>Tab</tt>.  If there is no previous key, <tt><em>$end_of_table</em></tt> is
 returned.</p>.</td></tr><tr><td valign="top"><a href="#repair-2">repair/2</a></td><td><p>If a table cannot be opened, you may attempt to call this
 method to resurrect as much of the contents of the table as
 possible.  Some data may be lost, so be careful when calling this
 function on a table that contains important information. This
-function only applies to <tt>driver</tt> and <tt>nif</tt> implementations.</p>.</td></tr><tr><td valign="top"><a href="#tab2list-1">tab2list/1</a></td><td><p>Returns a list of all objects in the table <tt>Tab</tt>. The
+function only applies to <tt>driver</tt> and <tt>nif</tt> implementations.</p>.</td></tr><tr><td valign="top"><a href="#select-1">select/1</a></td><td><p>Continues a select started with <tt>select/3</tt>.</p>.</td></tr><tr><td valign="top"><a href="#select-2">select/2</a></td><td><p>Matches the objects in the table <tt>Tab</tt> against the spec
+<tt>Spec</tt>.</p>.</td></tr><tr><td valign="top"><a href="#select-3">select/3</a></td><td><p>Matches the objects in the table <tt>Tab</tt> against the spec <tt>Spec</tt>
+and returns a limited (<tt>Limit</tt>) number of matching objects.</p>.</td></tr><tr><td valign="top"><a href="#select_count-2">select_count/2</a></td><td><p>Counts all objects which match the spec <tt>Spec</tt> from the
+table <tt>Tab</tt> and returns the number matched.</p>.</td></tr><tr><td valign="top"><a href="#select_delete-2">select_delete/2</a></td><td><p>Deletes all objects which match the spec <tt>Spec</tt> from the
+table <tt>Tab</tt> and returns the number deleted.</p>.</td></tr><tr><td valign="top"><a href="#select_reverse-1">select_reverse/1</a></td><td><p>Continues a select reverse started with <tt>select_reverse/3</tt>.</p>.</td></tr><tr><td valign="top"><a href="#select_reverse-2">select_reverse/2</a></td><td><p>Matches in reverse the objects in the table <tt>Tab</tt> against the
+spec <tt>Spec</tt>.</p>.</td></tr><tr><td valign="top"><a href="#select_reverse-3">select_reverse/3</a></td><td><p>Matches in reverse the objects in the table <tt>Tab</tt> against the
+spec <tt>Spec</tt> and returns a limited (<tt>Limit</tt>) number of matching
+objects.</p>.</td></tr><tr><td valign="top"><a href="#tab2list-1">tab2list/1</a></td><td><p>Returns a list of all objects in the table <tt>Tab</tt>. The
 operation is <strong>not</strong> guaranteed to be atomic and isolated.</p>.</td></tr></table>
 
 
@@ -412,7 +501,7 @@ __See also:__ [ets:delete_all_objects/1](ets.md#delete_all_objects-1).<a name="d
 
 
 
-<pre>destroy(Name::atom(), Options::[opts()](#type-opts)) -&gt; true</pre>
+<pre>destroy(Name::[name()](#type-name), Opts::[opts()](#type-opts)) -&gt; true</pre>
 <br></br>
 
 
@@ -437,14 +526,44 @@ only applies to <tt>driver</tt> and <tt>nif</tt> implementations.</p>
 is empty, <tt><em>$end_of_table</em></tt> will be returned.</p>
 
 
-__See also:__ [ets:first/1](ets.md#first-1).<a name="info-2"></a>
+__See also:__ [ets:first/1](ets.md#first-1).<a name="foldl-3"></a>
 
-###info/2##
-
-
+###foldl/3##
 
 
-<pre>info(Tab::[tab()](#type-tab), Item::atom()) -&gt; term()</pre>
+
+
+<pre>foldl(Fun, Acc0::term(), Tab::[tab()](#type-tab)) -&gt; Acc1::term()</pre>
+<ul class="definitions"><li><pre>Fun = fun((Element::term(), AccIn::term()) -&gt; AccOut::term())</pre></li></ul>
+
+
+
+<p>Fold from left to right over the elements of the table.</p>
+
+
+__See also:__ [ets:foldl/3](ets.md#foldl-3).<a name="foldr-3"></a>
+
+###foldr/3##
+
+
+
+
+<pre>foldr(Fun, Acc0::term(), Tab::[tab()](#type-tab)) -&gt; Acc1::term()</pre>
+<ul class="definitions"><li><pre>Fun = fun((Element::term(), AccIn::term()) -&gt; AccOut::term())</pre></li></ul>
+
+
+
+<p>Fold from right to left over the elements of the table.</p>
+
+
+__See also:__ [ets:foldr/3](ets.md#foldr-3).<a name="info-1"></a>
+
+###info/1##
+
+
+
+
+<pre>info(Tab::[tab()](#type-tab)) -&gt; [{[item()](#type-item), term()}]</pre>
 <br></br>
 
 
@@ -452,6 +571,22 @@ __See also:__ [ets:first/1](ets.md#first-1).<a name="info-2"></a>
 
 <p>Returns information about the table <tt>Tab</tt> as a list of <tt>{Item,
   Value}</tt> tuples.</p>
+
+
+__See also:__ [info/2](#info-2).<a name="info-2"></a>
+
+###info/2##
+
+
+
+
+<pre>info(Tab::[tab()](#type-tab), Item::[item()](#type-item)) -&gt; term()</pre>
+<br></br>
+
+
+
+
+<p>Returns the information associated with <tt>Item</tt> for the table <tt>Tab</tt>.</p>
 
 
 <pre><tt>Valid +Item+ options are:</tt></pre>
@@ -517,14 +652,14 @@ __See also:__ [ets:info/2](ets.md#info-2).<a name="insert-2"></a>
 
 
 
-<pre>insert(Tab::[tab()](#type-tab), ObjectOrObjects::[object()](#type-object) | [[object()](#type-object)]) -&gt; true</pre>
+<pre>insert(Tab::[tab()](#type-tab), ObjOrObjs::[object()](#type-object) | [[object()](#type-object)]) -&gt; true</pre>
 <br></br>
 
 
 
 
 <p>Inserts the object or all of the objects in the list
-<tt>ObjectOrObjects</tt> into the table <tt>Tab</tt>.</p>
+<tt>ObjOrObjs</tt> into the table <tt>Tab</tt>.</p>
 
 
 __See also:__ [ets:insert/2](ets.md#insert-2).<a name="insert_new-2"></a>
@@ -534,7 +669,7 @@ __See also:__ [ets:insert/2](ets.md#insert-2).<a name="insert_new-2"></a>
 
 
 
-<pre>insert_new(Tab::[tab()](#type-tab), ObjectOrObjects::[object()](#type-object) | [[object()](#type-object)]) -&gt; true</pre>
+<pre>insert_new(Tab::[tab()](#type-tab), ObjOrObjs::[object()](#type-object) | [[object()](#type-object)]) -&gt; true</pre>
 <br></br>
 
 
@@ -546,7 +681,24 @@ simply returns false.  This function only applies to the <tt>ets</tt>
 implementation.</p>
 
 
-__See also:__ [ets:insert_new/2](ets.md#insert_new-2).<a name="lookup-2"></a>
+__See also:__ [ets:insert_new/2](ets.md#insert_new-2).<a name="last-1"></a>
+
+###last/1##
+
+
+
+
+<pre>last(Tab::[tab()](#type-tab)) -&gt; [key()](#type-key) | '$end_of_table'</pre>
+<br></br>
+
+
+
+
+<p>Returns the last key <tt>Key</tt> in the table <tt>Tab</tt>.  If the table
+is empty, <tt><em>$end_of_table</em></tt> will be returned.</p>
+
+
+__See also:__ [ets:last/1](ets.md#last-1).<a name="lookup-2"></a>
 
 ###lookup/2##
 
@@ -563,14 +715,167 @@ __See also:__ [ets:insert_new/2](ets.md#insert_new-2).<a name="lookup-2"></a>
 <tt>Tab</tt>.</p>
 
 
-__See also:__ [ets:lookup/2](ets.md#lookup-2).<a name="new-2"></a>
+__See also:__ [ets:lookup/2](ets.md#lookup-2).<a name="lookup_element-3"></a>
+
+###lookup_element/3##
+
+
+
+
+<pre>lookup_element(Tab::[tab()](#type-tab), Key::[key()](#type-key), Pos::[pos()](#type-pos)) -&gt; term()</pre>
+<br></br>
+
+
+
+
+<p>Returns the <tt>Pos</tt>:th element of the object with the key <tt>Key</tt>
+in the table <tt>Tab</tt>.</p>
+
+
+__See also:__ [ets:lookup_element/3](ets.md#lookup_element-3).<a name="match-1"></a>
+
+###match/1##
+
+
+
+
+<pre>match(X1::[cont()](#type-cont)) -&gt; {[[match()](#type-match)], [cont()](#type-cont)} | '$end_of_table'</pre>
+<br></br>
+
+
+
+
+<p>Continues a match started with <tt>match/3</tt>.</p>
+
+
+__See also:__ [ets:match/1](ets.md#match-1).<a name="match-2"></a>
+
+###match/2##
+
+
+
+
+<pre>match(Tab::[tab()](#type-tab), Pattern::[pattern()](#type-pattern)) -&gt; [[match()](#type-match)]</pre>
+<br></br>
+
+
+
+
+<p>Matches the objects in the table <tt>Tab</tt> against the pattern
+<tt>Pattern</tt>.</p>
+
+
+__See also:__ [ets:match/2](ets.md#match-2).<a name="match-3"></a>
+
+###match/3##
+
+
+
+
+<pre>match(Tab::[tab()](#type-tab), Pattern::[pattern()](#type-pattern), Limit::[limit()](#type-limit)) -&gt; {[[match()](#type-match)], [cont()](#type-cont)} | '$end_of_table'</pre>
+<br></br>
+
+
+
+
+<p>Matches the objects in the table <tt>Tab</tt> against the pattern
+<tt>Pattern</tt> and returns a limited (<tt>Limit</tt>) number of matching
+objects.</p>
+
+
+__See also:__ [ets:match/3](ets.md#match-3).<a name="match_delete-2"></a>
+
+###match_delete/2##
+
+
+
+
+<pre>match_delete(Tab::[tab()](#type-tab), Pattern::[pattern()](#type-pattern)) -&gt; true</pre>
+<br></br>
+
+
+
+
+<p>Deletes all objects which match the pattern <tt>Pattern</tt> from the
+table <tt>Tab</tt>.</p>
+
+
+__See also:__ [ets:match_delete/2](ets.md#match_delete-2).<a name="match_object-1"></a>
+
+###match_object/1##
+
+
+
+
+<pre>match_object(X1::[cont()](#type-cont)) -&gt; {[[match()](#type-match)], [cont()](#type-cont)} | '$end_of_table'</pre>
+<br></br>
+
+
+
+
+<p>Continues a match started with <tt>match_object/3</tt>.</p>
+
+
+__See also:__ [ets:match_object/1](ets.md#match_object-1).<a name="match_object-2"></a>
+
+###match_object/2##
+
+
+
+
+<pre>match_object(Tab::[tab()](#type-tab), Pattern::[pattern()](#type-pattern)) -&gt; [[match()](#type-match)]</pre>
+<br></br>
+
+
+
+
+<p>Matches the objects in the table <tt>Tab</tt> against the pattern
+<tt>Pattern</tt>.</p>
+
+
+__See also:__ [ets:match_object/2](ets.md#match_object-2).<a name="match_object-3"></a>
+
+###match_object/3##
+
+
+
+
+<pre>match_object(Tab::[tab()](#type-tab), Pattern::[pattern()](#type-pattern), Limit::[limit()](#type-limit)) -&gt; {[[match()](#type-match)], [cont()](#type-cont)} | '$end_of_table'</pre>
+<br></br>
+
+
+
+
+<p>Matches the objects in the table <tt>Tab</tt> against the pattern
+<tt>Pattern</tt> and returns a limited (<tt>Limit</tt>) number of matching
+objects.</p>
+
+
+__See also:__ [ets:match_object/3](ets.md#match_object-3).<a name="member-2"></a>
+
+###member/2##
+
+
+
+
+<pre>member(Tab::[tab()](#type-tab), Key::[key()](#type-key)) -&gt; true | false</pre>
+<br></br>
+
+
+
+
+<p>Returns <tt>true</tt> if one or more elements in the table <tt>Tab</tt> has
+the key <tt>Key</tt>, <tt>false</tt> otherwise.</p>
+
+
+__See also:__ [ets:member/2](ets.md#member-2).<a name="new-2"></a>
 
 ###new/2##
 
 
 
 
-<pre>new(Name::atom(), Options::[opts()](#type-opts)) -&gt; [tab()](#type-tab)</pre>
+<pre>new(Name::[name()](#type-name), Opts::[opts()](#type-opts)) -&gt; [tab()](#type-tab)</pre>
 <br></br>
 
 
@@ -782,14 +1087,32 @@ table <tt>Tab</tt>.  If there is no next key, <tt><em>$end_of_table</em></tt> is
 returned.</p>
 
 
-__See also:__ [ets:next/2](ets.md#next-2).<a name="repair-2"></a>
+__See also:__ [ets:next/2](ets.md#next-2).<a name="prev-2"></a>
+
+###prev/2##
+
+
+
+
+<pre>prev(Tab::[tab()](#type-tab), Key::[key()](#type-key)) -&gt; [key()](#type-key) | '$end_of_table'</pre>
+<br></br>
+
+
+
+
+<p>Returns the previous key <tt>Key2</tt>, following the key <tt>Key1</tt> in
+the table <tt>Tab</tt>.  If there is no previous key, <tt><em>$end_of_table</em></tt> is
+returned.</p>
+
+
+__See also:__ [ets:prev/2](ets.md#prev-2).<a name="repair-2"></a>
 
 ###repair/2##
 
 
 
 
-<pre>repair(Name::atom(), Options::[opts()](#type-opts)) -&gt; true</pre>
+<pre>repair(Name::[name()](#type-name), Opts::[opts()](#type-opts)) -&gt; true</pre>
 <br></br>
 
 
@@ -800,7 +1123,142 @@ method to resurrect as much of the contents of the table as
 possible.  Some data may be lost, so be careful when calling this
 function on a table that contains important information. This
 function only applies to <tt>driver</tt> and <tt>nif</tt> implementations.</p>
-<a name="tab2list-1"></a>
+<a name="select-1"></a>
+
+###select/1##
+
+
+
+
+<pre>select(X1::[cont()](#type-cont)) -&gt; {[[match()](#type-match)], [cont()](#type-cont)} | '$end_of_table'</pre>
+<br></br>
+
+
+
+
+<p>Continues a select started with <tt>select/3</tt>.</p>
+
+
+__See also:__ [ets:select/1](ets.md#select-1).<a name="select-2"></a>
+
+###select/2##
+
+
+
+
+<pre>select(Tab::[tab()](#type-tab), Spec::[spec()](#type-spec)) -&gt; [[match()](#type-match)]</pre>
+<br></br>
+
+
+
+
+<p>Matches the objects in the table <tt>Tab</tt> against the spec
+<tt>Spec</tt>.</p>
+
+
+__See also:__ [ets:select/2](ets.md#select-2).<a name="select-3"></a>
+
+###select/3##
+
+
+
+
+<pre>select(Tab::[tab()](#type-tab), Spec::[spec()](#type-spec), Limit::[limit()](#type-limit)) -&gt; {[[match()](#type-match)], [cont()](#type-cont)} | '$end_of_table'</pre>
+<br></br>
+
+
+
+
+<p>Matches the objects in the table <tt>Tab</tt> against the spec <tt>Spec</tt>
+and returns a limited (<tt>Limit</tt>) number of matching objects.</p>
+
+
+__See also:__ [ets:select/3](ets.md#select-3).<a name="select_count-2"></a>
+
+###select_count/2##
+
+
+
+
+<pre>select_count(Tab::[tab()](#type-tab), Spec::[pattern()](#type-pattern)) -&gt; pos_integer()</pre>
+<br></br>
+
+
+
+
+<p>Counts all objects which match the spec <tt>Spec</tt> from the
+table <tt>Tab</tt> and returns the number matched.</p>
+
+
+__See also:__ [ets:select_count/2](ets.md#select_count-2).<a name="select_delete-2"></a>
+
+###select_delete/2##
+
+
+
+
+<pre>select_delete(Tab::[tab()](#type-tab), Spec::[pattern()](#type-pattern)) -&gt; pos_integer()</pre>
+<br></br>
+
+
+
+
+<p>Deletes all objects which match the spec <tt>Spec</tt> from the
+table <tt>Tab</tt> and returns the number deleted.</p>
+
+
+__See also:__ [ets:select_delete/2](ets.md#select_delete-2).<a name="select_reverse-1"></a>
+
+###select_reverse/1##
+
+
+
+
+<pre>select_reverse(X1::[cont()](#type-cont)) -&gt; {[[match()](#type-match)], [cont()](#type-cont)} | '$end_of_table'</pre>
+<br></br>
+
+
+
+
+<p>Continues a select reverse started with <tt>select_reverse/3</tt>.</p>
+
+
+__See also:__ [ets:select_reverse/1](ets.md#select_reverse-1).<a name="select_reverse-2"></a>
+
+###select_reverse/2##
+
+
+
+
+<pre>select_reverse(Tab::[tab()](#type-tab), Spec::[spec()](#type-spec)) -&gt; [[match()](#type-match)]</pre>
+<br></br>
+
+
+
+
+<p>Matches in reverse the objects in the table <tt>Tab</tt> against the
+spec <tt>Spec</tt>.</p>
+
+
+__See also:__ [ets:select_reverse/2](ets.md#select_reverse-2).<a name="select_reverse-3"></a>
+
+###select_reverse/3##
+
+
+
+
+<pre>select_reverse(Tab::[tab()](#type-tab), Spec::[spec()](#type-spec), Limit::[limit()](#type-limit)) -&gt; {[[match()](#type-match)], [cont()](#type-cont)} | '$end_of_table'</pre>
+<br></br>
+
+
+
+
+<p>Matches in reverse the objects in the table <tt>Tab</tt> against the
+spec <tt>Spec</tt> and returns a limited (<tt>Limit</tt>) number of matching
+objects.</p>
+
+
+__See also:__ [ets:select_reverse/3](ets.md#select_reverse-3).<a name="tab2list-1"></a>
 
 ###tab2list/1##
 

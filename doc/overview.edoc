@@ -8,7 +8,8 @@ LETS is an alternative Erlang Term Storage using LevelDB as the
 storage implementation.  LETS tries to address some bad properties of
 ETS and DETS.  ETS is limited by physical memory.  DETS is limited by
 a 2 GB file size limitation and does not implement ordered sets.  LETS
-has neither of these limitations.
+has neither of these limitations.  Data can also be automatically
+compressed using the Snappy compression library.
 
 For testing and comparison purposes, LETS supports three
 implementations:
@@ -18,20 +19,40 @@ implementations:
 - +ets+ Erlang ETS backend
 
 LETS is not intended to be an exact clone of ETS.  The currently
-supported APIs are:
+supported ETS APIs are:
 
-- +new/2+
-- +destroy/2+ _only driver and nif implementations_
-- +repair/2+  _only driver and nif implementations_
-- +insert/2+
-- +insert_new/2+ _only the ets implementation_
 - +delete/1+
 - +delete/2+
-- +delete_all_objects/1+ _only the ets implementation_
-- +lookup/2+
+- +delete_all_objects/1+ _only ets implementation_
 - +first/1+
-- +next/2+
+- +foldl/3+
+- +foldr/3+
+- +info/1+ _only a subset of items_
 - +info/2+ _only a subset of items_
+- +insert/2+
+- +insert_new/2+ _only ets implementation_
+- +last/1+
+- +lookup/2+
+- +lookup_element/3+
+- +match/1+
+- +match/2+
+- +match/3+
+- +match_delete/2+
+- +match_object/1+
+- +match_object/2+
+- +match_object/3+
+- +member/2+
+- +new/2+
+- +next/2+
+- +prev/2+
+- +select/1+
+- +select/2+
+- +select/3+
+- +select_count/2+
+- +select_delete/2+
+- +select_reverse/1+
+- +select_reverse/2+
+- +select_reverse/3+
 - +tab2list/1+
 
 _This repository is experimental in nature - use at your own risk and
@@ -63,7 +84,7 @@ please read further.
 
 This README is the only bit of documentation right now.
 
-The QC (a.k.a. QuickCheck, Proper, etc.) tests underneath the
+The QC (a.k.a. QuickCheck, PropEr, etc.) tests underneath the
 "tests/qc" directory should be helpful for understanding the
 specification and behavior of ETS and LETS.  These QC tests also
 illustrate several strategies for testing Erlang Driver-based and
@@ -84,6 +105,12 @@ LevelDB is a fast key-value storage library written at Google that
 provides an ordered mapping from string keys to string values.
 
 See http://code.google.com/p/leveldb/ for further details.
+
+=== What is Snappy?
+
+Snappy is a fast compression/decompression library written at Google.
+
+See http://code.google.com/p/snappy/ for further details.
 
 == To download
 
@@ -212,16 +239,45 @@ $ make compile-eqc eqc-compile
 $ cd working-directory-name/src/lib/lets/.eunit
 $ erl -smp +A 5 -pz ../../sext/ebin -pz ../../qc/ebin
 
-1> qc_statem_lets:run(5000).
+1> qc_statem_lets:qc_run(5000).
+....
+OK, passed 5000 tests
+
+9.022% {delete,ok}
+7.800% {new,ok}
+4.535% {match_delete,ok}
+4.491% {lookup,ok}
+4.399% {select,ok}
+4.352% {select_delete,ok}
+4.348% {tab2list,ok}
+4.341% {member,ok}
+4.334% {last,ok}
+4.315% {foldl,ok}
+4.308% {select_reverse,ok}
+4.301% {select_count,ok}
+4.293% {select31,ok}
+4.264% {first,ok}
+4.216% {foldr,ok}
+4.202% {match_object,ok}
+4.184% {match,ok}
+4.056% {insert,ok}
+3.997% {prev,ok}
+3.774% {next,ok}
+3.416% {lookup_element,{error,badarg}}
+1.298% {insert_new,ok}
+0.757% {lookup_element,ok}
+0.516% {next,{error,badarg}}
+0.483% {prev,{error,badarg}}
+true
 .......
 ------
 +
 TIP: For testing LevelDB directly using the C bindings, try
-     +qc_statemc_lets:run(5000)+.
+     +qc_statemc_lets:qc_run(5000)+.
 
-== To test - Proper
+== To test - PropEr
 
-1. Make sure Proper is in your Erlang code path.  One simple way to
+1. Make sure PropEr is in your Erlang code path.  One simple way to
    accomplish this is by adding the code path to your +~/.erlang+
    resource file.
 +
@@ -229,7 +285,7 @@ TIP: For testing LevelDB directly using the C bindings, try
 true = code:add_pathz(os:getenv("HOME")++"/.erlang.d/lib/proper/ebin").
 ------
 
-2. Compile for Proper
+2. Compile for PropEr
 +
 ------
 $ cd working-directory-name/src
@@ -237,20 +293,49 @@ $ make clean
 $ make compile-proper proper-compile
 ------
 
-3. Run 5,000 Proper tests
+3. Run 5,000 PropEr tests
 +
 ------
 $ cd working-directory-name/src/lib/lets/.eunit
 $ erl -smp +A 5 -pz ../../sext/ebin -pz ../../qc/ebin
 
-1> qc_statem_lets:run(5000).
+1> qc_statem_lets:qc_run(5000).
+....
+OK: Passed 5000 test(s).
+
+11% {new,ok}
+8% {delete,ok}
+4% {member,ok}
+4% {select,ok}
+4% {select_count,ok}
+4% {select_reverse,ok}
+4% {lookup,ok}
+4% {match_object,ok}
+4% {tab2list,ok}
+4% {last,ok}
+4% {match,ok}
+4% {foldl,ok}
+4% {match_delete,ok}
+3% {prev,ok}
+3% {select31,ok}
+3% {select_delete,ok}
+3% {foldr,ok}
+3% {insert,ok}
+3% {first,ok}
+3% {next,ok}
+3% {lookup_element,{error,badarg}}
+1% {insert_new,ok}
+0% {prev,{error,badarg}}
+0% {lookup_element,ok}
+0% {next,{error,badarg}}
+true
 .......
 ------
 
 == Roadmap
 
 - Documentation
-  * Explain how to run QuickCheck/Proper tests using a new rebar
+  * Explain how to run QuickCheck/PropEr tests using a new rebar
     plugin.
   * Explain how to build and to run lets with valgrind enabled
     OTP/Erlang virtual machine
@@ -270,6 +355,10 @@ $ erl -smp +A 5 -pz ../../sext/ebin -pz ../../qc/ebin
 
   * +delete_all_objects/1+
     (http://code.google.com/p/leveldb/issues/detail?id=43)
+
+  * Add custom (i.e. not supported by native ETS) APIs for providing
+    access to LevelDB\'s iterators for +drv+ and +nif+ backend
+    implementations.
 
 - Existing APIs (TBD)
   * +delete/1+

@@ -9,7 +9,8 @@ __Authors:__ Joseph Wayne Norton ([`norton@alum.mit.edu`](mailto:norton@alum.mit
 storage implementation.  LETS tries to address some bad properties of
 ETS and DETS.  ETS is limited by physical memory.  DETS is limited by
 a 2 GB file size limitation and does not implement ordered sets.  LETS
-has neither of these limitations.</p>
+has neither of these limitations.  Data can also be automatically
+compressed using the Snappy compression library.</p>
 <p>For testing and comparison purposes, LETS supports three
 implementations:</p>
 <ul>
@@ -30,33 +31,8 @@ implementations:</p>
 </li>
 </ul>
 <p>LETS is not intended to be an exact clone of ETS.  The currently
-supported APIs are:</p>
+supported ETS APIs are:</p>
 <ul>
-<li>
-<p>
-<tt>new/2</tt>
-</p>
-</li>
-<li>
-<p>
-<tt>destroy/2</tt> <em>only driver and nif implementations</em>
-</p>
-</li>
-<li>
-<p>
-<tt>repair/2</tt>  <em>only driver and nif implementations</em>
-</p>
-</li>
-<li>
-<p>
-<tt>insert/2</tt>
-</p>
-</li>
-<li>
-<p>
-<tt>insert_new/2</tt> <em>only the ets implementation</em>
-</p>
-</li>
 <li>
 <p>
 <tt>delete/1</tt>
@@ -69,12 +45,7 @@ supported APIs are:</p>
 </li>
 <li>
 <p>
-<tt>delete_all_objects/1</tt> <em>only the ets implementation</em>
-</p>
-</li>
-<li>
-<p>
-<tt>lookup/2</tt>
+<tt>delete_all_objects/1</tt> <em>only ets implementation</em>
 </p>
 </li>
 <li>
@@ -84,12 +55,142 @@ supported APIs are:</p>
 </li>
 <li>
 <p>
-<tt>next/2</tt>
+<tt>foldl/3</tt>
+</p>
+</li>
+<li>
+<p>
+<tt>foldr/3</tt>
+</p>
+</li>
+<li>
+<p>
+<tt>info/1</tt> <em>only a subset of items</em>
 </p>
 </li>
 <li>
 <p>
 <tt>info/2</tt> <em>only a subset of items</em>
+</p>
+</li>
+<li>
+<p>
+<tt>insert/2</tt>
+</p>
+</li>
+<li>
+<p>
+<tt>insert_new/2</tt> <em>only ets implementation</em>
+</p>
+</li>
+<li>
+<p>
+<tt>last/1</tt>
+</p>
+</li>
+<li>
+<p>
+<tt>lookup/2</tt>
+</p>
+</li>
+<li>
+<p>
+<tt>lookup_element/3</tt>
+</p>
+</li>
+<li>
+<p>
+<tt>match/1</tt>
+</p>
+</li>
+<li>
+<p>
+<tt>match/2</tt>
+</p>
+</li>
+<li>
+<p>
+<tt>match/3</tt>
+</p>
+</li>
+<li>
+<p>
+<tt>match_delete/2</tt>
+</p>
+</li>
+<li>
+<p>
+<tt>match_object/1</tt>
+</p>
+</li>
+<li>
+<p>
+<tt>match_object/2</tt>
+</p>
+</li>
+<li>
+<p>
+<tt>match_object/3</tt>
+</p>
+</li>
+<li>
+<p>
+<tt>member/2</tt>
+</p>
+</li>
+<li>
+<p>
+<tt>new/2</tt>
+</p>
+</li>
+<li>
+<p>
+<tt>next/2</tt>
+</p>
+</li>
+<li>
+<p>
+<tt>prev/2</tt>
+</p>
+</li>
+<li>
+<p>
+<tt>select/1</tt>
+</p>
+</li>
+<li>
+<p>
+<tt>select/2</tt>
+</p>
+</li>
+<li>
+<p>
+<tt>select/3</tt>
+</p>
+</li>
+<li>
+<p>
+<tt>select_count/2</tt>
+</p>
+</li>
+<li>
+<p>
+<tt>select_delete/2</tt>
+</p>
+</li>
+<li>
+<p>
+<tt>select_reverse/1</tt>
+</p>
+</li>
+<li>
+<p>
+<tt>select_reverse/2</tt>
+</p>
+</li>
+<li>
+<p>
+<tt>select_reverse/3</tt>
 </p>
 </li>
 <li>
@@ -127,7 +228,7 @@ please read further.</p>
 
 <h3 id="_where_should_i_start">Where should I start?</h3>
 <p>This README is the only bit of documentation right now.</p>
-<p>The QC (a.k.a. QuickCheck, Proper, etc.) tests underneath the
+<p>The QC (a.k.a. QuickCheck, PropEr, etc.) tests underneath the
 "tests/qc" directory should be helpful for understanding the
 specification and behavior of ETS and LETS.  These QC tests also
 illustrate several strategies for testing Erlang Driver-based and
@@ -146,6 +247,11 @@ disk-based implementation.</p>
 <p>LevelDB is a fast key-value storage library written at Google that
 provides an ordered mapping from string keys to string values.</p>
 <p>See <a href="http://code.google.com/p/leveldb/">http://code.google.com/p/leveldb/</a> for further details.</p>
+
+
+<h3 id="_what_is_snappy">What is Snappy?</h3>
+<p>Snappy is a fast compression/decompression library written at Google.</p>
+<p>See <a href="http://code.google.com/p/snappy/">http://code.google.com/p/snappy/</a> for further details.</p>
 
 
 
@@ -415,7 +521,36 @@ Run 5,000 QuickCheck tests
 <pre><tt>$ cd working-directory-name/src/lib/lets/.eunit
 $ erl -smp +A 5 -pz ../../sext/ebin -pz ../../qc/ebin
 
-1> qc_statem_lets:run(5000).
+1> qc_statem_lets:qc_run(5000).
+....
+OK, passed 5000 tests
+
+9.022% {delete,ok}
+7.800% {new,ok}
+4.535% {match_delete,ok}
+4.491% {lookup,ok}
+4.399% {select,ok}
+4.352% {select_delete,ok}
+4.348% {tab2list,ok}
+4.341% {member,ok}
+4.334% {last,ok}
+4.315% {foldl,ok}
+4.308% {select_reverse,ok}
+4.301% {select_count,ok}
+4.293% {select31,ok}
+4.264% {first,ok}
+4.216% {foldr,ok}
+4.202% {match_object,ok}
+4.184% {match,ok}
+4.056% {insert,ok}
+3.997% {prev,ok}
+3.774% {next,ok}
+3.416% {lookup_element,{error,badarg}}
+1.298% {insert_new,ok}
+0.757% {lookup_element,ok}
+0.516% {next,{error,badarg}}
+0.483% {prev,{error,badarg}}
+true
 .......</tt></pre>
 
 
@@ -424,7 +559,7 @@ $ erl -smp +A 5 -pz ../../sext/ebin -pz ../../qc/ebin
 Tip
 </td>
 <td class="content">For testing LevelDB directly using the C bindings, try
-     <tt>qc_statemc_lets:run(5000)</tt>.</td>
+     <tt>qc_statemc_lets:qc_run(5000)</tt>.</td>
 </tr></table>
 
 </li>
@@ -432,12 +567,12 @@ Tip
 
 
 
-<h2 id="_to_test_proper">To test - Proper</h2>
+<h2 id="_to_test_proper">To test - PropEr</h2>
 
 <ol class="arabic">
 <li>
 <p>
-Make sure Proper is in your Erlang code path.  One simple way to
+Make sure PropEr is in your Erlang code path.  One simple way to
    accomplish this is by adding the code path to your <tt>~/.erlang</tt>
    resource file.
 </p>
@@ -448,7 +583,7 @@ Make sure Proper is in your Erlang code path.  One simple way to
 </li>
 <li>
 <p>
-Compile for Proper
+Compile for PropEr
 </p>
 
 
@@ -459,14 +594,43 @@ $ make compile-proper proper-compile</tt></pre>
 </li>
 <li>
 <p>
-Run 5,000 Proper tests
+Run 5,000 PropEr tests
 </p>
 
 
 <pre><tt>$ cd working-directory-name/src/lib/lets/.eunit
 $ erl -smp +A 5 -pz ../../sext/ebin -pz ../../qc/ebin
 
-1> qc_statem_lets:run(5000).
+1> qc_statem_lets:qc_run(5000).
+....
+OK: Passed 5000 test(s).
+
+11% {new,ok}
+8% {delete,ok}
+4% {member,ok}
+4% {select,ok}
+4% {select_count,ok}
+4% {select_reverse,ok}
+4% {lookup,ok}
+4% {match_object,ok}
+4% {tab2list,ok}
+4% {last,ok}
+4% {match,ok}
+4% {foldl,ok}
+4% {match_delete,ok}
+3% {prev,ok}
+3% {select31,ok}
+3% {select_delete,ok}
+3% {foldr,ok}
+3% {insert,ok}
+3% {first,ok}
+3% {next,ok}
+3% {lookup_element,{error,badarg}}
+1% {insert_new,ok}
+0% {prev,{error,badarg}}
+0% {lookup_element,ok}
+0% {next,{error,badarg}}
+true
 .......</tt></pre>
 
 </li>
@@ -484,7 +648,7 @@ Documentation
 <ul>
 <li>
 <p>
-Explain how to run QuickCheck/Proper tests using a new rebar
+Explain how to run QuickCheck/PropEr tests using a new rebar
     plugin.
 </p>
 </li>
@@ -547,6 +711,13 @@ New APIs (TBD)
 <p>
 <tt>delete_all_objects/1</tt>
     (<a href="http://code.google.com/p/leveldb/issues/detail?id=43">http://code.google.com/p/leveldb/issues/detail?id=43</a>)
+</p>
+</li>
+<li>
+<p>
+Add custom (i.e. not supported by native ETS) APIs for providing
+    access to LevelDB's iterators for <tt>drv</tt> and <tt>nif</tt> backend
+    implementations.
 </p>
 </li>
 </ul>

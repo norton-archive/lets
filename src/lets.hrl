@@ -33,9 +33,7 @@
               protection=protected :: public|protected|private,
               compressed=false :: boolean(),
               async=false :: boolean(),
-              drv :: port() | undefined,
-              nif :: nif() | undefined,
-              ets :: ets:tab() | undefined
+              impl :: port() | nif() | ets:tab() | undefined
              }).
 
 -endif. % -ifndef(lets).

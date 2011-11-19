@@ -31,15 +31,37 @@
          , new/3
          , destroy/3
          , repair/3
-         , insert/2
-         , insert_new/2
          , delete/1
          , delete/2
          , delete_all_objects/1
-         , lookup/2
          , first/1
-         , next/2
+         , foldl/3
+         , foldr/3
+         , info/1
          , info/2
+         , insert/2
+         , insert_new/2
+         , last/1
+         , lookup/2
+         , lookup_element/3
+         , match/2
+         , match/3
+         , match/1
+         , match_delete/2
+         , match_object/2
+         , match_object/3
+         , match_object/1
+         , member/2
+         , next/2
+         , prev/2
+         , select/2
+         , select/3
+         , select/1
+         , select_count/2
+         , select_delete/2
+         , select_reverse/2
+         , select_reverse/3
+         , select_reverse/1
          , tab2list/1
         ]).
 
@@ -68,12 +90,6 @@ destroy(Tab, Name, Options) ->
 repair(Tab, Name, Options) ->
     qc_lets_raw:repair(Tab, Name, Options).
 
-insert(Tab, ObjOrObjs) ->
-    qc_lets_proxy:insert(Tab, ObjOrObjs).
-
-insert_new(Tab, ObjOrObjs) ->
-    qc_lets_proxy:insert_new(Tab, ObjOrObjs).
-
 delete(Tab) ->
     qc_lets_proxy:delete(Tab).
 
@@ -83,24 +99,96 @@ delete(Tab, Key) ->
 delete_all_objects(Tab) ->
     qc_lets_proxy:delete_all_objects(Tab).
 
+first(Tab) ->
+    qc_lets_proxy:first(Tab).
+
+foldl(Function, Acc0, Tab) ->
+    qc_lets_proxy:foldl(Function, Acc0, Tab).
+
+foldr(Function, Acc0, Tab) ->
+    qc_lets_proxy:foldr(Function, Acc0, Tab).
+
+info(Tab) ->
+    qc_lets_proxy:info(Tab).
+
+info(Tab, Item) ->
+    qc_lets_proxy:info(Tab, Item).
+
+insert(Tab, ObjOrObjs) ->
+    qc_lets_proxy:insert(Tab, ObjOrObjs).
+
+insert_new(Tab, ObjOrObjs) ->
+    qc_lets_proxy:insert_new(Tab, ObjOrObjs).
+
+last(Tab) ->
+    qc_lets_proxy:last(Tab).
+
 lookup(Tab, Key) ->
     qc_lets_proxy:lookup(Tab, Key).
 
-first(Tab) ->
-    qc_lets_proxy:first(Tab).
+lookup_element(Tab, Key, Pos) ->
+    qc_lets_proxy:lookup_element(Tab, Key, Pos).
+
+match(Tab, Pattern) ->
+    qc_lets_proxy:match(Tab, Pattern).
+
+match(Tab, Pattern, Limit) ->
+    qc_lets_proxy:match(Tab, Pattern, Limit).
+
+match(Cont) ->
+    qc_lets_proxy:match(Cont).
+
+match_delete(Tab, Pattern) ->
+    qc_lets_proxy:match_delete(Tab, Pattern).
+
+match_object(Tab, Pattern) ->
+    qc_lets_proxy:match_object(Tab, Pattern).
+
+match_object(Tab, Pattern, Limit) ->
+    qc_lets_proxy:match_object(Tab, Pattern, Limit).
+
+match_object(Cont) ->
+    qc_lets_proxy:match_object(Cont).
+
+member(Tab, Key) ->
+    qc_lets_proxy:member(Tab, Key).
 
 next(Tab, Key) ->
     qc_lets_proxy:next(Tab, Key).
 
-info(Tab, Item) ->
-    qc_lets_proxy:info(Tab, Item).
+prev(Tab, Key) ->
+    qc_lets_proxy:prev(Tab, Key).
+
+select(Tab, Spec) ->
+    qc_lets_proxy:select(Tab, Spec).
+
+select(Tab, Spec, Limit) ->
+    qc_lets_proxy:select(Tab, Spec, Limit).
+
+select(Cont) ->
+    qc_lets_proxy:select(Cont).
+
+select_count(Tab, Spec) ->
+    qc_lets_proxy:select_count(Tab, Spec).
+
+select_delete(Tab, Spec) ->
+    qc_lets_proxy:select_delete(Tab, Spec).
+
+select_reverse(Tab, Spec) ->
+    qc_lets_proxy:select_reverse(Tab, Spec).
+
+select_reverse(Tab, Spec, Limit) ->
+    qc_lets_proxy:select_reverse(Tab, Spec, Limit).
+
+select_reverse(Cont) ->
+    qc_lets_proxy:select_reverse(Cont).
 
 tab2list(Tab) ->
     qc_lets_proxy:tab2list(Tab).
 
 
 %%%===================================================================
-%%% Internal functions
+%%% Internal
 %%%===================================================================
 
 stop_slave() ->

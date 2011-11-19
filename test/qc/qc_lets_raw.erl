@@ -33,15 +33,37 @@
          , new/3
          , destroy/3
          , repair/3
-         , insert/2
-         , insert_new/2
          , delete/1
          , delete/2
          , delete_all_objects/1
-         , lookup/2
          , first/1
-         , next/2
+         , foldl/3
+         , foldr/3
+         , info/1
          , info/2
+         , insert/2
+         , insert_new/2
+         , last/1
+         , lookup/2
+         , lookup_element/3
+         , match/2
+         , match/3
+         , match/1
+         , match_delete/2
+         , match_object/2
+         , match_object/3
+         , match_object/1
+         , member/2
+         , next/2
+         , prev/2
+         , select/2
+         , select/3
+         , select/1
+         , select_count/2
+         , select_delete/2
+         , select_reverse/2
+         , select_reverse/3
+         , select_reverse/1
          , tab2list/1
         ]).
 
@@ -75,12 +97,6 @@ repair(_Tab, Name, Options) ->
     %% _Tab is to help control generators and shrinking
     catch lets:repair(Name, filter_options(Options)).
 
-insert(Tab, ObjOrObjs) ->
-    catch lets:insert(Tab, ObjOrObjs).
-
-insert_new(Tab, ObjOrObjs) ->
-    catch lets:insert_new(Tab, ObjOrObjs).
-
 delete(Tab) ->
     catch lets:delete(Tab).
 
@@ -90,17 +106,89 @@ delete(Tab, Key) ->
 delete_all_objects(Tab) ->
     catch lets:delete_all_objects(Tab).
 
+first(Tab) ->
+    catch lets:first(Tab).
+
+foldl(Function, Acc0, Tab) ->
+    catch lets:foldl(Function, Acc0, Tab).
+
+foldr(Function, Acc0, Tab) ->
+    catch lets:foldr(Function, Acc0, Tab).
+
+info(Tab) ->
+    catch lets:info(Tab).
+
+info(Tab, Item) ->
+    catch lets:info(Tab, Item).
+
+insert(Tab, ObjOrObjs) ->
+    catch lets:insert(Tab, ObjOrObjs).
+
+insert_new(Tab, ObjOrObjs) ->
+    catch lets:insert_new(Tab, ObjOrObjs).
+
+last(Tab) ->
+    catch lets:last(Tab).
+
 lookup(Tab, Key) ->
     catch lets:lookup(Tab, Key).
 
-first(Tab) ->
-    catch lets:first(Tab).
+lookup_element(Tab, Key, Pos) ->
+    catch lets:lookup_element(Tab, Key, Pos).
+
+match(Tab, Pattern) ->
+    catch lets:match(Tab, Pattern).
+
+match(Tab, Pattern, Limit) ->
+    catch lets:match(Tab, Pattern, Limit).
+
+match(Cont) ->
+    catch lets:match(Cont).
+
+match_delete(Tab, Pattern) ->
+    catch lets:match_delete(Tab, Pattern).
+
+match_object(Tab, Pattern) ->
+    catch lets:match_object(Tab, Pattern).
+
+match_object(Tab, Pattern, Limit) ->
+    catch lets:match_object(Tab, Pattern, Limit).
+
+match_object(Cont) ->
+    catch lets:match_object(Cont).
+
+member(Tab, Key) ->
+    catch lets:member(Tab, Key).
 
 next(Tab, Key) ->
     catch lets:next(Tab, Key).
 
-info(Tab, Item) ->
-    catch lets:info(Tab, Item).
+prev(Tab, Key) ->
+    catch lets:prev(Tab, Key).
+
+select(Tab, Spec) ->
+    catch lets:select(Tab, Spec).
+
+select(Tab, Spec, Limit) ->
+    catch lets:select(Tab, Spec, Limit).
+
+select(Cont) ->
+    catch lets:select(Cont).
+
+select_count(Tab, Spec) ->
+    catch lets:select_count(Tab, Spec).
+
+select_delete(Tab, Spec) ->
+    catch lets:select_delete(Tab, Spec).
+
+select_reverse(Tab, Spec) ->
+    catch lets:select_reverse(Tab, Spec).
+
+select_reverse(Tab, Spec, Limit) ->
+    catch lets:select_reverse(Tab, Spec, Limit).
+
+select_reverse(Cont) ->
+    catch lets:select_reverse(Cont).
 
 tab2list(Tab) ->
     catch lets:tab2list(Tab).

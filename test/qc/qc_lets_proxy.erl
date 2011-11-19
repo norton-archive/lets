@@ -33,15 +33,37 @@
          , new/3
          , destroy/3
          , repair/3
-         , insert/2
-         , insert_new/2
          , delete/1
          , delete/2
          , delete_all_objects/1
-         , lookup/2
          , first/1
-         , next/2
+         , foldl/3
+         , foldr/3
+         , info/1
          , info/2
+         , insert/2
+         , insert_new/2
+         , last/1
+         , lookup/2
+         , lookup_element/3
+         , match/2
+         , match/3
+         , match/1
+         , match_delete/2
+         , match_object/2
+         , match_object/3
+         , match_object/1
+         , member/2
+         , next/2
+         , prev/2
+         , select/2
+         , select/3
+         , select/1
+         , select_count/2
+         , select_delete/2
+         , select_reverse/2
+         , select_reverse/3
+         , select_reverse/1
          , tab2list/1
         ]).
 
@@ -49,7 +71,7 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
          terminate/2, code_change/3]).
 
--record(state, {tab}).
+-record(state, {tab, name, conts=dict:new()}).
 
 
 %%%===================================================================
@@ -76,12 +98,6 @@ destroy(Tab, Name, Options) ->
 repair(Tab, Name, Options) ->
     qc_lets_raw:repair(Tab, Name, Options).
 
-insert(Tab, ObjOrObjs) ->
-    gen_server:call(Tab, {insert, ObjOrObjs}).
-
-insert_new(Tab, ObjOrObjs) ->
-    gen_server:call(Tab, {insert_new, ObjOrObjs}).
-
 delete(Tab) ->
     gen_server:call(Tab, delete).
 
@@ -91,17 +107,101 @@ delete(Tab, Key) ->
 delete_all_objects(Tab) ->
     gen_server:call(Tab, delete_all_objects).
 
+first(Tab) ->
+    gen_server:call(Tab, first).
+
+foldl(Function, Acc0, Tab) ->
+    gen_server:call(Tab, {foldl, Function, Acc0}).
+
+foldr(Function, Acc0, Tab) ->
+    gen_server:call(Tab, {foldr, Function, Acc0}).
+
+info(Tab) ->
+    gen_server:call(Tab, info).
+
+info(Tab, Item) ->
+    gen_server:call(Tab, {info, Item}).
+
+insert(Tab, ObjOrObjs) ->
+    gen_server:call(Tab, {insert, ObjOrObjs}).
+
+insert_new(Tab, ObjOrObjs) ->
+    gen_server:call(Tab, {insert_new, ObjOrObjs}).
+
+last(Tab) ->
+    gen_server:call(Tab, last).
+
 lookup(Tab, Key) ->
     gen_server:call(Tab, {lookup, Key}).
 
-first(Tab) ->
-    gen_server:call(Tab, first).
+lookup_element(Tab, Key, Pos) ->
+    gen_server:call(Tab, {lookup_element, Key, Pos}).
+
+match(Tab, Pattern) ->
+    gen_server:call(Tab, {match, Pattern}).
+
+match(Tab, Pattern, Limit) ->
+    gen_server:call(Tab, {match, Pattern, Limit}).
+
+match({wcont, _, _}=Cont0) ->
+    {Tab, Cont} = unwrap_cont(Cont0),
+    gen_server:call(Tab, {match_cont, Cont});
+match('$end_of_table') ->
+    '$end_of_table'.
+
+match_delete(Tab, Pattern) ->
+    gen_server:call(Tab, {match_delete, Pattern}).
+
+match_object(Tab, Pattern) ->
+    gen_server:call(Tab, {match_object, Pattern}).
+
+match_object(Tab, Pattern, Limit) ->
+    gen_server:call(Tab, {match_object, Pattern, Limit}).
+
+match_object({wcont, _, _}=Cont0) ->
+    {Tab, Cont} = unwrap_cont(Cont0),
+    gen_server:call(Tab, {match_object_cont, Cont});
+match_object('$end_of_table') ->
+    '$end_of_table'.
+
+member(Tab, Key) ->
+    gen_server:call(Tab, {member, Key}).
 
 next(Tab, Key) ->
     gen_server:call(Tab, {next, Key}).
 
-info(Tab, Item) ->
-    gen_server:call(Tab, {info, Item}).
+prev(Tab, Key) ->
+    gen_server:call(Tab, {prev, Key}).
+
+select(Tab, Spec) ->
+    gen_server:call(Tab, {select, Spec}).
+
+select(Tab, Spec, Limit) ->
+    gen_server:call(Tab, {select, Spec, Limit}).
+
+select({wcont, _, _}=Cont0) ->
+    {Tab, Cont} = unwrap_cont(Cont0),
+    gen_server:call(Tab, {select_cont, Cont});
+select('$end_of_table') ->
+    '$end_of_table'.
+
+select_count(Tab, Spec) ->
+    gen_server:call(Tab, {select_count, Spec}).
+
+select_delete(Tab, Spec) ->
+    gen_server:call(Tab, {select_delete, Spec}).
+
+select_reverse(Tab, Spec) ->
+    gen_server:call(Tab, {select_reverse, Spec}).
+
+select_reverse(Tab, Spec, Limit) ->
+    gen_server:call(Tab, {select_reverse, Spec, Limit}).
+
+select_reverse({wcont, _, _}=Cont0) ->
+    {Tab, Cont} = unwrap_cont(Cont0),
+    gen_server:call(Tab, {select_reverse_cont, Cont});
+select_reverse('$end_of_table') ->
+    '$end_of_table'.
 
 tab2list(Tab) ->
     gen_server:call(Tab, tab2list).
@@ -117,19 +217,13 @@ tab2list(Tab) ->
 %%--------------------------------------------------------------------
 init([Name, Options]) ->
     Tab = qc_lets_raw:new(Name, Options),
-    {ok, #state{tab=Tab}}.
+    {ok, #state{tab=Tab, name=Name}}.
 
 %%--------------------------------------------------------------------
 %% @private
 %% @doc
 %% Handling call messages
 %%--------------------------------------------------------------------
-handle_call({insert, ObjOrObjs}, _From, #state{tab=Tab}=State) ->
-    Reply = qc_lets_raw:insert(Tab, ObjOrObjs),
-    {reply, Reply, State};
-handle_call({insert_new, ObjOrObjs}, _From, #state{tab=Tab}=State) ->
-    Reply = qc_lets_raw:insert_new(Tab, ObjOrObjs),
-    {reply, Reply, State};
 handle_call(delete, _From, #state{tab=Tab}=State) ->
     Reply = qc_lets_raw:delete(Tab),
     {stop, normal, Reply, State#state{tab=undefined}};
@@ -139,18 +233,94 @@ handle_call({delete, Key}, _From, #state{tab=Tab}=State) ->
 handle_call(delete_all_objects, _From, #state{tab=Tab}=State) ->
     Reply = qc_lets_raw:delete_all_objects(Tab),
     {reply, Reply, State};
-handle_call({lookup, Key}, _From, #state{tab=Tab}=State) ->
-    Reply = qc_lets_raw:lookup(Tab, Key),
-    {reply, Reply, State};
 handle_call(first, _From, #state{tab=Tab}=State) ->
     Reply = qc_lets_raw:first(Tab),
     {reply, Reply, State};
-handle_call({next, Key}, _From, #state{tab=Tab}=State) ->
-    Reply = qc_lets_raw:next(Tab, Key),
+handle_call({foldl, Function, Acc0}, _From, #state{tab=Tab}=State) ->
+    Reply = qc_lets_raw:foldl(Function, Acc0, Tab),
+    {reply, Reply, State};
+handle_call({foldr, Function, Acc0}, _From, #state{tab=Tab}=State) ->
+    Reply = qc_lets_raw:foldr(Function, Acc0, Tab),
+    {reply, Reply, State};
+handle_call(info, _From, #state{tab=Tab}=State) ->
+    Reply = qc_lets_raw:info(Tab),
     {reply, Reply, State};
 handle_call({info, Item}, _From, #state{tab=Tab}=State) ->
     Reply = qc_lets_raw:info(Tab, Item),
     {reply, Reply, State};
+handle_call({insert, ObjOrObjs}, _From, #state{tab=Tab}=State) ->
+    Reply = qc_lets_raw:insert(Tab, ObjOrObjs),
+    {reply, Reply, State};
+handle_call({insert_new, ObjOrObjs}, _From, #state{tab=Tab}=State) ->
+    Reply = qc_lets_raw:insert_new(Tab, ObjOrObjs),
+    {reply, Reply, State};
+handle_call(last, _From, #state{tab=Tab}=State) ->
+    Reply = qc_lets_raw:last(Tab),
+    {reply, Reply, State};
+handle_call({lookup, Key}, _From, #state{tab=Tab}=State) ->
+    Reply = qc_lets_raw:lookup(Tab, Key),
+    {reply, Reply, State};
+handle_call({lookup_element, Key, Pos}, _From, #state{tab=Tab}=State) ->
+    Reply = qc_lets_raw:lookup_element(Tab, Key, Pos),
+    {reply, Reply, State};
+handle_call({match, Pattern}, _From, #state{tab=Tab}=State) ->
+    Reply = qc_lets_raw:match(Tab, Pattern),
+    {reply, Reply, State};
+handle_call({match, Pattern, Limit}, _From, #state{tab=Tab}=State) ->
+    {Reply, NewState} = wrap_cont(qc_lets_raw:match(Tab, Pattern, Limit), State),
+    {reply, Reply, NewState};
+handle_call({match_cont, Cont0}, _From, State0) ->
+    {Cont, State} = unwrap_cont(Cont0, State0),
+    {Reply, NewState} = wrap_cont(qc_lets_raw:match(Cont), State),
+    {reply, Reply, NewState};
+handle_call({match_delete, Pattern}, _From, #state{tab=Tab}=State) ->
+    Reply = qc_lets_raw:match_delete(Tab, Pattern),
+    {reply, Reply, State};
+handle_call({match_object, Pattern}, _From, #state{tab=Tab}=State) ->
+    Reply = qc_lets_raw:match_object(Tab, Pattern),
+    {reply, Reply, State};
+handle_call({match_object, Pattern, Limit}, _From, #state{tab=Tab}=State) ->
+    {Reply, NewState} = wrap_cont(qc_lets_raw:match_object(Tab, Pattern, Limit), State),
+    {reply, Reply, NewState};
+handle_call({match_object_cont, Cont0}, _From, State0) ->
+    {Cont, State} = unwrap_cont(Cont0, State0),
+    {Reply, NewState} = wrap_cont(qc_lets_raw:match_object(Cont), State),
+    {reply, Reply, NewState};
+handle_call({member, Key}, _From, #state{tab=Tab}=State) ->
+    Reply = qc_lets_raw:member(Tab, Key),
+    {reply, Reply, State};
+handle_call({next, Key}, _From, #state{tab=Tab}=State) ->
+    Reply = qc_lets_raw:next(Tab, Key),
+    {reply, Reply, State};
+handle_call({prev, Key}, _From, #state{tab=Tab}=State) ->
+    Reply = qc_lets_raw:prev(Tab, Key),
+    {reply, Reply, State};
+handle_call({select_count, Spec}, _From, #state{tab=Tab}=State) ->
+    Reply = qc_lets_raw:select_count(Tab, Spec),
+    {reply, Reply, State};
+handle_call({select_delete, Spec}, _From, #state{tab=Tab}=State) ->
+    Reply = qc_lets_raw:select_delete(Tab, Spec),
+    {reply, Reply, State};
+handle_call({select, Spec}, _From, #state{tab=Tab}=State) ->
+    Reply = qc_lets_raw:select(Tab, Spec),
+    {reply, Reply, State};
+handle_call({select, Spec, Limit}, _From, #state{tab=Tab}=State) ->
+    {Reply, NewState} = wrap_cont(qc_lets_raw:select(Tab, Spec, Limit), State),
+    {reply, Reply, NewState};
+handle_call({select_cont, Cont0}, _From, State0) ->
+    {Cont, State} = unwrap_cont(Cont0, State0),
+    {Reply, NewState} = wrap_cont(qc_lets_raw:select(Cont), State),
+    {reply, Reply, NewState};
+handle_call({select_reverse, Spec}, _From, #state{tab=Tab}=State) ->
+    Reply = qc_lets_raw:select_reverse(Tab, Spec),
+    {reply, Reply, State};
+handle_call({select_reverse, Spec, Limit}, _From, #state{tab=Tab}=State) ->
+    {Reply, NewState} = wrap_cont(qc_lets_raw:select_reverse(Tab, Spec, Limit), State),
+    {reply, Reply, NewState};
+handle_call({select_reverse_cont, Cont0}, _From, State0) ->
+    {Cont, State} = unwrap_cont(Cont0, State0),
+    {Reply, NewState} = wrap_cont(qc_lets_raw:select_reverse(Cont), State),
+    {reply, Reply, NewState};
 handle_call(tab2list, _From, #state{tab=Tab}=State) ->
     Reply = qc_lets_raw:tab2list(Tab),
     {reply, Reply, State}.
@@ -193,5 +363,28 @@ code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
 %%%===================================================================
-%%% Internal functions
+%%% Internal
 %%%===================================================================
+
+wrap_cont({'EXIT', _}=Err, State) ->
+    {Err, State};
+wrap_cont('$end_of_table'=Reply, State) ->
+    {Reply, State};
+wrap_cont({_Match, '$end_of_table'}=Reply, State) ->
+    {Reply, State};
+wrap_cont({_Match, Cont}=Reply, #state{name=Name, conts=Conts}=State) ->
+    ServerRef = {Name, node()},
+    Ref = make_ref(),
+    NewState = State#state{conts=dict:store(Ref, Cont, Conts)},
+    {setelement(2, Reply, wrap_cont({ServerRef, Ref})), NewState}.
+
+unwrap_cont(Ref, #state{conts=Conts}=State) ->
+    Cont = dict:fetch(Ref, Conts),
+    NewState = State#state{conts=dict:erase(Ref, Conts)},
+    {Cont, NewState}.
+
+wrap_cont({ServerRef, Cont}) ->
+    {wcont, ServerRef, Cont}.
+
+unwrap_cont({wcont, ServerRef, Cont}) ->
+    {ServerRef, Cont}.

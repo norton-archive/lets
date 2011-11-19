@@ -29,7 +29,7 @@
 -behaviour(qc_statem).
 -export([command_gen/2]).
 -export([initial_state/0, state_is_sane/1, next_state/3, precondition/2, postcondition/3]).
--export([commands_setup/1, commands_teardown/1, commands_teardown/2]).
+-export([setup/1, teardown/1, teardown/2, aggregate/1]).
 
 %% @NOTE For boilerplate exports, see "qc_statem.hrl"
 -include_lib("eqc/include/eqc_c.hrl").
@@ -77,7 +77,8 @@ serial_command_gen(_Mod,#state{db=Db}=S) ->
            {call,?IMPL,get,[Db,gen_key(S)]},
            {call,?IMPL,first,[Db]},
            {call,?IMPL,last,[Db]},
-           {call,?IMPL,next,[Db,gen_key(S)]}
+           {call,?IMPL,next,[Db,gen_key(S)]},
+           {call,?IMPL,prev,[Db,gen_key(S)]}
           ]).
 
 parallel_command_gen(_Mod,#state{db=undefined}) ->
@@ -168,31 +169,45 @@ postcondition(S, {call,_,next,[_Db,Key]}, Res) ->
         [#obj{key=K}|_] ->
             Res =:= K
     end;
+postcondition(S, {call,_,prev,[_Db,Key]}, Res) ->
+    case lists:dropwhile(fun(#obj{key=X}) -> X >= Key end, rsort_objs(S)) of
+        [] ->
+            Res;
+        [#obj{key=K}|_] ->
+            Res =:= K
+    end;
 postcondition(_S, {call,_,_,_}, _Res) ->
     false.
 
--spec commands_setup(boolean()) -> {ok, term()}.
-commands_setup(_Hard) ->
+-spec setup(boolean()) -> {ok, term()}.
+setup(_Hard) ->
     ?IMPL:setup(),
     teardown(),
     {ok, unused}.
 
--spec commands_teardown(term()) -> ok.
-commands_teardown(unused) ->
+-spec teardown(term()) -> ok.
+teardown(unused) ->
     teardown(),
     ok.
 
--spec commands_teardown(term(), #state{}) -> ok.
-commands_teardown(Ref, _State) ->
-    commands_teardown(Ref).
+-spec teardown(term(), #state{}) -> ok.
+teardown(Ref, _State) ->
+    teardown(Ref).
+
+-spec aggregate([{integer(), term(), term(), #state{}}])
+               -> [{atom(), atom(), integer() | term()}].
+aggregate(L) ->
+    [ {Cmd,filter_reply(Reply)} || {_N,{set,_,{call,_,Cmd,_}},Reply,_State} <- L ].
+
+filter_reply({'EXIT',{Err,_}}) ->
+    {error,Err};
+filter_reply(_) ->
+    ok.
 
 
 %%%----------------------------------------------------------------------
-%%% Internal
+%%% Internal - Generators
 %%%----------------------------------------------------------------------
-
-teardown() ->
-    ?IMPL:teardown().
 
 gen_bytes() ->
     ?LET(B, list(choose(0,127)), list_to_binary(B)).
@@ -216,6 +231,11 @@ gen_obj(#state{objs=[]}) ->
 gen_obj(#state{objs=Objs}) ->
     oneof([oneof(Objs), gen_obj()]).
 
+
+%%%----------------------------------------------------------------------
+%%% Internal - Model
+%%%----------------------------------------------------------------------
+
 insert_obj(S, #obj{key=K}=Obj) ->
     case keymember(K, S) of
         false ->
@@ -238,6 +258,9 @@ get_val(S, K) ->
 sort_objs(#state{objs=Objs}) ->
     lists:sort(Objs).
 
+rsort_objs(S) ->
+    lists:reverse(sort_objs(S)).
+
 keydelete(X, #state{objs=L}) ->
     lists:filter(fun(#obj{key=K}) -> K =/= X end, L).
 
@@ -249,6 +272,15 @@ keyfind(X, #state{objs=L}) ->
 
 keymember(X, S) ->
     [] /= keyfind(X, S).
+
+
+%%%----------------------------------------------------------------------
+%%% Internal - Implementation
+%%%----------------------------------------------------------------------
+
+teardown() ->
+    ?IMPL:teardown().
+
 
 -endif. %% -ifdef(EQC).
 -endif. %% -ifdef(QC).

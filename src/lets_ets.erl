@@ -28,17 +28,38 @@
 -export([open/1
          , destroy/1
          , repair/1
-         , insert/3
-         , insert_new/3
+         , delete/1
          , delete/2
-         , delete/3
-         , delete_all_objects/2
-         , lookup/3
-         , first/2
-         , next/3
-         , info_memory/2
-         , info_size/2
-         , tab2list/2
+         , delete_all_objects/1
+         , first/1
+         , foldl/3
+         , foldr/3
+         , info_memory/1
+         , info_size/1
+         , insert/2
+         , insert_new/2
+         , last/1
+         , lookup/2
+         , lookup_element/3
+         , match/2
+         , match/3
+         , match/1
+         , match_delete/2
+         , match_object/2
+         , match_object/3
+         , match_object/1
+         , member/2
+         , next/2
+         , prev/2
+         , select/2
+         , select/3
+         , select/1
+         , select_count/2
+         , select_delete/2
+         , select_reverse/2
+         , select_reverse/3
+         , select_reverse/1
+         , tab2list/1
         ]).
 
 
@@ -56,8 +77,8 @@ open(#tab{name=Name, named_table=NamedTable, type=Type, keypos=KeyPos, protectio
         [Type, {keypos,KeyPos}, Protection] ++
         [named_table || NamedTable ] ++
         [compressed || Compressed ],
-    Ets = ets:new(Name, Opts),
-    Tab#tab{ets=Ets}.
+    Impl = ets:new(Name, Opts),
+    Tab#tab{impl=Impl}.
 
 destroy(#tab{}) ->
     true.
@@ -65,35 +86,98 @@ destroy(#tab{}) ->
 repair(#tab{}) ->
     true.
 
-insert(_Tab, Ets, ObjectOrObjects) ->
-    ets:insert(Ets, ObjectOrObjects).
+delete(#tab{impl=Impl}) ->
+    ets:delete(Impl).
 
-insert_new(_Tab, Ets, ObjectOrObjects) ->
-    ets:insert_new(Ets, ObjectOrObjects).
+delete(#tab{impl=Impl}, Key) ->
+    ets:delete(Impl, Key).
 
-delete(_Tab, Ets) ->
-    ets:delete(Ets).
+delete_all_objects(#tab{impl=Impl}) ->
+    ets:delete_all_objects(Impl).
 
-delete(_Tab, Ets, Key) ->
-    ets:delete(Ets, Key).
+first(#tab{impl=Impl}) ->
+    ets:first(Impl).
 
-delete_all_objects(_Tab, Ets) ->
-    ets:delete_all_objects(Ets).
+foldl(Function, Acc0, #tab{impl=Impl}) ->
+    ets:foldl(Function, Acc0, Impl).
 
-lookup(_Tab, Ets, Key) ->
-    ets:lookup(Ets, Key).
+foldr(Function, Acc0, #tab{impl=Impl}) ->
+    ets:foldr(Function, Acc0, Impl).
 
-first(_Tab, Ets) ->
-    ets:first(Ets).
+info_memory(#tab{impl=Impl}) ->
+    ets:info(Impl, memory).
 
-next(_Tab, Ets, Key) ->
-    ets:next(Ets, Key).
+info_size(#tab{impl=Impl}) ->
+    ets:info(Impl, size).
 
-info_memory(_Tab, Ets) ->
-    ets:info(Ets, memory).
+insert(#tab{impl=Impl}, ObjOrObjs) ->
+    ets:insert(Impl, ObjOrObjs).
 
-info_size(_Tab, Ets) ->
-    ets:info(Ets, size).
+insert_new(#tab{impl=Impl}, ObjOrObjs) ->
+    ets:insert_new(Impl, ObjOrObjs).
 
-tab2list(_Tab, Ets) ->
-    ets:tab2list(Ets).
+last(#tab{impl=Impl}) ->
+    ets:last(Impl).
+
+lookup(#tab{impl=Impl}, Key) ->
+    ets:lookup(Impl, Key).
+
+lookup_element(#tab{impl=Impl}, Key, Pos) ->
+    ets:lookup_element(Impl, Key, Pos).
+
+match(#tab{impl=Impl}, Pattern) ->
+    ets:match(Impl, Pattern).
+
+match(#tab{impl=Impl}, Pattern, Limit) ->
+    ets:match(Impl, Pattern, Limit).
+
+match(Cont) ->
+    ets:match(Cont).
+
+match_delete(#tab{impl=Impl}, Pattern) ->
+    ets:match_delete(Impl, Pattern).
+
+match_object(#tab{impl=Impl}, Pattern) ->
+    ets:match_object(Impl, Pattern).
+
+match_object(#tab{impl=Impl}, Pattern, Limit) ->
+    ets:match_object(Impl, Pattern, Limit).
+
+match_object(Cont) ->
+    ets:match_object(Cont).
+
+member(#tab{impl=Impl}, Key) ->
+    ets:member(Impl, Key).
+
+next(#tab{impl=Impl}, Key) ->
+    ets:next(Impl, Key).
+
+prev(#tab{impl=Impl}, Key) ->
+    ets:prev(Impl, Key).
+
+select(#tab{impl=Impl}, Spec) ->
+    ets:select(Impl, Spec).
+
+select(#tab{impl=Impl}, Spec, Limit) ->
+    ets:select(Impl, Spec, Limit).
+
+select(Cont) ->
+    ets:select(Cont).
+
+select_count(#tab{impl=Impl}, Spec) ->
+    ets:select_count(Impl, Spec).
+
+select_delete(#tab{impl=Impl}, Spec) ->
+    ets:select_delete(Impl, Spec).
+
+select_reverse(#tab{impl=Impl}, Spec) ->
+    ets:select_reverse(Impl, Spec).
+
+select_reverse(#tab{impl=Impl}, Spec, Limit) ->
+    ets:select_reverse(Impl, Spec, Limit).
+
+select_reverse(Cont) ->
+    ets:select_reverse(Cont).
+
+tab2list(#tab{impl=Impl}) ->
+    ets:tab2list(Impl).
