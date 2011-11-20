@@ -16,12 +16,12 @@ implementations:</p>
 <ul>
 <li>
 <p>
-<tt>drv</tt> C+\+ Driver with LevelDB backend <em>(default)</em>
+<tt>drv</tt> C++ Driver with LevelDB backend <em>(default)</em>
 </p>
 </li>
 <li>
 <p>
-<tt>nif</tt> C+\+ NIF with LevelDB backend
+<tt>nif</tt> C++ NIF with LevelDB backend
 </p>
 </li>
 <li>

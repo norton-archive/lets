@@ -14,8 +14,8 @@ compressed using the Snappy compression library.
 For testing and comparison purposes, LETS supports three
 implementations:
 
-- +drv+ C\+\+ Driver with LevelDB backend _(default)_
-- +nif+ C\+\+ NIF with LevelDB backend
+- +drv+ C++ Driver with LevelDB backend _(default)_
+- +nif+ C++ NIF with LevelDB backend
 - +ets+ Erlang ETS backend
 
 LETS is not intended to be an exact clone of ETS.  The currently

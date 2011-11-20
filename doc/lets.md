@@ -739,7 +739,7 @@ __See also:__ [ets:lookup_element/3](ets.md#lookup_element-3).<a name="match-1">
 
 
 
-<pre>match(X1::[cont()](#type-cont)) -&gt; {[[match()](#type-match)], [cont()](#type-cont)} | '$end_of_table'</pre>
+<pre>match(X1::[cont()](#type-cont) | '$end_of_table') -&gt; {[[match()](#type-match)], [cont()](#type-cont) | '$end_of_table'} | '$end_of_table'</pre>
 <br></br>
 
 
@@ -772,7 +772,7 @@ __See also:__ [ets:match/2](ets.md#match-2).<a name="match-3"></a>
 
 
 
-<pre>match(Tab::[tab()](#type-tab), Pattern::[pattern()](#type-pattern), Limit::[limit()](#type-limit)) -&gt; {[[match()](#type-match)], [cont()](#type-cont)} | '$end_of_table'</pre>
+<pre>match(Tab::[tab()](#type-tab), Pattern::[pattern()](#type-pattern), Limit::[limit()](#type-limit)) -&gt; {[[match()](#type-match)], [cont()](#type-cont) | '$end_of_table'} | '$end_of_table'</pre>
 <br></br>
 
 
@@ -807,7 +807,7 @@ __See also:__ [ets:match_delete/2](ets.md#match_delete-2).<a name="match_object-
 
 
 
-<pre>match_object(X1::[cont()](#type-cont)) -&gt; {[[match()](#type-match)], [cont()](#type-cont)} | '$end_of_table'</pre>
+<pre>match_object(X1::[cont()](#type-cont) | '$end_of_table') -&gt; {[[match()](#type-match)], [cont()](#type-cont) | '$end_of_table'} | '$end_of_table'</pre>
 <br></br>
 
 
@@ -840,7 +840,7 @@ __See also:__ [ets:match_object/2](ets.md#match_object-2).<a name="match_object-
 
 
 
-<pre>match_object(Tab::[tab()](#type-tab), Pattern::[pattern()](#type-pattern), Limit::[limit()](#type-limit)) -&gt; {[[match()](#type-match)], [cont()](#type-cont)} | '$end_of_table'</pre>
+<pre>match_object(Tab::[tab()](#type-tab), Pattern::[pattern()](#type-pattern), Limit::[limit()](#type-limit)) -&gt; {[[match()](#type-match)], [cont()](#type-cont) | '$end_of_table'} | '$end_of_table'</pre>
 <br></br>
 
 
@@ -1130,7 +1130,7 @@ function only applies to <tt>driver</tt> and <tt>nif</tt> implementations.</p>
 
 
 
-<pre>select(X1::[cont()](#type-cont)) -&gt; {[[match()](#type-match)], [cont()](#type-cont)} | '$end_of_table'</pre>
+<pre>select(X1::[cont()](#type-cont) | '$end_of_table') -&gt; {[[match()](#type-match)], [cont()](#type-cont) | '$end_of_table'} | '$end_of_table'</pre>
 <br></br>
 
 
@@ -1163,7 +1163,7 @@ __See also:__ [ets:select/2](ets.md#select-2).<a name="select-3"></a>
 
 
 
-<pre>select(Tab::[tab()](#type-tab), Spec::[spec()](#type-spec), Limit::[limit()](#type-limit)) -&gt; {[[match()](#type-match)], [cont()](#type-cont)} | '$end_of_table'</pre>
+<pre>select(Tab::[tab()](#type-tab), Spec::[spec()](#type-spec), Limit::[limit()](#type-limit)) -&gt; {[[match()](#type-match)], [cont()](#type-cont) | '$end_of_table'} | '$end_of_table'</pre>
 <br></br>
 
 
@@ -1214,7 +1214,7 @@ __See also:__ [ets:select_delete/2](ets.md#select_delete-2).<a name="select_reve
 
 
 
-<pre>select_reverse(X1::[cont()](#type-cont)) -&gt; {[[match()](#type-match)], [cont()](#type-cont)} | '$end_of_table'</pre>
+<pre>select_reverse(X1::[cont()](#type-cont) | '$end_of_table') -&gt; {[[match()](#type-match)], [cont()](#type-cont) | '$end_of_table'} | '$end_of_table'</pre>
 <br></br>
 
 
@@ -1247,7 +1247,7 @@ __See also:__ [ets:select_reverse/2](ets.md#select_reverse-2).<a name="select_re
 
 
 
-<pre>select_reverse(Tab::[tab()](#type-tab), Spec::[spec()](#type-spec), Limit::[limit()](#type-limit)) -&gt; {[[match()](#type-match)], [cont()](#type-cont)} | '$end_of_table'</pre>
+<pre>select_reverse(Tab::[tab()](#type-tab), Spec::[spec()](#type-spec), Limit::[limit()](#type-limit)) -&gt; {[[match()](#type-match)], [cont()](#type-cont) | '$end_of_table'} | '$end_of_table'</pre>
 <br></br>
 
 

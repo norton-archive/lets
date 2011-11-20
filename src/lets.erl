@@ -532,7 +532,7 @@ match(Tab, Pattern) ->
 %% @end
 %% @see ets:match/3
 
--spec match(tab(), pattern(), limit()) -> {[match()],cont()} | '$end_of_table'.
+-spec match(tab(), pattern(), limit()) -> {[match()], cont() | '$end_of_table'} | '$end_of_table'.
 match(Tab, Pattern, Limit) ->
     case check_access(Tab) of
         undefined ->
@@ -545,7 +545,7 @@ match(Tab, Pattern, Limit) ->
 %% @end
 %% @see ets:match/1
 
--spec match(cont()) -> {[match()],cont()} | '$end_of_table'.
+-spec match(cont() | '$end_of_table') -> {[match()], cont() | '$end_of_table'} | '$end_of_table'.
 match({cont, Tab, Cont}) ->
     case check_access(Tab) of
         undefined ->
@@ -590,7 +590,7 @@ match_object(Tab, Pattern) ->
 %% @end
 %% @see ets:match_object/3
 
--spec match_object(tab(), pattern(), limit()) -> {[match()], cont()} | '$end_of_table'.
+-spec match_object(tab(), pattern(), limit()) -> {[match()], cont() | '$end_of_table'} | '$end_of_table'.
 match_object(Tab, Pattern, Limit) ->
     case check_access(Tab) of
         undefined ->
@@ -603,7 +603,7 @@ match_object(Tab, Pattern, Limit) ->
 %% @end
 %% @see ets:match_object/1
 
--spec match_object(cont()) -> {[match()], cont()} | '$end_of_table'.
+-spec match_object(cont() | '$end_of_table') -> {[match()], cont() | '$end_of_table'} | '$end_of_table'.
 match_object({cont, Tab, Cont}) ->
     case check_access(Tab) of
         undefined ->
@@ -679,7 +679,7 @@ select(Tab, Spec) ->
 %% @end
 %% @see ets:select/3
 
--spec select(tab(), spec(), limit()) -> {[match()], cont()} | '$end_of_table'.
+-spec select(tab(), spec(), limit()) -> {[match()], cont() | '$end_of_table'} | '$end_of_table'.
 select(Tab, Spec, Limit) ->
     case check_access(Tab) of
         undefined ->
@@ -692,7 +692,7 @@ select(Tab, Spec, Limit) ->
 %% @end
 %% @see ets:select/1
 
--spec select(cont()) -> {[match()], cont()} | '$end_of_table'.
+-spec select(cont() | '$end_of_table') -> {[match()], cont() | '$end_of_table'} | '$end_of_table'.
 select({cont, Tab, Cont}) ->
     case check_access(Tab) of
         undefined ->
@@ -751,7 +751,7 @@ select_reverse(Tab, Spec) ->
 %% @end
 %% @see ets:select_reverse/3
 
--spec select_reverse(tab(), spec(), limit()) -> {[match()], cont()} | '$end_of_table'.
+-spec select_reverse(tab(), spec(), limit()) -> {[match()], cont() | '$end_of_table'} | '$end_of_table'.
 select_reverse(Tab, Spec, Limit) ->
     case check_access(Tab) of
         undefined ->
@@ -764,7 +764,7 @@ select_reverse(Tab, Spec, Limit) ->
 %% @end
 %% @see ets:select_reverse/1
 
--spec select_reverse(cont()) -> {[match()], cont()} | '$end_of_table'.
+-spec select_reverse(cont() | '$end_of_table') -> {[match()], cont() | '$end_of_table'} | '$end_of_table'.
 select_reverse({cont, Tab, Cont}) ->
     case check_access(Tab) of
         undefined ->
