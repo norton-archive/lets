@@ -340,7 +340,7 @@ true
   * Explain how to build and to run lets with valgrind enabled
     OTP/Erlang virtual machine
 
-- Testing
+- Testing - Black Box
   * Functional
     ** Update test model to include LevelDB\'s database, read, and
        write options.  These options have not been tested.
@@ -348,6 +348,30 @@ true
        operations.  These operations have not been tested.
   * Performance (TBD)
   * Stability (TBD)
+
+- Testing - White (or more like "Grey") Box
+  * Goals
+    ** Test normal, abnormal, and corner test cases without having to
+       actually use "big data" or invoke lots of operations.  Invoke
+       operations using small inputs but with varying sizes, ranges,
+       and patterns.
+    ** Learn about what special parameters exist, their default values
+       and ranges, and the difficulty to control these parameters on a
+       request-by-request basis (at best case).
+  * Functional (TBD)
+    ** Enable/disable background compaction
+    ** Invoke/suspend manual compaction
+    ** Force new memtable creation
+    ** Force new level creation
+    ** Database Recovery (i.e. closing/reopening the db)
+    ** Large keys (e.g. 1KB)
+    ** Adjacent keys that share a long prefix (e.g ~1KB); useful
+       since file format has prefix compression
+    ** Snapshots that are live across compactions and are read from
+       after compaction
+    ** Iterators that are live across compactions and are read from
+       after compaction
+    ** File system writes return errors (e.g., disk-full)
 
 - New APIs (TBD)
   * +insert_new/2+
@@ -361,6 +385,10 @@ true
     implementations.
 
 - Existing APIs (TBD)
+  * Performance improvement for non-existing keys
+    ** http://erlang.org/pipermail/erlang-questions/2011-November/062755.html
+    ** http://comments.gmane.org/gmane.comp.db.leveldb/249
+
   * +delete/1+
     (http://code.google.com/p/leveldb/issues/detail?id=48)
 

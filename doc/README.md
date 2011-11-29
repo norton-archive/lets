@@ -662,7 +662,7 @@ Explain how to build and to run lets with valgrind enabled
 </li>
 <li>
 <p>
-Testing
+Testing - Black Box
 </p>
 <ul>
 <li>
@@ -698,6 +698,95 @@ Stability (TBD)
 </li>
 <li>
 <p>
+Testing - White (or more like "Grey") Box
+</p>
+<ul>
+<li>
+<p>
+Goals
+</p>
+<ul>
+<li>
+<p>
+Test normal, abnormal, and corner test cases without having to
+       actually use "big data" or invoke lots of operations.  Invoke
+       operations using small inputs but with varying sizes, ranges,
+       and patterns.
+</p>
+</li>
+<li>
+<p>
+Learn about what special parameters exist, their default values
+       and ranges, and the difficulty to control these parameters on a
+       request-by-request basis (at best case).
+</p>
+</li>
+</ul>
+</li>
+<li>
+<p>
+Functional (TBD)
+</p>
+<ul>
+<li>
+<p>
+Enable/disable background compaction
+</p>
+</li>
+<li>
+<p>
+Invoke/suspend manual compaction
+</p>
+</li>
+<li>
+<p>
+Force new memtable creation
+</p>
+</li>
+<li>
+<p>
+Force new level creation
+</p>
+</li>
+<li>
+<p>
+Database Recovery (i.e. closing/reopening the db)
+</p>
+</li>
+<li>
+<p>
+Large keys (e.g. 1KB)
+</p>
+</li>
+<li>
+<p>
+Adjacent keys that share a long prefix (e.g ~1KB); useful
+       since file format has prefix compression
+</p>
+</li>
+<li>
+<p>
+Snapshots that are live across compactions and are read from
+       after compaction
+</p>
+</li>
+<li>
+<p>
+Iterators that are live across compactions and are read from
+       after compaction
+</p>
+</li>
+<li>
+<p>
+File system writes return errors (e.g., disk-full)
+</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>
 New APIs (TBD)
 </p>
 <ul>
@@ -727,6 +816,23 @@ Add custom (i.e. not supported by native ETS) APIs for providing
 Existing APIs (TBD)
 </p>
 <ul>
+<li>
+<p>
+Performance improvement for non-existing keys
+</p>
+<ul>
+<li>
+<p>
+<a href="http://erlang.org/pipermail/erlang-questions/2011-November/062755.md">http://erlang.org/pipermail/erlang-questions/2011-November/062755.html</a>
+</p>
+</li>
+<li>
+<p>
+<a href="http://comments.gmane.org/gmane.comp.db.leveldb/249">http://comments.gmane.org/gmane.comp.db.leveldb/249</a>
+</p>
+</li>
+</ul>
+</li>
 <li>
 <p>
 <tt>delete/1</tt>
