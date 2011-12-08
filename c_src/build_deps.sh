@@ -40,6 +40,11 @@ case "$1" in
         rm -rf leveldb leveldb-$LEVELDB_VSN
         ;;
 
+    get_deps)
+        git clone git://github.com/norton/snappy.git $BASEDIR/snappy_git
+        git clone git://github.com/norton/leveldb.git $BASEDIR/leveldb_git
+        ;;
+
     *)
         # snappy
         if [ ! -f $BASEDIR/snappy/lib/libsnappy.a  ]; then
@@ -54,7 +59,7 @@ case "$1" in
                 }
             }
 
-            (cd ../../snappy && git archive --format=tar --prefix=snappy-$SNAPPY_VSN/ $SNAPPY_VSN) \
+            (cd $BASEDIR/snappy_git && git archive --format=tar --prefix=snappy-$SNAPPY_VSN/ $SNAPPY_VSN) \
                 | tar xf -
             (cd snappy-$SNAPPY_VSN && \
                 sed -ibak '/^AC_ARG_WITH.*$/, /^fi$/d' configure.ac
@@ -76,7 +81,7 @@ case "$1" in
         fi
         # leveldb
         if [ ! -f $BASEDIR/leveldb/lib/libleveldb.a  ]; then
-            (cd ../../leveldb && git archive --format=tar --prefix=leveldb-$LEVELDB_VSN/ $LEVELDB_VSN) \
+            (cd $BASEDIR/leveldb_git && git archive --format=tar --prefix=leveldb-$LEVELDB_VSN/ $LEVELDB_VSN) \
                 | tar xf -
             (cd leveldb-$LEVELDB_VSN && \
                 echo "echo \"PLATFORM_CFLAGS+=-fPIC -I$BASEDIR/snappy/include\" >> build_config.mk" >> build_detect_platform &&
