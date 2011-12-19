@@ -40,9 +40,20 @@ case "$1" in
         rm -rf leveldb leveldb-$LEVELDB_VSN
         ;;
 
+    get_deps)
+        # snappy
+        if [ ! -d $REBAR_DEPS_DIR/snappy ]; then
+            git clone git://github.com/norton/snappy.git $REBAR_DEPS_DIR/snappy
+        fi
+        # leveldb
+        if [ ! -d $REBAR_DEPS_DIR/leveldb ]; then
+            git clone git://github.com/norton/leveldb.git $REBAR_DEPS_DIR/leveldb
+        fi
+        ;;
+
     *)
         # snappy
-        if [ ! -f $BASEDIR/snappy/lib/libsnappy.a  ]; then
+        if [ ! -f $BASEDIR/snappy/lib/libsnappy.a ]; then
             LIBTOOLIZE=libtoolize
             ($LIBTOOLIZE --version) < /dev/null > /dev/null 2>&1 || {
                 LIBTOOLIZE=glibtoolize
@@ -54,7 +65,7 @@ case "$1" in
                 }
             }
 
-            (cd ../../snappy && git archive --format=tar --prefix=snappy-$SNAPPY_VSN/ $SNAPPY_VSN) \
+            (cd $REBAR_DEPS_DIR/snappy && git archive --format=tar --prefix=snappy-$SNAPPY_VSN/ $SNAPPY_VSN) \
                 | tar xf -
             (cd snappy-$SNAPPY_VSN && \
                 sed -ibak '/^AC_ARG_WITH.*$/, /^fi$/d' configure.ac
@@ -75,8 +86,8 @@ case "$1" in
                 make install)
         fi
         # leveldb
-        if [ ! -f $BASEDIR/leveldb/lib/libleveldb.a  ]; then
-            (cd ../../leveldb && git archive --format=tar --prefix=leveldb-$LEVELDB_VSN/ $LEVELDB_VSN) \
+        if [ ! -f $BASEDIR/leveldb/lib/libleveldb.a ]; then
+            (cd $REBAR_DEPS_DIR/leveldb && git archive --format=tar --prefix=leveldb-$LEVELDB_VSN/ $LEVELDB_VSN) \
                 | tar xf -
             (cd leveldb-$LEVELDB_VSN && \
                 echo "echo \"PLATFORM_CFLAGS+=-fPIC -I$BASEDIR/snappy/include\" >> build_config.mk" >> build_detect_platform &&

@@ -66,8 +66,6 @@ this recipe:
 ------
 $ mkdir working-directory-name
 $ cd working-directory-name
-$ git clone git://github.com/norton/snappy.git snappy
-$ git clone git://github.com/norton/leveldb.git leveldb
 $ git clone git://github.com/norton/lets.git lets
 $ cd lets
 $ ./rebar get-deps
