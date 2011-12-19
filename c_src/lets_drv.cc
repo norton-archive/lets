@@ -108,48 +108,48 @@ struct DrvAsync {
     }
 };
 
-static void lets_output_create6(const char op, DrvData* d, char* buf, int len, int* index, int items);
+static void lets_output_create6(const char op, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 static void lets_async_create6(void* async_data);
-static void lets_output_open6(DrvData* d, char* buf, int len, int* index, int items);
-static void lets_output_destroy6(DrvData* d, char* buf, int len, int* index, int items);
-static void lets_output_repair6(DrvData* d, char* buf, int len, int* index, int items);
-static void lets_output_insert2(DrvData* d, char* buf, int len, int* index, int items);
+static void lets_output_open6(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
+static void lets_output_destroy6(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
+static void lets_output_repair6(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
+static void lets_output_insert2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 static void lets_async_insert2(void* async_data);
-static void lets_output_insert3(DrvData* d, char* buf, int len, int* index, int items);
+static void lets_output_insert3(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 static void lets_async_insert3(void* async_data);
-// static void lets_output_insert_new2(DrvData* d, char* buf, int len, int* index, int items);
+// static void lets_output_insert_new2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 // static void lets_async_insert_new2(void* async_data);
-// static void lets_output_insert_new3(DrvData* d, char* buf, int len, int* index, int items);
+// static void lets_output_insert_new3(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 // static void lets_async_insert_new3(void* async_data);
-static void lets_output_delete1(DrvData* d, char* buf, int len, int* index, int items);
+static void lets_output_delete1(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 static void lets_async_delete1(void* async_data);
-static void lets_output_delete2(DrvData* d, char* buf, int len, int* index, int items);
+static void lets_output_delete2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 static void lets_async_delete2(void* async_data);
-// static void lets_output_delete_all_objects1(DrvData* d, char* buf, int len, int* index, int items);
+// static void lets_output_delete_all_objects1(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 // static void lets_async_delete_all_objects1(void* async_data);
-static void lets_output_lookup2(DrvData* d, char* buf, int len, int* index, int items);
+static void lets_output_lookup2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 static void lets_async_lookup2(void* async_data);
-static void lets_output_member2(DrvData* d, char* buf, int len, int* index, int items);
+static void lets_output_member2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 static void lets_async_member2(void* async_data);
-static void lets_output_first1(DrvData* d, char* buf, int len, int* index, int items);
+static void lets_output_first1(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 static void lets_async_first1(void* async_data);
-static void lets_output_first_iter1(DrvData* d, char* buf, int len, int* index, int items);
+static void lets_output_first_iter1(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 static void lets_async_first_iter1(void* async_data);
-static void lets_output_last1(DrvData* d, char* buf, int len, int* index, int items);
+static void lets_output_last1(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 static void lets_async_last1(void* async_data);
-static void lets_output_last_iter1(DrvData* d, char* buf, int len, int* index, int items);
+static void lets_output_last_iter1(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 static void lets_async_last_iter1(void* async_data);
-static void lets_output_next2(DrvData* d, char* buf, int len, int* index, int items);
+static void lets_output_next2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 static void lets_async_next2(void* async_data);
-static void lets_output_next_iter2(DrvData* d, char* buf, int len, int* index, int items);
+static void lets_output_next_iter2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 static void lets_async_next_iter2(void* async_data);
-static void lets_output_prev2(DrvData* d, char* buf, int len, int* index, int items);
+static void lets_output_prev2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 static void lets_async_prev2(void* async_data);
-static void lets_output_prev_iter2(DrvData* d, char* buf, int len, int* index, int items);
+static void lets_output_prev_iter2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 static void lets_async_prev_iter2(void* async_data);
-// static void lets_output_info_memory1(DrvData* d, char* buf, int len, int* index, int items);
+// static void lets_output_info_memory1(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 // static void lets_async_info_memory1(void* async_data);
-// static void lets_output_info_size1(DrvData* d, char* buf, int len, int* index, int items);
+// static void lets_output_info_size1(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 // static void lets_async_info_size1(void* async_data);
 
 static void
@@ -244,6 +244,8 @@ drv_init()
 ErlDrvData
 drv_start(ErlDrvPort port, char* command)
 {
+    (void) command;
+
     DrvData* d;
 
     if (port == NULL) {
@@ -284,7 +286,7 @@ drv_stop(ErlDrvData handle)
 }
 
 void
-drv_output(ErlDrvData handle, char* buf, int len)
+drv_output(ErlDrvData handle, char* buf, ErlDrvSizeT len)
 {
     DrvData* d = (DrvData*) handle;
     int ng, index, version, items;
@@ -488,8 +490,11 @@ drv_async_free(void* async_data)
 //
 
 static void
-lets_output_create6(const char op, DrvData* d, char* buf, int len, int* index, int items)
+lets_output_create6(const char op, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
+    (void) len;
+    (void) items;
+
     DrvAsync* drv_async = NULL;
     char type;
     char privacy;
@@ -600,26 +605,28 @@ lets_async_create6(void* async_data)
 }
 
 static void
-lets_output_open6(DrvData* d, char* buf, int len, int* index, int items)
+lets_output_open6(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
     lets_output_create6(OPEN, d, buf, len, index, items);
 }
 
 static void
-lets_output_destroy6(DrvData* d, char* buf, int len, int* index, int items)
+lets_output_destroy6(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
     lets_output_create6(DESTROY, d, buf, len, index, items);
 }
 
 static void
-lets_output_repair6(DrvData* d, char* buf, int len, int* index, int items)
+lets_output_repair6(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
     lets_output_create6(REPAIR, d, buf, len, index, items);
 }
 
 static void
-lets_output_insert2(DrvData* d, char* buf, int len, int* index, int items)
+lets_output_insert2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
+    (void) len;
+
     DrvAsync* drv_async = NULL;
     int ng, arity;
     char *key;
@@ -703,8 +710,11 @@ lets_async_insert2(void* async_data)
 }
 
 static void
-lets_output_insert3(DrvData* d, char* buf, int len, int* index, int items)
+lets_output_insert3(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
+    (void) len;
+    (void) items;
+
     DrvAsync* drv_async = NULL;
     int ng;
     char *key;
@@ -765,8 +775,13 @@ lets_async_insert3(void* async_data)
 }
 
 static void
-lets_output_delete1(DrvData* d, char* buf, int len, int* index, int items)
+lets_output_delete1(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
+    (void) buf;
+    (void) len;
+    (void) index;
+    (void) items;
+
     DrvAsync* drv_async = NULL;
     leveldb::WriteOptions db_write_options;
     leveldb::WriteBatch batch;
@@ -824,8 +839,11 @@ lets_async_delete1(void* async_data)
 }
 
 static void
-lets_output_delete2(DrvData* d, char* buf, int len, int* index, int items)
+lets_output_delete2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
+    (void) len;
+    (void) items;
+
     DrvAsync* drv_async = NULL;
     int ng;
     char *key;
@@ -881,8 +899,11 @@ lets_async_delete2(void* async_data)
 }
 
 static void
-lets_output_lookup2(DrvData* d, char* buf, int len, int* index, int items)
+lets_output_lookup2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
+    (void) len;
+    (void) items;
+
     DrvAsync* drv_async = NULL;
     int ng;
     char *key;
@@ -956,8 +977,11 @@ lets_async_lookup2(void* async_data)
 }
 
 static void
-lets_output_member2(DrvData* d, char* buf, int len, int* index, int items)
+lets_output_member2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
+    (void) len;
+    (void) items;
+
     DrvAsync* drv_async = NULL;
     int ng;
     char *key;
@@ -1023,8 +1047,13 @@ lets_async_member2(void* async_data)
 }
 
 static void
-lets_output_first1(DrvData* d, char* buf, int len, int* index, int items)
+lets_output_first1(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
+    (void) buf;
+    (void) len;
+    (void) index;
+    (void) items;
+
     DrvAsync* drv_async = NULL;
 
     if (d->impl.async) {
@@ -1090,8 +1119,13 @@ lets_async_first1(void* async_data)
 }
 
 static void
-lets_output_first_iter1(DrvData* d, char* buf, int len, int* index, int items)
+lets_output_first_iter1(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
+    (void) buf;
+    (void) len;
+    (void) index;
+    (void) items;
+
     DrvAsync* drv_async = NULL;
 
     if (d->impl.async) {
@@ -1157,8 +1191,13 @@ lets_async_first_iter1(void* async_data)
 }
 
 static void
-lets_output_last1(DrvData* d, char* buf, int len, int* index, int items)
+lets_output_last1(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
+    (void) buf;
+    (void) len;
+    (void) index;
+    (void) items;
+
     DrvAsync* drv_async = NULL;
 
     if (d->impl.async) {
@@ -1225,8 +1264,13 @@ lets_async_last1(void* async_data)
 
 
 static void
-lets_output_last_iter1(DrvData* d, char* buf, int len, int* index, int items)
+lets_output_last_iter1(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
+    (void) buf;
+    (void) len;
+    (void) index;
+    (void) items;
+
     DrvAsync* drv_async = NULL;
 
     if (d->impl.async) {
@@ -1292,8 +1336,11 @@ lets_async_last_iter1(void* async_data)
 }
 
 static void
-lets_output_next2(DrvData* d, char* buf, int len, int* index, int items)
+lets_output_next2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
+    (void) len;
+    (void) items;
+
     DrvAsync* drv_async = NULL;
     int ng;
     char *key;
@@ -1385,8 +1432,11 @@ lets_async_next2(void* async_data)
 
 
 static void
-lets_output_next_iter2(DrvData* d, char* buf, int len, int* index, int items)
+lets_output_next_iter2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
+    (void) len;
+    (void) items;
+
     DrvAsync* drv_async = NULL;
     int ng;
     char *key;
@@ -1477,8 +1527,11 @@ lets_async_next_iter2(void* async_data)
 }
 
 static void
-lets_output_prev2(DrvData* d, char* buf, int len, int* index, int items)
+lets_output_prev2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
+    (void) len;
+    (void) items;
+
     DrvAsync* drv_async = NULL;
     int ng;
     char *key;
@@ -1563,8 +1616,11 @@ lets_async_prev2(void* async_data)
 }
 
 static void
-lets_output_prev_iter2(DrvData* d, char* buf, int len, int* index, int items)
+lets_output_prev_iter2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
+    (void) len;
+    (void) items;
+
     DrvAsync* drv_async = NULL;
     int ng;
     char *key;

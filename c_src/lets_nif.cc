@@ -76,6 +76,7 @@ static ErlNifFunc nif_funcs[] =
 static void
 lets_nif_resource_dtor(ErlNifEnv* env, void* arg)
 {
+    (void) env;
     lets_nif_handle* h = (lets_nif_handle*) arg;
 
     // alive
@@ -94,6 +95,9 @@ lets_nif_resource_dtor(ErlNifEnv* env, void* arg)
 static int
 on_load(ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info)
 {
+    (void) priv_data;
+    (void) load_info;
+
     if (!lets_nif_lib_init(env)) {
         return -1;
     }
@@ -115,6 +119,8 @@ ERL_NIF_INIT(lets_nif, nif_funcs, &on_load, NULL, NULL, NULL);
 static ERL_NIF_TERM
 db_create6(const char op, ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[], lets_nif_handle** reth)
 {
+    (void) argc;
+
     char type;
     char privacy;
     ErlNifBinary path;
@@ -242,6 +248,8 @@ lets_nif_repair6(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 ERL_NIF_TERM
 lets_nif_insert2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
+    (void) argc;
+
     lets_nif_handle* h;
     ERL_NIF_TERM list;
     unsigned list_len;
@@ -294,6 +302,8 @@ lets_nif_insert2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 ERL_NIF_TERM
 lets_nif_insert3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
+    (void) argc;
+
     lets_nif_handle* h;
     ErlNifBinary key;
     ErlNifBinary blob;
@@ -329,6 +339,9 @@ lets_nif_insert3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 ERL_NIF_TERM
 lets_nif_insert_new2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
+    (void) argc;
+    (void) argv;
+
     leveldb::Status status;
     // @TODO not supported by leveldb
     return MAKEBADARG(env, status);
@@ -337,6 +350,9 @@ lets_nif_insert_new2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 ERL_NIF_TERM
 lets_nif_insert_new3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
+    (void) argc;
+    (void) argv;
+
     leveldb::Status status;
     // @TODO not supported by leveldb
     return MAKEBADARG(env, status);
@@ -345,6 +361,8 @@ lets_nif_insert_new3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 ERL_NIF_TERM
 lets_nif_delete1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
+    (void) argc;
+
     lets_nif_handle* h;
     leveldb::WriteOptions db_write_options;
     leveldb::WriteBatch batch;
@@ -377,6 +395,8 @@ lets_nif_delete1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 ERL_NIF_TERM
 lets_nif_delete2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
+    (void) argc;
+
     lets_nif_handle* h;
     ErlNifBinary key;
     leveldb::WriteBatch batch;
@@ -407,6 +427,9 @@ lets_nif_delete2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 ERL_NIF_TERM
 lets_nif_delete_all_objects1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
+    (void) argc;
+    (void) argv;
+
     leveldb::Status status;
     // @TODO not supported by leveldb
     return MAKEBADARG(env, status);
@@ -415,6 +438,8 @@ lets_nif_delete_all_objects1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]
 ERL_NIF_TERM
 lets_nif_lookup2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
+    (void) argc;
+
     lets_nif_handle* h;
     ErlNifBinary key;
     ERL_NIF_TERM blob = 0;
@@ -458,6 +483,8 @@ lets_nif_lookup2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 ERL_NIF_TERM
 lets_nif_member2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
+    (void) argc;
+
     lets_nif_handle* h;
     ErlNifBinary key;
     leveldb::Status status;
@@ -492,6 +519,8 @@ lets_nif_member2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 ERL_NIF_TERM
 lets_nif_first1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
+    (void) argc;
+
     lets_nif_handle* h;
     ERL_NIF_TERM first = 0;
     leveldb::Status status;
@@ -530,6 +559,8 @@ lets_nif_first1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 ERL_NIF_TERM
 lets_nif_first_iter1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
+    (void) argc;
+
     lets_nif_handle* h;
     ERL_NIF_TERM first = 0;
     leveldb::Status status;
@@ -568,6 +599,8 @@ lets_nif_first_iter1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 ERL_NIF_TERM
 lets_nif_last1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
+    (void) argc;
+
     lets_nif_handle* h;
     ERL_NIF_TERM last = 0;
     leveldb::Status status;
@@ -606,6 +639,8 @@ lets_nif_last1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 ERL_NIF_TERM
 lets_nif_last_iter1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
+    (void) argc;
+
     lets_nif_handle* h;
     ERL_NIF_TERM last = 0;
     leveldb::Status status;
@@ -644,6 +679,8 @@ lets_nif_last_iter1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 ERL_NIF_TERM
 lets_nif_next2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
+    (void) argc;
+
     lets_nif_handle* h;
     ErlNifBinary key;
     ERL_NIF_TERM next = 0;
@@ -695,6 +732,8 @@ lets_nif_next2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 ERL_NIF_TERM
 lets_nif_next_iter2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
+    (void) argc;
+
     lets_nif_handle* h;
     ErlNifBinary key;
     ERL_NIF_TERM next = 0;
@@ -746,6 +785,8 @@ lets_nif_next_iter2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 ERL_NIF_TERM
 lets_nif_prev2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
+    (void) argc;
+
     lets_nif_handle* h;
     ErlNifBinary key;
     ERL_NIF_TERM prev = 0;
@@ -795,6 +836,8 @@ lets_nif_prev2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 ERL_NIF_TERM
 lets_nif_prev_iter2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
+    (void) argc;
+
     lets_nif_handle* h;
     ErlNifBinary key;
     ERL_NIF_TERM prev = 0;
@@ -844,6 +887,8 @@ lets_nif_prev_iter2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 ERL_NIF_TERM
 lets_nif_info_memory1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
+    (void) argc;
+
     lets_nif_handle* h;
     // ERL_NIF_TERM info;
     leveldb::Status status;
@@ -866,6 +911,8 @@ lets_nif_info_memory1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 ERL_NIF_TERM
 lets_nif_info_size1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
+    (void) argc;
+
     lets_nif_handle* h;
     // ERL_NIF_TERM info;
     leveldb::Status status;

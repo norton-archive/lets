@@ -99,8 +99,10 @@ lets_create(lets_impl& impl,
 
 bool
 lets_parse_options(lets_impl& impl,
-                   const char* buf, int len)
+                   const char* buf, ErlDrvSizeT len)
 {
+    (void) len;
+
     int index, ng, items, arity, term_type, size_needed;
     char atom[MAXATOMLEN];
 
@@ -233,8 +235,10 @@ lets_parse_options(lets_impl& impl,
 
 bool
 lets_parse_read_options(lets_impl& impl,
-                        const char* buf, int len)
+                        const char* buf, ErlDrvSizeT len)
 {
+    (void) len;
+
     int index, ng, items, arity, term_type, size_needed;
     char atom[MAXATOMLEN];
 
@@ -309,8 +313,10 @@ lets_parse_read_options(lets_impl& impl,
 
 bool
 lets_parse_write_options(lets_impl& impl,
-                         const char* buf, int len)
+                         const char* buf, ErlDrvSizeT len)
 {
+    (void) len;
+
     int index, ng, items, arity, term_type, size_needed;
     char atom[MAXATOMLEN];
 

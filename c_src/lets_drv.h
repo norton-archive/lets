@@ -30,6 +30,11 @@ extern "C" {
 #include <ei.h>
 #include <erl_driver.h>
 
+#if ERL_DRV_EXTENDED_MAJOR_VERSION<2
+    typedef int ErlDrvSizeT;
+    typedef int ErlDrvSSizeT;
+#endif
+
     // @doc driver init
     DRIVER_INIT(lib_lets_drv);
 
@@ -38,7 +43,7 @@ extern "C" {
 
     ErlDrvData drv_start(ErlDrvPort port, char* command);
     void drv_stop(ErlDrvData);
-    void drv_output(ErlDrvData drv_data, char* buf, int len);
+    void drv_output(ErlDrvData drv_data, char* buf, ErlDrvSizeT len);
     void drv_ready_async(ErlDrvData, ErlDrvThreadData);
 
 #ifdef __cplusplus

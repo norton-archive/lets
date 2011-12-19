@@ -30,7 +30,7 @@
 #include "leveldb/slice.h"
 #include "leveldb/write_batch.h"
 
-#include "erl_driver.h"
+#include "lets_drv.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -84,11 +84,11 @@ extern "C" {
                             const char op);
 
     extern bool lets_parse_options(lets_impl& impl,
-                                   const char* buf, int len);
+                                   const char* buf, ErlDrvSizeT len);
     extern bool lets_parse_read_options(lets_impl& impl,
-                                        const char* buf, int len);
+                                        const char* buf, ErlDrvSizeT len);
     extern bool lets_parse_write_options(lets_impl& impl,
-                                         const char* buf, int len);
+                                         const char* buf, ErlDrvSizeT len);
 
     // helpers
     extern int ei_inspect_atom(const char *buf, int *index, char *p);

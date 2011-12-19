@@ -147,6 +147,8 @@ bool
 lets_parse_options(ErlNifEnv* env, lets_impl& impl,
                    ERL_NIF_TERM& options, const ERL_NIF_TERM& options_len)
 {
+    (void) options_len;
+
     ERL_NIF_TERM head, tail;
     int arity;
     const ERL_NIF_TERM* tuple;
@@ -237,6 +239,8 @@ bool
 lets_parse_read_options(ErlNifEnv* env, lets_impl& impl,
                         ERL_NIF_TERM& options, const ERL_NIF_TERM& options_len)
 {
+    (void) options_len;
+
     ERL_NIF_TERM head, tail;
     int arity;
     const ERL_NIF_TERM* tuple;
@@ -280,6 +284,8 @@ bool
 lets_parse_write_options(ErlNifEnv* env, lets_impl& impl,
                          ERL_NIF_TERM& options, const ERL_NIF_TERM& options_len)
 {
+    (void) options_len;
+
     ERL_NIF_TERM head, tail;
     int arity;
     const ERL_NIF_TERM* tuple;
