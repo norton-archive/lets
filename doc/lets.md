@@ -28,7 +28,7 @@ __abstract datatype__: `cont()`
 
 
 
-<pre>db_opts() = {db, [{path, [file:filename()](file.md#type-filename)} | create_if_missing | {create_if_missing, boolean()} | error_if_exists | {error_if_exists, boolean()} | paranoid_checks | {paranoid_checks, boolean()} | {write_buffer_size, pos_integer()} | {max_open_files, pos_integer()} | {block_cache_size, pos_integer()} | {block_size, pos_integer()} | {block_restart_interval, pos_integer()}]}</pre>
+<pre>db_opts() = {db, [{path, <a href="file.md#type-filename">file:filename()</a>} | create_if_missing | {create_if_missing, boolean()} | error_if_exists | {error_if_exists, boolean()} | paranoid_checks | {paranoid_checks, boolean()} | {write_buffer_size, pos_integer()} | {max_open_files, pos_integer()} | {block_cache_size, pos_integer()} | {block_size, pos_integer()} | {block_restart_interval, pos_integer()}]}</pre>
 
 
 
@@ -116,7 +116,7 @@ __abstract datatype__: `cont()`
 
 
 
-<pre>opts() = [[ets_opt()](#type-ets_opt) | [impl_opt()](#type-impl_opt) | [db_opts()](#type-db_opts) | [db_read_opts()](#type-db_read_opts) | [db_write_opts()](#type-db_write_opts)]</pre>
+<pre>opts() = [<a href="#type-ets_opt">ets_opt()</a> | <a href="#type-impl_opt">impl_opt()</a> | <a href="#type-db_opts">db_opts()</a> | <a href="#type-db_read_opts">db_read_opts()</a> | <a href="#type-db_write_opts">db_write_opts()</a>]</pre>
 
 
 
@@ -146,7 +146,7 @@ __abstract datatype__: `cont()`
 
 
 
-<pre>spec() = [ets:match_spec()](ets.md#type-match_spec)</pre>
+<pre>spec() = <a href="ets.md#type-match_spec">ets:match_spec()</a></pre>
 
 
 
@@ -451,7 +451,7 @@ operation is <strong>not</strong> guaranteed to be atomic and isolated.</p>.</td
 
 
 
-<pre>delete(Tab::[tab()](#type-tab)) -&gt; true</pre>
+<pre>delete(Tab::<a href="#type-tab">tab()</a>) -> true</pre>
 <br></br>
 
 
@@ -467,7 +467,7 @@ __See also:__ [ets:delete/1](ets.md#delete-1).<a name="delete-2"></a>
 
 
 
-<pre>delete(Tab::[tab()](#type-tab), Key::[key()](#type-key)) -&gt; true</pre>
+<pre>delete(Tab::<a href="#type-tab">tab()</a>, Key::<a href="#type-key">key()</a>) -> true</pre>
 <br></br>
 
 
@@ -483,7 +483,7 @@ __See also:__ [ets:delete/2](ets.md#delete-2).<a name="delete_all_objects-1"></a
 
 
 
-<pre>delete_all_objects(Tab::[tab()](#type-tab)) -&gt; true</pre>
+<pre>delete_all_objects(Tab::<a href="#type-tab">tab()</a>) -> true</pre>
 <br></br>
 
 
@@ -501,7 +501,7 @@ __See also:__ [ets:delete_all_objects/1](ets.md#delete_all_objects-1).<a name="d
 
 
 
-<pre>destroy(Name::[name()](#type-name), Opts::[opts()](#type-opts)) -&gt; true</pre>
+<pre>destroy(Name::<a href="#type-name">name()</a>, Opts::<a href="#type-opts">opts()</a>) -> true</pre>
 <br></br>
 
 
@@ -516,7 +516,7 @@ only applies to <tt>driver</tt> and <tt>nif</tt> implementations.</p>
 
 
 
-<pre>first(Tab::[tab()](#type-tab)) -&gt; [key()](#type-key) | '$end_of_table'</pre>
+<pre>first(Tab::<a href="#type-tab">tab()</a>) -> <a href="#type-key">key()</a> | '$end_of_table'</pre>
 <br></br>
 
 
@@ -533,7 +533,7 @@ __See also:__ [ets:first/1](ets.md#first-1).<a name="foldl-3"></a>
 
 
 
-<pre>foldl(Fun, Acc0::term(), Tab::[tab()](#type-tab)) -&gt; Acc1::term()</pre>
+<pre>foldl(Fun, Acc0::term(), Tab::<a href="#type-tab">tab()</a>) -> Acc1::term()</pre>
 <ul class="definitions"><li><pre>Fun = fun((Element::term(), AccIn::term()) -&gt; AccOut::term())</pre></li></ul>
 
 
@@ -548,7 +548,7 @@ __See also:__ [ets:foldl/3](ets.md#foldl-3).<a name="foldr-3"></a>
 
 
 
-<pre>foldr(Fun, Acc0::term(), Tab::[tab()](#type-tab)) -&gt; Acc1::term()</pre>
+<pre>foldr(Fun, Acc0::term(), Tab::<a href="#type-tab">tab()</a>) -> Acc1::term()</pre>
 <ul class="definitions"><li><pre>Fun = fun((Element::term(), AccIn::term()) -&gt; AccOut::term())</pre></li></ul>
 
 
@@ -563,7 +563,7 @@ __See also:__ [ets:foldr/3](ets.md#foldr-3).<a name="info-1"></a>
 
 
 
-<pre>info(Tab::[tab()](#type-tab)) -&gt; [{[item()](#type-item), term()}]</pre>
+<pre>info(Tab::<a href="#type-tab">tab()</a>) -> [{<a href="#type-item">item()</a>, term()}]</pre>
 <br></br>
 
 
@@ -580,7 +580,7 @@ __See also:__ [info/2](#info-2).<a name="info-2"></a>
 
 
 
-<pre>info(Tab::[tab()](#type-tab), Item::[item()](#type-item)) -&gt; term()</pre>
+<pre>info(Tab::<a href="#type-tab">tab()</a>, Item::<a href="#type-item">item()</a>) -> term()</pre>
 <br></br>
 
 
@@ -652,7 +652,7 @@ __See also:__ [ets:info/2](ets.md#info-2).<a name="insert-2"></a>
 
 
 
-<pre>insert(Tab::[tab()](#type-tab), ObjOrObjs::[object()](#type-object) | [[object()](#type-object)]) -&gt; true</pre>
+<pre>insert(Tab::<a href="#type-tab">tab()</a>, ObjOrObjs::<a href="#type-object">object()</a> | [<a href="#type-object">object()</a>]) -> true</pre>
 <br></br>
 
 
@@ -669,7 +669,7 @@ __See also:__ [ets:insert/2](ets.md#insert-2).<a name="insert_new-2"></a>
 
 
 
-<pre>insert_new(Tab::[tab()](#type-tab), ObjOrObjs::[object()](#type-object) | [[object()](#type-object)]) -&gt; true</pre>
+<pre>insert_new(Tab::<a href="#type-tab">tab()</a>, ObjOrObjs::<a href="#type-object">object()</a> | [<a href="#type-object">object()</a>]) -> true</pre>
 <br></br>
 
 
@@ -688,7 +688,7 @@ __See also:__ [ets:insert_new/2](ets.md#insert_new-2).<a name="last-1"></a>
 
 
 
-<pre>last(Tab::[tab()](#type-tab)) -&gt; [key()](#type-key) | '$end_of_table'</pre>
+<pre>last(Tab::<a href="#type-tab">tab()</a>) -> <a href="#type-key">key()</a> | '$end_of_table'</pre>
 <br></br>
 
 
@@ -705,7 +705,7 @@ __See also:__ [ets:last/1](ets.md#last-1).<a name="lookup-2"></a>
 
 
 
-<pre>lookup(Tab::[tab()](#type-tab), Key::[key()](#type-key)) -&gt; [[object()](#type-object)]</pre>
+<pre>lookup(Tab::<a href="#type-tab">tab()</a>, Key::<a href="#type-key">key()</a>) -> [<a href="#type-object">object()</a>]</pre>
 <br></br>
 
 
@@ -722,7 +722,7 @@ __See also:__ [ets:lookup/2](ets.md#lookup-2).<a name="lookup_element-3"></a>
 
 
 
-<pre>lookup_element(Tab::[tab()](#type-tab), Key::[key()](#type-key), Pos::[pos()](#type-pos)) -&gt; term()</pre>
+<pre>lookup_element(Tab::<a href="#type-tab">tab()</a>, Key::<a href="#type-key">key()</a>, Pos::<a href="#type-pos">pos()</a>) -> term()</pre>
 <br></br>
 
 
@@ -739,7 +739,7 @@ __See also:__ [ets:lookup_element/3](ets.md#lookup_element-3).<a name="match-1">
 
 
 
-<pre>match(X1::[cont()](#type-cont) | '$end_of_table') -&gt; {[[match()](#type-match)], [cont()](#type-cont) | '$end_of_table'} | '$end_of_table'</pre>
+<pre>match(X1::<a href="#type-cont">cont()</a> | '$end_of_table') -> {[<a href="#type-match">match()</a>], <a href="#type-cont">cont()</a> | '$end_of_table'} | '$end_of_table'</pre>
 <br></br>
 
 
@@ -755,7 +755,7 @@ __See also:__ [ets:match/1](ets.md#match-1).<a name="match-2"></a>
 
 
 
-<pre>match(Tab::[tab()](#type-tab), Pattern::[pattern()](#type-pattern)) -&gt; [[match()](#type-match)]</pre>
+<pre>match(Tab::<a href="#type-tab">tab()</a>, Pattern::<a href="#type-pattern">pattern()</a>) -> [<a href="#type-match">match()</a>]</pre>
 <br></br>
 
 
@@ -772,7 +772,7 @@ __See also:__ [ets:match/2](ets.md#match-2).<a name="match-3"></a>
 
 
 
-<pre>match(Tab::[tab()](#type-tab), Pattern::[pattern()](#type-pattern), Limit::[limit()](#type-limit)) -&gt; {[[match()](#type-match)], [cont()](#type-cont) | '$end_of_table'} | '$end_of_table'</pre>
+<pre>match(Tab::<a href="#type-tab">tab()</a>, Pattern::<a href="#type-pattern">pattern()</a>, Limit::<a href="#type-limit">limit()</a>) -> {[<a href="#type-match">match()</a>], <a href="#type-cont">cont()</a> | '$end_of_table'} | '$end_of_table'</pre>
 <br></br>
 
 
@@ -790,7 +790,7 @@ __See also:__ [ets:match/3](ets.md#match-3).<a name="match_delete-2"></a>
 
 
 
-<pre>match_delete(Tab::[tab()](#type-tab), Pattern::[pattern()](#type-pattern)) -&gt; true</pre>
+<pre>match_delete(Tab::<a href="#type-tab">tab()</a>, Pattern::<a href="#type-pattern">pattern()</a>) -> true</pre>
 <br></br>
 
 
@@ -807,7 +807,7 @@ __See also:__ [ets:match_delete/2](ets.md#match_delete-2).<a name="match_object-
 
 
 
-<pre>match_object(X1::[cont()](#type-cont) | '$end_of_table') -&gt; {[[match()](#type-match)], [cont()](#type-cont) | '$end_of_table'} | '$end_of_table'</pre>
+<pre>match_object(X1::<a href="#type-cont">cont()</a> | '$end_of_table') -> {[<a href="#type-match">match()</a>], <a href="#type-cont">cont()</a> | '$end_of_table'} | '$end_of_table'</pre>
 <br></br>
 
 
@@ -823,7 +823,7 @@ __See also:__ [ets:match_object/1](ets.md#match_object-1).<a name="match_object-
 
 
 
-<pre>match_object(Tab::[tab()](#type-tab), Pattern::[pattern()](#type-pattern)) -&gt; [[match()](#type-match)]</pre>
+<pre>match_object(Tab::<a href="#type-tab">tab()</a>, Pattern::<a href="#type-pattern">pattern()</a>) -> [<a href="#type-match">match()</a>]</pre>
 <br></br>
 
 
@@ -840,7 +840,7 @@ __See also:__ [ets:match_object/2](ets.md#match_object-2).<a name="match_object-
 
 
 
-<pre>match_object(Tab::[tab()](#type-tab), Pattern::[pattern()](#type-pattern), Limit::[limit()](#type-limit)) -&gt; {[[match()](#type-match)], [cont()](#type-cont) | '$end_of_table'} | '$end_of_table'</pre>
+<pre>match_object(Tab::<a href="#type-tab">tab()</a>, Pattern::<a href="#type-pattern">pattern()</a>, Limit::<a href="#type-limit">limit()</a>) -> {[<a href="#type-match">match()</a>], <a href="#type-cont">cont()</a> | '$end_of_table'} | '$end_of_table'</pre>
 <br></br>
 
 
@@ -858,7 +858,7 @@ __See also:__ [ets:match_object/3](ets.md#match_object-3).<a name="member-2"></a
 
 
 
-<pre>member(Tab::[tab()](#type-tab), Key::[key()](#type-key)) -&gt; true | false</pre>
+<pre>member(Tab::<a href="#type-tab">tab()</a>, Key::<a href="#type-key">key()</a>) -> true | false</pre>
 <br></br>
 
 
@@ -875,7 +875,7 @@ __See also:__ [ets:member/2](ets.md#member-2).<a name="new-2"></a>
 
 
 
-<pre>new(Name::[name()](#type-name), Opts::[opts()](#type-opts)) -&gt; [tab()](#type-tab)</pre>
+<pre>new(Name::<a href="#type-name">name()</a>, Opts::<a href="#type-opts">opts()</a>) -> <a href="#type-tab">tab()</a></pre>
 <br></br>
 
 
@@ -1076,7 +1076,7 @@ __See also:__ [ets:new/2](ets.md#new-2).<a name="next-2"></a>
 
 
 
-<pre>next(Tab::[tab()](#type-tab), Key::[key()](#type-key)) -&gt; [key()](#type-key) | '$end_of_table'</pre>
+<pre>next(Tab::<a href="#type-tab">tab()</a>, Key::<a href="#type-key">key()</a>) -> <a href="#type-key">key()</a> | '$end_of_table'</pre>
 <br></br>
 
 
@@ -1094,7 +1094,7 @@ __See also:__ [ets:next/2](ets.md#next-2).<a name="prev-2"></a>
 
 
 
-<pre>prev(Tab::[tab()](#type-tab), Key::[key()](#type-key)) -&gt; [key()](#type-key) | '$end_of_table'</pre>
+<pre>prev(Tab::<a href="#type-tab">tab()</a>, Key::<a href="#type-key">key()</a>) -> <a href="#type-key">key()</a> | '$end_of_table'</pre>
 <br></br>
 
 
@@ -1112,7 +1112,7 @@ __See also:__ [ets:prev/2](ets.md#prev-2).<a name="repair-2"></a>
 
 
 
-<pre>repair(Name::[name()](#type-name), Opts::[opts()](#type-opts)) -&gt; true</pre>
+<pre>repair(Name::<a href="#type-name">name()</a>, Opts::<a href="#type-opts">opts()</a>) -> true</pre>
 <br></br>
 
 
@@ -1130,7 +1130,7 @@ function only applies to <tt>driver</tt> and <tt>nif</tt> implementations.</p>
 
 
 
-<pre>select(X1::[cont()](#type-cont) | '$end_of_table') -&gt; {[[match()](#type-match)], [cont()](#type-cont) | '$end_of_table'} | '$end_of_table'</pre>
+<pre>select(X1::<a href="#type-cont">cont()</a> | '$end_of_table') -> {[<a href="#type-match">match()</a>], <a href="#type-cont">cont()</a> | '$end_of_table'} | '$end_of_table'</pre>
 <br></br>
 
 
@@ -1146,7 +1146,7 @@ __See also:__ [ets:select/1](ets.md#select-1).<a name="select-2"></a>
 
 
 
-<pre>select(Tab::[tab()](#type-tab), Spec::[spec()](#type-spec)) -&gt; [[match()](#type-match)]</pre>
+<pre>select(Tab::<a href="#type-tab">tab()</a>, Spec::<a href="#type-spec">spec()</a>) -> [<a href="#type-match">match()</a>]</pre>
 <br></br>
 
 
@@ -1163,7 +1163,7 @@ __See also:__ [ets:select/2](ets.md#select-2).<a name="select-3"></a>
 
 
 
-<pre>select(Tab::[tab()](#type-tab), Spec::[spec()](#type-spec), Limit::[limit()](#type-limit)) -&gt; {[[match()](#type-match)], [cont()](#type-cont) | '$end_of_table'} | '$end_of_table'</pre>
+<pre>select(Tab::<a href="#type-tab">tab()</a>, Spec::<a href="#type-spec">spec()</a>, Limit::<a href="#type-limit">limit()</a>) -> {[<a href="#type-match">match()</a>], <a href="#type-cont">cont()</a> | '$end_of_table'} | '$end_of_table'</pre>
 <br></br>
 
 
@@ -1180,7 +1180,7 @@ __See also:__ [ets:select/3](ets.md#select-3).<a name="select_count-2"></a>
 
 
 
-<pre>select_count(Tab::[tab()](#type-tab), Spec::[pattern()](#type-pattern)) -&gt; pos_integer()</pre>
+<pre>select_count(Tab::<a href="#type-tab">tab()</a>, Spec::<a href="#type-pattern">pattern()</a>) -> pos_integer()</pre>
 <br></br>
 
 
@@ -1197,7 +1197,7 @@ __See also:__ [ets:select_count/2](ets.md#select_count-2).<a name="select_delete
 
 
 
-<pre>select_delete(Tab::[tab()](#type-tab), Spec::[pattern()](#type-pattern)) -&gt; pos_integer()</pre>
+<pre>select_delete(Tab::<a href="#type-tab">tab()</a>, Spec::<a href="#type-pattern">pattern()</a>) -> pos_integer()</pre>
 <br></br>
 
 
@@ -1214,7 +1214,7 @@ __See also:__ [ets:select_delete/2](ets.md#select_delete-2).<a name="select_reve
 
 
 
-<pre>select_reverse(X1::[cont()](#type-cont) | '$end_of_table') -&gt; {[[match()](#type-match)], [cont()](#type-cont) | '$end_of_table'} | '$end_of_table'</pre>
+<pre>select_reverse(X1::<a href="#type-cont">cont()</a> | '$end_of_table') -> {[<a href="#type-match">match()</a>], <a href="#type-cont">cont()</a> | '$end_of_table'} | '$end_of_table'</pre>
 <br></br>
 
 
@@ -1230,7 +1230,7 @@ __See also:__ [ets:select_reverse/1](ets.md#select_reverse-1).<a name="select_re
 
 
 
-<pre>select_reverse(Tab::[tab()](#type-tab), Spec::[spec()](#type-spec)) -&gt; [[match()](#type-match)]</pre>
+<pre>select_reverse(Tab::<a href="#type-tab">tab()</a>, Spec::<a href="#type-spec">spec()</a>) -> [<a href="#type-match">match()</a>]</pre>
 <br></br>
 
 
@@ -1247,7 +1247,7 @@ __See also:__ [ets:select_reverse/2](ets.md#select_reverse-2).<a name="select_re
 
 
 
-<pre>select_reverse(Tab::[tab()](#type-tab), Spec::[spec()](#type-spec), Limit::[limit()](#type-limit)) -&gt; {[[match()](#type-match)], [cont()](#type-cont) | '$end_of_table'} | '$end_of_table'</pre>
+<pre>select_reverse(Tab::<a href="#type-tab">tab()</a>, Spec::<a href="#type-spec">spec()</a>, Limit::<a href="#type-limit">limit()</a>) -> {[<a href="#type-match">match()</a>], <a href="#type-cont">cont()</a> | '$end_of_table'} | '$end_of_table'</pre>
 <br></br>
 
 
@@ -1265,7 +1265,7 @@ __See also:__ [ets:select_reverse/3](ets.md#select_reverse-3).<a name="tab2list-
 
 
 
-<pre>tab2list(Tab::[tab()](#type-tab)) -&gt; [[object()](#type-object)]</pre>
+<pre>tab2list(Tab::<a href="#type-tab">tab()</a>) -> [<a href="#type-object">object()</a>]</pre>
 <br></br>
 
 
