@@ -330,7 +330,7 @@ Erlang - <a href="http://www.erlang.org/">http://www.erlang.org/</a>
 <ul>
 <li>
 <p>
-<strong>R13B04 or newer, R15B has been tested most recently</strong>
+<strong>R14 or newer, R15B has been tested most recently</strong>
 </p>
 </li>
 </ul>
@@ -342,7 +342,7 @@ Git - <a href="http://git-scm.com/">http://git-scm.com/</a>
 <ul>
 <li>
 <p>
-<strong>Git 1.5.4 or newer, Git 1.7.8 has been tested recently</strong>
+<strong>Git 1.5.4 or newer, Git 1.7.9.3 has been tested recently</strong>
 </p>
 </li>
 <li>
@@ -403,7 +403,7 @@ Build
 </p>
 
 
-<pre><tt>$ cd working-directory-name/src
+<pre><tt>$ cd working-directory-name
 $ make compile</tt></pre>
 
 </li>
@@ -425,7 +425,7 @@ Build Dialyzer's PLT <em>(required once)</em>
 </p>
 
 
-<pre><tt>$ cd working-directory-name/src
+<pre><tt>$ cd working-directory-name
 $ make build-plt</tt></pre>
 
 
@@ -444,7 +444,7 @@ Dialyze with specs
 </p>
 
 
-<pre><tt>$ cd working-directory-name/src
+<pre><tt>$ cd working-directory-name
 $ make dialyze</tt></pre>
 
 
@@ -465,7 +465,7 @@ Dialyze without specs
 </p>
 
 
-<pre><tt>$ cd working-directory-name/src
+<pre><tt>$ cd working-directory-name
 $ make dialyze-nospec</tt></pre>
 
 </li>
@@ -495,7 +495,7 @@ Compile for QuickCheck
 </p>
 
 
-<pre><tt>$ cd working-directory-name/src
+<pre><tt>$ cd working-directory-name
 $ make clean
 $ make compile-eqc eqc-compile</tt></pre>
 
@@ -506,7 +506,7 @@ Run 5,000 QuickCheck tests
 </p>
 
 
-<pre><tt>$ cd working-directory-name/src/lib/lets/.eunit
+<pre><tt>$ cd working-directory-name/lib/lets/.eunit
 $ erl -smp +A 5 -pz ../../sext/ebin -pz ../../qc/ebin
 
 1> qc_statem_lets:qc_run(5000).
@@ -575,7 +575,7 @@ Compile for PropEr
 </p>
 
 
-<pre><tt>$ cd working-directory-name/src
+<pre><tt>$ cd working-directory-name
 $ make clean
 $ make compile-proper proper-compile</tt></pre>
 
@@ -586,7 +586,7 @@ Run 5,000 PropEr tests
 </p>
 
 
-<pre><tt>$ cd working-directory-name/src/lib/lets/.eunit
+<pre><tt>$ cd working-directory-name/lib/lets/.eunit
 $ erl -smp +A 5 -pz ../../sext/ebin -pz ../../qc/ebin
 
 1> qc_statem_lets:qc_run(5000).

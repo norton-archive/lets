@@ -154,9 +154,9 @@ For futher information and help for related tools, please refer to the
 following links:
 
 - Erlang - http://www.erlang.org/
-  * *R13B04 or newer, R15B has been tested most recently*
+  * *R14 or newer, R15B has been tested most recently*
 - Git - http://git-scm.com/
-  * *Git 1.5.4 or newer, Git 1.7.8 has been tested recently*
+  * *Git 1.5.4 or newer, Git 1.7.9.3 has been tested recently*
   * _required for Repo and GitHub_
 - GitHub - https://github.com
 - Python - http://www.python.org
@@ -173,7 +173,7 @@ following links:
 2. Build
 +
 ------
-$ cd working-directory-name/src
+$ cd working-directory-name
 $ make compile
 ------
 
@@ -183,7 +183,7 @@ A. Dialyzer Testing _basic recipe_
    1. Build Dialyzer\'s PLT _(required once)_
 +
 ------
-$ cd working-directory-name/src
+$ cd working-directory-name
 $ make build-plt
 ------
 +
@@ -193,7 +193,7 @@ information.
    2. Dialyze with specs
 +
 ------
-$ cd working-directory-name/src
+$ cd working-directory-name
 $ make dialyze
 ------
 +
@@ -205,7 +205,7 @@ information.
    3. Dialyze without specs
 +
 ------
-$ cd working-directory-name/src
+$ cd working-directory-name
 $ make dialyze-nospec
 ------
 
@@ -222,15 +222,15 @@ true = code:add_pathz(os:getenv("HOME")++"/.erlang.d/lib/quviq/eqc-X.Y.Z/ebin").
 2. Compile for QuickCheck
 +
 ------
-$ cd working-directory-name/src
+$ cd working-directory-name
 $ make clean
-$ make compile-eqc eqc-compile
+$ make eqc-compile
 ------
 
 3. Run 5,000 QuickCheck tests
 +
 ------
-$ cd working-directory-name/src/lib/lets/.eunit
+$ cd working-directory-name/lib/lets/.eunit
 $ erl -smp +A 5 -pz ../../sext/ebin -pz ../../qc/ebin
 
 1> qc_statem_lets:qc_run(5000).
@@ -282,15 +282,15 @@ true = code:add_pathz(os:getenv("HOME")++"/.erlang.d/lib/proper/ebin").
 2. Compile for PropEr
 +
 ------
-$ cd working-directory-name/src
+$ cd working-directory-name
 $ make clean
-$ make compile-proper proper-compile
+$ make proper-compile
 ------
 
 3. Run 5,000 PropEr tests
 +
 ------
-$ cd working-directory-name/src/lib/lets/.eunit
+$ cd working-directory-name/lib/lets/.eunit
 $ erl -smp +A 5 -pz ../../sext/ebin -pz ../../qc/ebin
 
 1> qc_statem_lets:qc_run(5000).
