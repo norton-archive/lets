@@ -3,7 +3,7 @@
 #LETS - LevelDB-based Erlang Term Storage#
 
 
-Copyright (c) 2011 by Joseph Wayne Norton
+Copyright (c) 2011-2012 by Joseph Wayne Norton
 
 __Authors:__ Joseph Wayne Norton ([`norton@alum.mit.edu`](mailto:norton@alum.mit.edu)).<p>LETS is an alternative Erlang Term Storage using LevelDB as the
 storage implementation.  LETS tries to address some bad properties of
