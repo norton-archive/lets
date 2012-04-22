@@ -141,7 +141,7 @@
 -type ets_opt()       :: set | ordered_set | named_table | {key_pos,pos_integer()} | public | protected | private | compressed | async.
 -type impl_opt()      :: drv | nif | ets.
 
--type db_opts()       :: {db, [{path,file:filename()} | create_if_missing | {create_if_missing,boolean()} | error_if_exists | {error_if_exists,boolean()} | paranoid_checks | {paranoid_checks,boolean()} | {write_buffer_size,pos_integer()} | {max_open_files,pos_integer()} | {block_cache_size,pos_integer()} | {block_size,pos_integer()} | {block_restart_interval,pos_integer()}]}.
+-type db_opts()       :: {db, [{path,file:filename()} | create_if_missing | {create_if_missing,boolean()} | error_if_exists | {error_if_exists,boolean()} | paranoid_checks | {paranoid_checks,boolean()} | {write_buffer_size,pos_integer()} | {max_open_files,pos_integer()} | {block_cache_size,pos_integer()} | {block_size,pos_integer()} | {block_restart_interval,pos_integer()} | {filter_policy,no | {bloom,pos_integer()}}]}.
 -type db_read_opts()  :: {db_read, [verify_checksums | {verify_checksums,boolean()} | fill_cache | {fill_cache,boolean()}]}.
 -type db_write_opts() :: {db_write, [sync | {sync,boolean()}]}.
 
@@ -241,6 +241,8 @@
 %% - +{block_size, pos_integer()}+ The default is 4K.
 %%
 %% - +{block_restart_interval, pos_integer()}+ The default is 16.
+%%
+%% - +{filter_policy, no | {bloom, pos_integer()}}+ The default is +no+.
 %%
 %% Valid LevelDB read properties for +db_read_opts()+ are:
 %%
@@ -929,7 +931,7 @@ options(Options, [], L) ->
     {lists:reverse(L), Options}.
 
 sub_options(db=Key, Value, Options, Keys, L) ->
-    SubKeys = [path, create_if_missing, error_if_exists, paranoid_checks, write_buffer_size, max_open_files, block_cache_size, block_size, block_restart_interval],
+    SubKeys = [path, create_if_missing, error_if_exists, paranoid_checks, write_buffer_size, max_open_files, block_cache_size, block_size, block_restart_interval, filter_policy],
     sub_options(Key, Value, Options, Keys, L, SubKeys);
 sub_options(db_read=Key, Value, Options, Keys, L) ->
     %% @TODO snapshot

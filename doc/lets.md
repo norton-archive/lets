@@ -28,7 +28,7 @@ __abstract datatype__: `cont()`
 
 
 
-<pre>db_opts() = {db, [{path, <a href="file.md#type-filename">file:filename()</a>} | create_if_missing | {create_if_missing, boolean()} | error_if_exists | {error_if_exists, boolean()} | paranoid_checks | {paranoid_checks, boolean()} | {write_buffer_size, pos_integer()} | {max_open_files, pos_integer()} | {block_cache_size, pos_integer()} | {block_size, pos_integer()} | {block_restart_interval, pos_integer()}]}</pre>
+<pre>db_opts() = {db, [{path, <a href="file.md#type-filename">file:filename()</a>} | create_if_missing | {create_if_missing, boolean()} | error_if_exists | {error_if_exists, boolean()} | paranoid_checks | {paranoid_checks, boolean()} | {write_buffer_size, pos_integer()} | {max_open_files, pos_integer()} | {block_cache_size, pos_integer()} | {block_size, pos_integer()} | {block_restart_interval, pos_integer()} | {filter_policy, no | {bloom, pos_integer()}}]}</pre>
 
 
 
@@ -391,6 +391,11 @@ default is <tt>false</tt>.
 <li>
 <p>
 <tt>{block_restart_interval, pos_integer()}</tt> The default is 16.
+</p>
+</li>
+<li>
+<p>
+<tt>{filter_policy, no | {bloom, pos_integer()}}</tt> The default is <tt>no</tt>.
 </p>
 
 
@@ -1036,6 +1041,11 @@ default is <tt>false</tt>.
 <li>
 <p>
 <tt>{block_restart_interval, pos_integer()}</tt> The default is 16.
+</p>
+</li>
+<li>
+<p>
+<tt>{filter_policy, no | {bloom, pos_integer()}}</tt> The default is <tt>no</tt>.
 </p>
 
 

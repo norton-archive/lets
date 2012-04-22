@@ -85,6 +85,8 @@ is_table(Tab) ->
     is_pid(Tab).
 
 new(Name, Options) ->
+    %% @NOTE needed for foldr's and foldl's anonymous funs
+    _ = code:ensure_loaded(qc_statem_lets),
     {ok, Pid} = gen_server:start({local, Name}, ?MODULE, [Name, Options], []),
     Pid.
 

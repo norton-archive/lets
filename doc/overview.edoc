@@ -154,9 +154,9 @@ For futher information and help for related tools, please refer to the
 following links:
 
 - Erlang - http://www.erlang.org/
-  * *R14 or newer, R15B has been tested most recently*
+  * *R14 or newer, R15B01 has been tested most recently*
 - Git - http://git-scm.com/
-  * *Git 1.5.4 or newer, Git 1.7.9.3 has been tested recently*
+  * *Git 1.5.4 or newer, Git 1.7.10 has been tested recently*
   * _required for Repo and GitHub_
 - GitHub - https://github.com
 - Python - http://www.python.org
@@ -379,10 +379,6 @@ true
     implementations.
 
 - Existing APIs (TBD)
-  * Performance improvement for non-existing keys
-    ** http://erlang.org/pipermail/erlang-questions/2011-November/062755.html
-    ** http://comments.gmane.org/gmane.comp.db.leveldb/249
-
   * +delete/1+
     (http://code.google.com/p/leveldb/issues/detail?id=48)
 

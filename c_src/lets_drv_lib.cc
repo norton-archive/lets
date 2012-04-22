@@ -182,6 +182,7 @@ lets_parse_options(lets_impl& impl,
                 ng = ei_decode_ulong(buf, &index, &val);
                 if (ng) return FALSE;
                 impl.db_block_cache_size = val;
+                delete impl.db_block_cache;
                 impl.db_block_cache = leveldb::NewLRUCache(impl.db_block_cache_size);
                 impl.db_options.block_cache = impl.db_block_cache;
                 if (!impl.db_options.block_cache) {
@@ -202,6 +203,35 @@ lets_parse_options(lets_impl& impl,
                     impl.db_options.compression = leveldb::kNoCompression;
                 } else if (strcmp(atom, "snappy") == 0) {
                     impl.db_options.compression = leveldb::kSnappyCompression;
+                } else {
+                    return FALSE;
+                }
+            } else if (strcmp(atom, "filter_policy") == 0) {
+                ng = ei_decode_atom(buf, &index, atom);
+                if (ng) {
+                    ng = ei_decode_tuple_header(buf, &index, &arity);
+                    if (ng) return FALSE;
+                    ng = (arity != 2);
+                    if (ng) return FALSE;
+                    ng = ei_decode_atom(buf, &index, atom);
+                    if (ng) return FALSE;
+                    if (strcmp(atom, "bloom") == 0) {
+                        ng = ei_decode_ulong(buf, &index, &val);
+                        if (ng) return FALSE;
+                        impl.db_filter_policy_bloom_bits_per_key = val;
+                        delete impl.db_filter_policy;
+                        impl.db_filter_policy = leveldb::NewBloomFilterPolicy(impl.db_filter_policy_bloom_bits_per_key);
+                        impl.db_options.filter_policy = impl.db_filter_policy;
+                        if (!impl.db_options.filter_policy) {
+                            return FALSE;
+                        }
+                    } else {
+                        return FALSE;
+                    }
+                } else if (strcmp(atom, "no") == 0) {
+                    delete impl.db_filter_policy;
+                    impl.db_filter_policy = NULL;
+                    impl.db_options.filter_policy = NULL;
                 } else {
                     return FALSE;
                 }

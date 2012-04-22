@@ -330,7 +330,7 @@ Erlang - <a href="http://www.erlang.org/">http://www.erlang.org/</a>
 <ul>
 <li>
 <p>
-<strong>R14 or newer, R15B has been tested most recently</strong>
+<strong>R14 or newer, R15B01 has been tested most recently</strong>
 </p>
 </li>
 </ul>
@@ -342,7 +342,7 @@ Git - <a href="http://git-scm.com/">http://git-scm.com/</a>
 <ul>
 <li>
 <p>
-<strong>Git 1.5.4 or newer, Git 1.7.9.3 has been tested recently</strong>
+<strong>Git 1.5.4 or newer, Git 1.7.10 has been tested recently</strong>
 </p>
 </li>
 <li>
@@ -497,7 +497,7 @@ Compile for QuickCheck
 
 <pre><tt>$ cd working-directory-name
 $ make clean
-$ make compile-eqc eqc-compile</tt></pre>
+$ make eqc-compile</tt></pre>
 
 </li>
 <li>
@@ -577,7 +577,7 @@ Compile for PropEr
 
 <pre><tt>$ cd working-directory-name
 $ make clean
-$ make compile-proper proper-compile</tt></pre>
+$ make proper-compile</tt></pre>
 
 </li>
 <li>
@@ -804,23 +804,6 @@ Add custom (i.e. not supported by native ETS) APIs for providing
 Existing APIs (TBD)
 </p>
 <ul>
-<li>
-<p>
-Performance improvement for non-existing keys
-</p>
-<ul>
-<li>
-<p>
-<a href="http://erlang.org/pipermail/erlang-questions/2011-November/062755.md">http://erlang.org/pipermail/erlang-questions/2011-November/062755.html</a>
-</p>
-</li>
-<li>
-<p>
-<a href="http://comments.gmane.org/gmane.comp.db.leveldb/249">http://comments.gmane.org/gmane.comp.db.leveldb/249</a>
-</p>
-</li>
-</ul>
-</li>
 <li>
 <p>
 <tt>delete/1</tt>

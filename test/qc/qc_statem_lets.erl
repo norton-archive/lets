@@ -30,9 +30,9 @@
 -export([initial_state/0, state_is_sane/1, next_state/3, precondition/2, postcondition/3]).
 -export([setup/1, teardown/1, teardown/2, aggregate/1]).
 
-%% @TODO remove at time of db, db_read, db_write options testing
 %% DEBUG
 -compile(export_all).
+
 %% Implementation
 -export([match31/3, match_object31/3, select31/3, select_reverse31/3]).
 
@@ -70,6 +70,7 @@
           type=undefined :: undefined | ets_type(),
           impl=undefined :: undefined | ets_impl(),
           exists=false   :: boolean(),
+          options=[]     :: proplists:proplist(),
           tab=undefined  :: undefined | tuple(),
           objs=[]        :: [obj()]
          }).
@@ -107,20 +108,20 @@ serial_command_gen(_Mod,#state{tab=Tab, type=Type, impl=Impl}=S) ->
           ++ [{call,?IMPL,last,[Tab]}]
           ++ [{call,?IMPL,next,[Tab,gen_key(S)]}]
           ++ [{call,?IMPL,prev,[Tab,gen_key(S)]}]
-          ++ [{call,?IMPL,foldl,[fun(X,Acc) -> [X|Acc] end, [], Tab]}]
-          ++ [{call,?IMPL,foldr,[fun(X,Acc) -> [X|Acc] end, [], Tab]}]
+          ++ [{call,?IMPL,foldl,[fun(X, Acc) -> [X|Acc] end, [], Tab]}]
+          ++ [{call,?IMPL,foldr,[fun(X, Acc) -> [X|Acc] end, [], Tab]}]
           ++ [{call,?IMPL,tab2list,[Tab]}]
           ++ [{call,?IMPL,match,[Tab, gen_pattern(S)]}]
-          %%++ [{call,?MODULE,match31,[Tab, gen_pattern(S), gen_pos_integer()]}]
+          ++ [{call,?MODULE,match31,[Tab, gen_pattern(S), gen_pos_integer()]}]
           ++ [{call,?IMPL,match_delete,[Tab, gen_pattern(S)]}]
           ++ [{call,?IMPL,match_object,[Tab, gen_pattern(S)]}]
-          %%++ [{call,?MODULE,match_object31,[Tab, gen_pattern(S), gen_pos_integer()]}]
+          ++ [{call,?MODULE,match_object31,[Tab, gen_pattern(S), gen_pos_integer()]}]
           ++ [{call,?IMPL,select,[Tab, gen_spec(S)]}]
           ++ [{call,?MODULE,select31,[Tab, gen_spec(S), gen_pos_integer()]}]
           ++ [{call,?IMPL,select_count,[Tab, gen_spec_true(S)]}]
           ++ [{call,?IMPL,select_delete,[Tab, gen_spec_true(S)]}]
           ++ [{call,?IMPL,select_reverse,[Tab, gen_spec(S)]}]
-          %%++ [{call,?MODULE,select_reverse31,[Tab, gen_spec(S), gen_pos_integer()]}]
+          ++ [{call,?MODULE,select_reverse31,[Tab, gen_spec(S), gen_pos_integer()]}]
          ).
 
 parallel_command_gen(_Mod,#state{tab=undefined, type=undefined, impl=undefined}=S) ->
@@ -152,7 +153,6 @@ state_is_sane(_S) ->
 
 -spec next_state(#state{}, term(), tuple()) -> #state{}.
 next_state(#state{tab=undefined, type=undefined, impl=undefined}=S, V, {call,_,new,[?TAB,Options]}) ->
-    %% @TODO Options
     case [proplists:get_bool(X, Options) || X <- [set, ordered_set]] of
         [_, false] ->
             Type = set;
@@ -167,9 +167,8 @@ next_state(#state{tab=undefined, type=undefined, impl=undefined}=S, V, {call,_,n
         [false, false, true] ->
             Impl = ets
     end,
-    S#state{type=Type, impl=Impl, exists=true, tab=V};
-next_state(#state{tab=undefined}=S, V, {call,_,new,[_Tab,?TAB,Options]}) ->
-    %% @TODO Options
+    S#state{type=Type, impl=Impl, exists=true, options=Options, tab=V};
+next_state(#state{type=Type, impl=Impl, tab=undefined}=S, V, {call,_,new,[_Tab,?TAB,Options]}) ->
     case [proplists:get_bool(X, Options) || X <- [set, ordered_set]] of
         [_, false] ->
             Type = set;
@@ -184,7 +183,7 @@ next_state(#state{tab=undefined}=S, V, {call,_,new,[_Tab,?TAB,Options]}) ->
         [false, false, true] ->
             Impl = ets
     end,
-    S#state{type=Type, impl=Impl, exists=true, tab=V};
+    S#state{type=Type, impl=Impl, exists=true, options=Options, tab=V};
 next_state(#state{impl=Impl}=S, _V, {call,_,destroy,[_Tab,?TAB,_Options]})
   when Impl =/= ets ->
     S#state{tab=undefined, exists=false, objs=[]};
@@ -412,7 +411,7 @@ filter_reply(_) ->
 %%% Internal - Generators
 %%%----------------------------------------------------------------------
 
-gen_options(Op,#state{tab=undefined, type=undefined, impl=undefined}=S) ->
+gen_options(Op,#state{type=undefined, impl=undefined, tab=undefined}=S) ->
     ?LET({Type,Impl}, {gen_ets_type(), gen_ets_impl()},
          gen_options(Op,S#state{type=Type, impl=Impl}));
 gen_options(Op,#state{type=Type, impl=drv=Impl}=S) ->
@@ -432,22 +431,18 @@ gen_leveldb_options(Op,S) ->
 
 gen_db_options(new,#state{exists=Exists}) ->
     ExistsOptions = if Exists -> []; true -> [create_if_missing, error_if_exists] end,
-    %% @TODO ?LET(Options, ulist(gen_db_options()), {db, Options ++ ExistsOptions});
-    {db, ExistsOptions};
-gen_db_options(_Op,_S) ->
-    %% @TODO ?LET(Options, ulist(gen_db_options()), {db, Options}).
-    {db, []} .
+    ?LET(Options,ulist(gen_db_options()), {db, ExistsOptions ++ Options});
+gen_db_options(_,_) ->
+    ?LET(Options,ulist(gen_db_options()), {db, Options}).
 
 gen_db_read_options(_Op,_S) ->
-    %% @TODO ?LET(Options, ulist(gen_db_read_options()), {db_read, Options}).
-    {db_read, []}.
+    ?LET(Options, ulist(gen_db_read_options()), {db_read, Options}).
 
 gen_db_write_options(_Op,_S) ->
-    %% @TODO ?LET(Options, ulist(gen_db_write_options()), {db_write, Options}).
-    {db_write, []}.
+    ?LET(Options, ulist(gen_db_write_options()), {db_write, Options}).
 
 gen_db_options() ->
-    oneof([paranoid_checks, {paranoid_checks,gen_boolean()}, {write_buffer_size,gen_pos_integer()}, {max_open_files,gen_pos_integer()}, {block_cache_size,gen_pos_integer()}, {block_size,gen_pos_integer()}, {block_restart_interval,gen_pos_integer()}]).
+    oneof([paranoid_checks, {paranoid_checks,gen_boolean()}, {write_buffer_size,gen_pos_integer()}, {max_open_files,gen_pos_integer()}, {block_cache_size,gen_pos_integer()}, {block_size,gen_pos_integer()}, {block_restart_interval,gen_pos_integer()}, {filter_policy, oneof([no, {bloom,gen_pos_integer()}])}]).
 
 gen_db_read_options() ->
     oneof([verify_checksums, {verify_checksums,gen_boolean()}, fill_cache, {fill_cache,gen_boolean()}]).

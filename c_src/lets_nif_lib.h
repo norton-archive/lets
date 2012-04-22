@@ -29,6 +29,7 @@
 #include "leveldb/cache.h"
 #include "leveldb/slice.h"
 #include "leveldb/write_batch.h"
+#include "leveldb/filter_policy.h"
 
 #include "erl_nif.h"
 
@@ -70,6 +71,8 @@ extern "C" {
         leveldb::WriteOptions db_write_options;
         size_t db_block_cache_size;
         leveldb::Cache* db_block_cache;
+        int db_filter_policy_bloom_bits_per_key;
+        const leveldb::FilterPolicy* db_filter_policy;
         leveldb::DB* db;
         ErlNifUInt64 db_memory;
         ErlNifUInt64 db_size;
@@ -89,11 +92,13 @@ extern "C" {
     extern ERL_NIF_TERM lets_atom_max_open_files;
     extern ERL_NIF_TERM lets_atom_block_cache_size;
     extern ERL_NIF_TERM lets_atom_block_size;
+    extern ERL_NIF_TERM lets_atom_block_restart_interval;
     extern ERL_NIF_TERM lets_atom_compression;
     extern ERL_NIF_TERM lets_atom_no;
     extern ERL_NIF_TERM lets_atom_snappy;
     extern ERL_NIF_TERM lets_atom_async;
-    extern ERL_NIF_TERM lets_atom_block_restart_interval;
+    extern ERL_NIF_TERM lets_atom_filter_policy;
+    extern ERL_NIF_TERM lets_atom_bloom;
     extern ERL_NIF_TERM lets_atom_verify_checksums;
     extern ERL_NIF_TERM lets_atom_fill_cache;
     extern ERL_NIF_TERM lets_atom_sync;

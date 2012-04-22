@@ -49,6 +49,7 @@
 -record(state, {
           parallel=false :: boolean(),
           exists=false   :: boolean(),
+          options=[]     :: proplists:proplist(),
           db=undefined   :: undefined | term(),
           objs=[]        :: [obj()]
          }).
@@ -64,29 +65,29 @@ command_gen(Mod,#state{parallel=true}=S) ->
     parallel_command_gen(Mod,S).
 
 serial_command_gen(_Mod,#state{db=undefined, exists=false}) ->
-    {call,?IMPL,open,[]};
+    {call,?IMPL,open,[ulist(gen_db_options())]};
 serial_command_gen(_Mod,#state{db=undefined, exists=true}) ->
-    oneof([{call,?IMPL,reopen,[]}
-           %% @TODO {call,?IMPL,destroy,[]},
-           %% @TODO {call,?IMPL,repair,[]}
+    oneof([{call,?IMPL,reopen,[ulist(gen_db_options())]}
+           %% @TODO {call,?IMPL,destroy,[ulist(gen_db_options())]}
+           %% @TODO {call,?IMPL,repair[ulist(gen_db_options())]}
           ]);
 serial_command_gen(_Mod,#state{db=Db}=S) ->
     oneof([{call,?IMPL,close,[Db]},
-           {call,?IMPL,put,[Db,gen_obj(S)]},
-           {call,?IMPL,delete,[Db,gen_key(S)]},
-           {call,?IMPL,get,[Db,gen_key(S)]},
-           {call,?IMPL,first,[Db]},
-           {call,?IMPL,last,[Db]},
-           {call,?IMPL,next,[Db,gen_key(S)]},
-           {call,?IMPL,prev,[Db,gen_key(S)]}
+           {call,?IMPL,put,[Db,gen_obj(S),ulist(gen_db_write_options())]},
+           {call,?IMPL,delete,[Db,gen_key(S),ulist(gen_db_write_options())]},
+           {call,?IMPL,get,[Db,gen_key(S),ulist(gen_db_read_options())]},
+           {call,?IMPL,first,[Db,ulist(gen_db_read_options())]},
+           {call,?IMPL,last,[Db,ulist(gen_db_read_options())]},
+           {call,?IMPL,next,[Db,gen_key(S),ulist(gen_db_read_options())]},
+           {call,?IMPL,prev,[Db,gen_key(S),ulist(gen_db_read_options())]}
           ]).
 
-parallel_command_gen(_Mod,#state{db=undefined}) ->
-    {call,?IMPL,open,[]};
+parallel_command_gen(_Mod,#state{db=undefined, exists=false}) ->
+    {call,?IMPL,open,[ulist(gen_db_options())]};
 parallel_command_gen(_Mod,#state{db=Db}=S) ->
-    oneof([{call,?IMPL,put,[Db,gen_obj(S)]},
-           {call,?IMPL,delete,[Db,gen_key(S)]},
-           {call,?IMPL,get,[Db,gen_key(S)]}
+    oneof([{call,?IMPL,put,[Db,gen_obj(S),ulist(gen_db_write_options())]},
+           {call,?IMPL,delete,[Db,gen_key(S),ulist(gen_db_write_options())]},
+           {call,?IMPL,get,[Db,gen_key(S),ulist(gen_db_read_options())]}
           ]).
 
 -spec initial_state() -> #state{}.
@@ -100,76 +101,76 @@ state_is_sane(_S) ->
     true.
 
 -spec next_state(#state{}, term(), tuple()) -> #state{}.
-next_state(#state{db=undefined, exists=false}=S, V, {call,_,open,[]}) ->
-    S#state{db=V, exists=true};
-next_state(#state{db=undefined, exists=true}=S, V, {call,_,reopen,[]}) ->
-    S#state{db=V, exists=true};
-next_state(#state{db=undefined, exists=true}=S, V, {call,_,destroy,[]}) ->
-    S#state{db=V, exists=false, objs=[]};
+next_state(#state{db=undefined, exists=false}=S, V, {call,_,open,[Opts]}) ->
+    S#state{options=Opts, db=V, exists=true};
+next_state(#state{db=undefined, exists=true}=S, V, {call,_,reopen,[Opts]}) ->
+    S#state{options=Opts, db=V, exists=true};
+next_state(#state{db=undefined, exists=true}=S, V, {call,_,destroy,[Opts]}) ->
+    S#state{options=Opts, db=V, exists=false, objs=[]};
 next_state(#state{db=Db}=S, _V, {call,_,close,[Db]}) when Db /= undefined ->
     S#state{db=undefined};
-next_state(S, _V, {call,_,put,[_Db,Obj]}) ->
+next_state(S, _V, {call,_,put,[_Db,Obj,_Opts]}) ->
     insert_obj(S, Obj);
-next_state(S, _V, {call,_,delete,[_Db,Key]}) ->
+next_state(S, _V, {call,_,delete,[_Db,Key,_Opts]}) ->
     delete_obj(S, Key);
 next_state(S, _V, {call,_,_,_}) ->
     S.
 
 -spec precondition(#state{}, tuple()) -> boolean().
-precondition(#state{exists=true}, {call,_,open,[]}) ->
+precondition(#state{exists=true}, {call,_,open,[__Opts]}) ->
     false;
-precondition(#state{exists=false}, {call,_,reopen,[]}) ->
+precondition(#state{exists=false}, {call,_,reopen,[__Opts]}) ->
     false;
-precondition(#state{exists=false}, {call,_,destroy,[]}) ->
+precondition(#state{exists=false}, {call,_,destroy,[__Opts]}) ->
     false;
-precondition(#state{exists=false}, {call,_,repair,[]}) ->
+precondition(#state{exists=false}, {call,_,repair,[__Opts]}) ->
     false;
-precondition(#state{db=Db}, {call,_,open,[]}) when Db /= undefined->
+precondition(#state{db=Db}, {call,_,open,[__Opts]}) when Db /= undefined->
     false;
-precondition(#state{db=Db}, {call,_,reopen,[]}) when Db /= undefined->
+precondition(#state{db=Db}, {call,_,reopen,[__Opts]}) when Db /= undefined->
     false;
-precondition(#state{db=Db}, {call,_,destroy,[]}) when Db /= undefined->
+precondition(#state{db=Db}, {call,_,destroy,[__Opts]}) when Db /= undefined->
     false;
-precondition(#state{db=Db}, {call,_,repair,[]}) when Db /= undefined->
+precondition(#state{db=Db}, {call,_,repair,[__Opts]}) when Db /= undefined->
     false;
 precondition(_S, {call,_,_,_}) ->
     true.
 
 -spec postcondition(#state{}, tuple(), term()) -> boolean().
-postcondition(#state{exists=false}, {call,_,open,[]}, Res) ->
+postcondition(#state{exists=false}, {call,_,open,[__Opts]}, Res) ->
     ?IMPL:is_db(Res);
-postcondition(#state{exists=true}, {call,_,reopen,[]}, Res) ->
+postcondition(#state{exists=true}, {call,_,reopen,[_Opts]}, Res) ->
     ?IMPL:is_db(Res);
-postcondition(#state{exists=true}, {call,_,destroy,[]}, Res) ->
+postcondition(#state{exists=true}, {call,_,destroy,[_Opts]}, Res) ->
     Res;
-postcondition(#state{exists=true}, {call,_,repair,[]}, Res) ->
+postcondition(#state{exists=true}, {call,_,repair,[_Opts]}, Res) ->
     Res;
 postcondition(#state{db=Db}, {call,_,close,[_Db]}, Res) ->
     Res andalso Db /= undefined;
-postcondition(_S, {call,_,put,[_Db,_]}, Res) ->
+postcondition(_S, {call,_,put,[_Db,_,_Opts]}, Res) ->
     Res;
-postcondition(_S, {call,_,delete,[_Db,_]}, Res) ->
+postcondition(_S, {call,_,delete,[_Db,_,_Opts]}, Res) ->
     Res;
-postcondition(S, {call,_,get,[_Db,Key]}, Res) ->
+postcondition(S, {call,_,get,[_Db,Key,_Opts]}, Res) ->
     Res =:= get_val(S, Key);
-postcondition(#state{objs=[]}, {call,_,first,[_Db]}, Res) ->
+postcondition(#state{objs=[]}, {call,_,first,[_Db,_Opts]}, Res) ->
     Res;
-postcondition(S, {call,_,first,[_Db]}, Res) ->
+postcondition(S, {call,_,first,[_Db,_Opts]}, Res) ->
     #obj{key=K} = hd(sort_objs(S)),
     Res =:= K;
-postcondition(#state{objs=[]}, {call,_,last,[_Db]}, Res) ->
+postcondition(#state{objs=[]}, {call,_,last,[_Db,_Opts]}, Res) ->
     Res;
-postcondition(S, {call,_,last,[_Db]}, Res) ->
+postcondition(S, {call,_,last,[_Db,_Opts]}, Res) ->
     #obj{key=K} = hd(lists:reverse(sort_objs(S))),
     Res =:= K;
-postcondition(S, {call,_,next,[_Db,Key]}, Res) ->
+postcondition(S, {call,_,next,[_Db,Key,_Opts]}, Res) ->
     case lists:dropwhile(fun(#obj{key=X}) -> X =< Key end, sort_objs(S)) of
         [] ->
             Res;
         [#obj{key=K}|_] ->
             Res =:= K
     end;
-postcondition(S, {call,_,prev,[_Db,Key]}, Res) ->
+postcondition(S, {call,_,prev,[_Db,Key,_Opts]}, Res) ->
     case lists:dropwhile(fun(#obj{key=X}) -> X >= Key end, rsort_objs(S)) of
         [] ->
             Res;
@@ -208,6 +209,21 @@ filter_reply(_) ->
 %%%----------------------------------------------------------------------
 %%% Internal - Generators
 %%%----------------------------------------------------------------------
+
+gen_db_options() ->
+    oneof([paranoid_checks, {paranoid_checks,gen_boolean()}, {write_buffer_size,gen_pos_integer()}, {max_open_files,gen_pos_integer()}, {block_cache_size,gen_pos_integer()}, {block_size,gen_pos_integer()}, {block_restart_interval,gen_pos_integer()}, compression, {compression, oneof([no, snappy])}, {filter_policy, oneof([no, {bloom,gen_pos_integer()}])}]).
+
+gen_db_read_options() ->
+    oneof([verify_checksums, {verify_checksums,gen_boolean()}, fill_cache, {fill_cache,gen_boolean()}]).
+
+gen_db_write_options() ->
+    oneof([sync, {sync,gen_boolean()}]).
+
+gen_boolean() ->
+    oneof([true, false]).
+
+gen_pos_integer() ->
+    ?LET(N, nat(), N+1).
 
 gen_bytes() ->
     ?LET(B, list(choose(0,127)), list_to_binary(B)).
@@ -280,7 +296,6 @@ keymember(X, S) ->
 
 teardown() ->
     ?IMPL:teardown().
-
 
 -endif. %% -ifdef(EQC).
 -endif. %% -ifdef(QC).

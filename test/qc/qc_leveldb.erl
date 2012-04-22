@@ -55,7 +55,6 @@ setup() ->
                     %% valgrind , {exec_command_line, fun(Exe) -> {os:find_executable("valgrind"), [Exe]} end}
                    ],
     eqc_c:start(leveldb, Options ++ DebugOptions).
-    %% eqc_c:start(leveldb, Options).
 
 teardown() ->
     os:cmd("rm -rf " ++ ?MODULE_STRING).
@@ -66,37 +65,203 @@ is_db(_) ->
     false.
 
 open() ->
+    open([]).
+
+open(Opts) ->
     Options = leveldb:leveldb_options_create(),
     try
+        set_openoptions(Opts, Options),
         leveldb:leveldb_options_set_create_if_missing(Options, 1),
         leveldb:leveldb_options_set_error_if_exists(Options, 1),
-        open(Options)
+        open1(Options)
     after
         leveldb:leveldb_options_destroy(Options)
-    end.
-
-open(Options) ->
-    ErrPtr = errptr(),
-    try
-        case leveldb:leveldb_open(Options, ?MODULE_STRING, ErrPtr) of
-            {ptr, {struct, leveldb_t}, 0} ->
-                read_errptr(ErrPtr);
-            {ptr, {struct, leveldb_t}, _}=Db ->
-                Db
-        end
-    after
-        free_ptr(ErrPtr)
     end.
 
 reopen() ->
+    reopen([]).
+
+reopen(Opts) ->
     Options = leveldb:leveldb_options_create(),
     try
-        reopen(Options)
+        set_openoptions(Opts, Options),
+        open1(Options)
     after
         leveldb:leveldb_options_destroy(Options)
     end.
 
-reopen(Options) ->
+destroy() ->
+    destroy([]).
+
+destroy(Opts) ->
+    Options = leveldb:leveldb_options_create(),
+    try
+        set_openoptions(Opts, Options),
+        destroy1(Options)
+    after
+        leveldb:leveldb_options_destroy(Options)
+    end.
+
+repair() ->
+    repair([]).
+
+repair(Opts) ->
+    Options = leveldb:leveldb_options_create(),
+    try
+        set_openoptions(Opts, Options),
+        repair1(Options)
+    after
+        leveldb:leveldb_options_repair(Options)
+    end.
+
+close(Db) ->
+    ok == leveldb:leveldb_close(Db).
+
+put(Db, Obj) ->
+    put(Db, Obj, []).
+
+put(Db, Obj, Opts) ->
+    Options = leveldb:leveldb_writeoptions_create(),
+    try
+        set_writeoptions(Opts, Options),
+        put1(Db, Obj, Options)
+    after
+        leveldb:leveldb_writeoptions_destroy(Options)
+    end.
+
+delete(Db, Key) ->
+    delete(Db, Key, []).
+
+delete(Db, Key, Opts) ->
+    Options = leveldb:leveldb_writeoptions_create(),
+    try
+        set_writeoptions(Opts, Options),
+        delete1(Db, Key, Options)
+    after
+        leveldb:leveldb_writeoptions_destroy(Options)
+    end.
+
+get(Db, Key) ->
+    get(Db, Key, []).
+
+get(Db, Key, Opts) ->
+    Options = leveldb:leveldb_readoptions_create(),
+    try
+        set_readoptions(Opts, Options),
+        get1(Db, Key, Options)
+    after
+        leveldb:leveldb_readoptions_destroy(Options)
+    end.
+
+first(Db) ->
+    first(Db, []).
+
+first(Db, Opts) ->
+    Options = leveldb:leveldb_readoptions_create(),
+    try
+        set_readoptions(Opts, Options),
+        first1(Db, Options)
+    after
+        leveldb:leveldb_readoptions_destroy(Options)
+    end.
+
+last(Db) ->
+    last(Db, []).
+
+last(Db, Opts) ->
+    Options = leveldb:leveldb_readoptions_create(),
+    try
+        set_readoptions(Opts, Options),
+        last1(Db, Options)
+    after
+        leveldb:leveldb_readoptions_destroy(Options)
+    end.
+
+next(Db, Key) ->
+    next(Db, Key, []).
+
+next(Db, Key, Opts) ->
+    Options = leveldb:leveldb_readoptions_create(),
+    try
+        set_readoptions(Opts, Options),
+        next1(Db, Key, Options)
+    after
+        leveldb:leveldb_readoptions_destroy(Options)
+    end.
+
+prev(Db, Key) ->
+    prev(Db, Key, []).
+
+prev(Db, Key, Opts) ->
+    Options = leveldb:leveldb_readoptions_create(),
+    try
+        set_readoptions(Opts, Options),
+        prev1(Db, Key, Options)
+    after
+        leveldb:leveldb_readoptions_destroy(Options)
+    end.
+
+%%%===================================================================
+%%% Internal
+%%%===================================================================
+
+set_openoptions(Opts, Options) ->
+    Fun = fun(paranoid_checks) ->
+                  leveldb:leveldb_options_set_paranoid_checks(Options, 1);
+             ({paranoid_checks, true}) ->
+                  leveldb:leveldb_options_set_paranoid_checks(Options, 1);
+             ({paranoid_checks, false}) ->
+                  leveldb:leveldb_options_set_paranoid_checks(Options, 0);
+             ({write_buffer_size, Size}) ->
+                  leveldb:leveldb_options_set_write_buffer_size(Options, Size);
+             ({max_open_files, Files}) ->
+                  leveldb:leveldb_options_set_max_open_files(Options, Files);
+             ({block_cache_size, Size}) ->
+                  leveldb:leveldb_options_set_cache(Options, leveldb:leveldb_cache_create_lru(Size));
+             ({block_size, Size}) ->
+                  leveldb:leveldb_options_set_block_size(Options, Size);
+             ({block_restart_interval, Interval}) ->
+                  leveldb:leveldb_options_set_block_restart_interval(Options, Interval);
+             (compression) ->
+                  leveldb:leveldb_options_set_compression(Options, 1);
+             ({compression, no}) ->
+                  leveldb:leveldb_options_set_compression(Options, 0);
+             ({compression, snappy}) ->
+                  leveldb:leveldb_options_set_compression(Options, 1);
+             ({filter_policy, no}) ->
+                  leveldb:leveldb_options_set_filter_policy(Options, {ptr, {struct, leveldb_filterpolicy_t}, 0});
+             ({filter_policy, {bloom, Bits}}) ->
+                  leveldb:leveldb_options_set_filter_policy(Options, leveldb:leveldb_filterpolicy_create_bloom(Bits))
+          end,
+    lists:foreach(Fun, Opts).
+
+set_writeoptions(Opts, Options) ->
+    Fun = fun(sync) ->
+                  leveldb:leveldb_writeoptions_set_sync(Options, 1);
+             ({sync, true}) ->
+                     leveldb:leveldb_writeoptions_set_sync(Options, 1);
+             ({sync, false}) ->
+                  leveldb:leveldb_writeoptions_set_sync(Options, 0)
+          end,
+    lists:foreach(Fun, Opts).
+
+set_readoptions(Opts, Options) ->
+    Fun = fun(verify_checksums) ->
+                  leveldb:leveldb_readoptions_set_verify_checksums(Options, 1);
+             ({verify_checksums, true}) ->
+                  leveldb:leveldb_readoptions_set_verify_checksums(Options, 1);
+             ({verify_checksums, false}) ->
+                  leveldb:leveldb_readoptions_set_verify_checksums(Options, 0);
+             (fill_cache) ->
+                  leveldb:leveldb_readoptions_set_fill_cache(Options, 1);
+             ({fill_cache, true}) ->
+                  leveldb:leveldb_readoptions_set_fill_cache(Options, 1);
+             ({fill_cache, false}) ->
+                  leveldb:leveldb_readoptions_set_fill_cache(Options, 0)
+          end,
+    lists:foreach(Fun, Opts).
+
+open1(Options) ->
     ErrPtr = errptr(),
     try
         case leveldb:leveldb_open(Options, ?MODULE_STRING, ErrPtr) of
@@ -109,15 +274,7 @@ reopen(Options) ->
         free_ptr(ErrPtr)
     end.
 
-destroy() ->
-    Options = leveldb:leveldb_options_create(),
-    try
-        destroy(Options)
-    after
-        leveldb:leveldb_options_destroy(Options)
-    end.
-
-destroy(Options) ->
+destroy1(Options) ->
     ErrPtr = errptr(),
     try
         leveldb:leveldb_destroy(Options, ?MODULE_STRING, ErrPtr),
@@ -126,15 +283,7 @@ destroy(Options) ->
         free_ptr(ErrPtr)
     end.
 
-repair() ->
-    Options = leveldb:leveldb_options_create(),
-    try
-        repair(Options)
-    after
-        leveldb:leveldb_options_repair(Options)
-    end.
-
-repair(Options) ->
+repair1(Options) ->
     ErrPtr = errptr(),
     try
         leveldb:leveldb_repair(Options, ?MODULE_STRING, ErrPtr),
@@ -143,18 +292,7 @@ repair(Options) ->
         free_ptr(ErrPtr)
     end.
 
-close(Db) ->
-    ok == leveldb:leveldb_close(Db).
-
-put(Db, Obj) ->
-    Options = leveldb:leveldb_writeoptions_create(),
-    try
-        put(Db, Options, Obj)
-    after
-        leveldb:leveldb_writeoptions_destroy(Options)
-    end.
-
-put(Db, Options, {obj,Key,Val}) ->
+put1(Db, {obj,Key,Val}, Options) ->
     ErrPtr = errptr(),
     try
         leveldb:leveldb_put(Db, Options, binary_to_list(Key), byte_size(Key), binary_to_list(Val), byte_size(Val), ErrPtr),
@@ -163,15 +301,7 @@ put(Db, Options, {obj,Key,Val}) ->
         free_ptr(ErrPtr)
     end.
 
-delete(Db, Key) ->
-    Options = leveldb:leveldb_writeoptions_create(),
-    try
-        delete(Db, Options, Key)
-    after
-        leveldb:leveldb_writeoptions_destroy(Options)
-    end.
-
-delete(Db, Options, Key) ->
+delete1(Db, Key, Options) ->
     ErrPtr = errptr(),
     try
         leveldb:leveldb_delete(Db, Options, binary_to_list(Key), byte_size(Key), ErrPtr),
@@ -180,15 +310,7 @@ delete(Db, Options, Key) ->
         free_ptr(ErrPtr)
     end.
 
-get(Db, Key) ->
-    Options = leveldb:leveldb_readoptions_create(),
-    try
-        get(Db, Options, Key)
-    after
-        leveldb:leveldb_readoptions_destroy(Options)
-    end.
-
-get(Db, Options, Key) ->
+get1(Db, Key, Options) ->
     ErrPtr = errptr(),
     LenPtr = lenptr(),
     try
@@ -203,15 +325,7 @@ get(Db, Options, Key) ->
         free_ptr(LenPtr)
     end.
 
-first(Db) ->
-    Options = leveldb:leveldb_readoptions_create(),
-    try
-        first(Db, Options)
-    after
-        leveldb:leveldb_readoptions_destroy(Options)
-    end.
-
-first(Db, Options) ->
+first1(Db, Options) ->
     Iter = leveldb:leveldb_create_iterator(Db, Options),
     LenPtr = lenptr(),
     try
@@ -228,15 +342,7 @@ first(Db, Options) ->
         free_ptr(LenPtr)
     end.
 
-last(Db) ->
-    Options = leveldb:leveldb_readoptions_create(),
-    try
-        last(Db, Options)
-    after
-        leveldb:leveldb_readoptions_destroy(Options)
-    end.
-
-last(Db, Options) ->
+last1(Db, Options) ->
     Iter = leveldb:leveldb_create_iterator(Db, Options),
     LenPtr = lenptr(),
     try
@@ -253,15 +359,7 @@ last(Db, Options) ->
         free_ptr(LenPtr)
     end.
 
-next(Db, Key) ->
-    Options = leveldb:leveldb_readoptions_create(),
-    try
-        next(Db, Key, Options)
-    after
-        leveldb:leveldb_readoptions_destroy(Options)
-    end.
-
-next(Db, Key, Options) ->
+next1(Db, Key, Options) ->
     Iter = leveldb:leveldb_create_iterator(Db, Options),
     LenPtr = lenptr(),
     LenPtr1 = lenptr(),
@@ -292,15 +390,7 @@ next(Db, Key, Options) ->
         free_ptr(LenPtr1)
     end.
 
-prev(Db, Key) ->
-    Options = leveldb:leveldb_readoptions_create(),
-    try
-        prev(Db, Key, Options)
-    after
-        leveldb:leveldb_readoptions_destroy(Options)
-    end.
-
-prev(Db, Key, Options) ->
+prev1(Db, Key, Options) ->
     Iter = leveldb:leveldb_create_iterator(Db, Options),
     LenPtr = lenptr(),
     LenPtr1 = lenptr(),
@@ -308,7 +398,7 @@ prev(Db, Key, Options) ->
         leveldb:leveldb_iter_seek(Iter, binary_to_list(Key), byte_size(Key)),
         case leveldb:leveldb_iter_valid(Iter) of
             0 ->
-                last(Db, Options);
+                last1(Db, Options);
             1 ->
                 leveldb:leveldb_iter_prev(Iter),
                 case leveldb:leveldb_iter_valid(Iter) of
@@ -324,10 +414,6 @@ prev(Db, Key, Options) ->
         free_ptr(LenPtr),
         free_ptr(LenPtr1)
     end.
-
-%%%===================================================================
-%%% Internal
-%%%===================================================================
 
 errptr() ->
     eqc_c:alloc({ptr, char}, [0]).

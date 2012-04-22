@@ -279,6 +279,9 @@ drv_stop(ErlDrvData handle)
     // db_block_cache
     delete d->impl.db_block_cache;
 
+    // db_filter_policy
+    delete d->impl.db_filter_policy;
+
     // name
     delete d->impl.name;
 

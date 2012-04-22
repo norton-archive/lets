@@ -88,6 +88,9 @@ lets_nif_resource_dtor(ErlNifEnv* env, void* arg)
     // db_block_cache
     delete h->impl.db_block_cache;
 
+    // db_filter_policy
+    delete h->impl.db_filter_policy;
+
     // name
     delete h->impl.name;
 }

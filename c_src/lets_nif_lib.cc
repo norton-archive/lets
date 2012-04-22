@@ -49,11 +49,13 @@ ERL_NIF_TERM lets_atom_write_buffer_size = 0;
 ERL_NIF_TERM lets_atom_max_open_files = 0;
 ERL_NIF_TERM lets_atom_block_cache_size = 0;
 ERL_NIF_TERM lets_atom_block_size = 0;
+ERL_NIF_TERM lets_atom_block_restart_interval = 0;
 ERL_NIF_TERM lets_atom_compression = 0;
 ERL_NIF_TERM lets_atom_no = 0;
 ERL_NIF_TERM lets_atom_snappy = 0;
+ERL_NIF_TERM lets_atom_filter_policy = 0;
+ERL_NIF_TERM lets_atom_bloom = 0;
 ERL_NIF_TERM lets_atom_async = 0;
-ERL_NIF_TERM lets_atom_block_restart_interval = 0;
 ERL_NIF_TERM lets_atom_verify_checksums = 0;
 ERL_NIF_TERM lets_atom_fill_cache = 0;
 ERL_NIF_TERM lets_atom_sync = 0;
@@ -76,11 +78,13 @@ lets_nif_lib_init(ErlNifEnv* env)
     lets_atom_max_open_files = enif_make_atom(env, "max_open_files");
     lets_atom_block_cache_size = enif_make_atom(env, "block_cache_size");
     lets_atom_block_size = enif_make_atom(env, "block_size");
+    lets_atom_block_restart_interval = enif_make_atom(env, "block_restart_interval");
     lets_atom_compression = enif_make_atom(env, "compression");
     lets_atom_no = enif_make_atom(env, "no");
     lets_atom_snappy = enif_make_atom(env, "snappy");
+    lets_atom_filter_policy = enif_make_atom(env, "filter_policy");
+    lets_atom_bloom = enif_make_atom(env, "bloom");
     lets_atom_async = enif_make_atom(env, "async");
-    lets_atom_block_restart_interval = enif_make_atom(env, "block_restart_interval");
     lets_atom_verify_checksums = enif_make_atom(env, "verify_checksums");
     lets_atom_fill_cache = enif_make_atom(env, "fill_cache");
     lets_atom_sync = enif_make_atom(env, "sync");
@@ -196,6 +200,7 @@ lets_parse_options(ErlNifEnv* env, lets_impl& impl,
             } else if (enif_is_identical(tuple[0], lets_atom_block_cache_size) &&
                        enif_get_uint(env, tuple[1], &val)) {
                 impl.db_block_cache_size = val;
+                delete impl.db_block_cache;
                 impl.db_block_cache = leveldb::NewLRUCache(impl.db_block_cache_size);
                 impl.db_options.block_cache = impl.db_block_cache;
                 if (!impl.db_options.block_cache) {
@@ -212,6 +217,25 @@ lets_parse_options(ErlNifEnv* env, lets_impl& impl,
                     impl.db_options.compression = leveldb::kNoCompression;
                 } else if (enif_is_identical(tuple[1], lets_atom_snappy)) {
                     impl.db_options.compression = leveldb::kSnappyCompression;
+                } else {
+                    return FALSE;
+                }
+            } else if (enif_is_identical(tuple[0], lets_atom_filter_policy)) {
+                if (enif_is_identical(tuple[1], lets_atom_no)) {
+                    delete impl.db_filter_policy;
+                    impl.db_filter_policy = NULL;
+                    impl.db_options.filter_policy = NULL;
+                } else if (enif_get_tuple(env, tuple[1], &arity, &tuple) && arity == 2) {
+                    if (enif_is_identical(tuple[0], lets_atom_bloom) &&
+                        enif_get_uint(env, tuple[1], &val)) {
+                        impl.db_filter_policy_bloom_bits_per_key = val;
+                        delete impl.db_filter_policy;
+                        impl.db_filter_policy = leveldb::NewBloomFilterPolicy(impl.db_filter_policy_bloom_bits_per_key);
+                        impl.db_options.filter_policy = impl.db_filter_policy;
+                        if (!impl.db_options.filter_policy) {
+                            return FALSE;
+                        }
+                    }
                 } else {
                     return FALSE;
                 }

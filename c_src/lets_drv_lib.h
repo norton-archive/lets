@@ -29,6 +29,7 @@
 #include "leveldb/cache.h"
 #include "leveldb/slice.h"
 #include "leveldb/write_batch.h"
+#include "leveldb/filter_policy.h"
 
 #include "lets_drv.h"
 
@@ -70,6 +71,8 @@ extern "C" {
         leveldb::WriteOptions db_write_options;
         size_t db_block_cache_size;
         leveldb::Cache* db_block_cache;
+        int db_filter_policy_bloom_bits_per_key;
+        const leveldb::FilterPolicy* db_filter_policy;
         leveldb::DB* db;
         ErlDrvUInt64 db_memory;
         ErlDrvUInt64 db_size;
