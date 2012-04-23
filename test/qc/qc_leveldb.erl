@@ -223,11 +223,23 @@ set_openoptions(Opts, Options) ->
              ({block_restart_interval, Interval}) ->
                   leveldb:leveldb_options_set_block_restart_interval(Options, Interval);
              (compression) ->
-                  leveldb:leveldb_options_set_compression(Options, 1);
+                  %% Workaround issue with LevelDB's API usage of an "anonymous" enum
+                  %%C = leveldb:leveldb_snappy_compression,
+                  C = 1,
+                  C = eqc_c_interface:eqc_detag_enum('__eqc_c_anonymous', leveldb_snappy_compression),
+                  leveldb:leveldb_options_set_compression(Options, C);
              ({compression, no}) ->
-                  leveldb:leveldb_options_set_compression(Options, 0);
+                  %% Workaround issue with LevelDB's API usage of an "anonymous" enum
+                  %%C = leveldb:leveldb_no_compression,
+                  C = 0,
+                  C = eqc_c_interface:eqc_detag_enum('__eqc_c_anonymous', leveldb_no_compression),
+                  leveldb:leveldb_options_set_compression(Options, C);
              ({compression, snappy}) ->
-                  leveldb:leveldb_options_set_compression(Options, 1);
+                  %% Workaround issue with LevelDB's API usage of an "anonymous" enum
+                  %%C = leveldb:leveldb_snappy_compression,
+                  C = 1,
+                  C = eqc_c_interface:eqc_detag_enum('__eqc_c_anonymous', leveldb_snappy_compression),
+                  leveldb:leveldb_options_set_compression(Options, C);
              ({filter_policy, no}) ->
                   leveldb:leveldb_options_set_filter_policy(Options, {ptr, {struct, leveldb_filterpolicy_t}, 0});
              ({filter_policy, {bloom, Bits}}) ->
