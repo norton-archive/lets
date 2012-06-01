@@ -91,6 +91,7 @@ case "$1" in
                 | tar xf -
             (cd leveldb-$LEVELDB_VSN && \
                 echo "echo \"PLATFORM_CFLAGS+=-fPIC -I$BASEDIR/snappy/include\" >> build_config.mk" >> build_detect_platform &&
+                echo "echo \"PLATFORM_CXXFLAGS+=-fPIC -I$BASEDIR/snappy/include\" >> build_config.mk" >> build_detect_platform &&
                 echo "echo \"PLATFORM_LDFLAGS+=-L $BASEDIR/snappy/lib -lsnappy\" >> build_config.mk" >> build_detect_platform &&
                 make SNAPPY=1 && \
                 mkdir -p $BASEDIR/leveldb/include/leveldb && \
