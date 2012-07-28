@@ -68,7 +68,8 @@ case "$1" in
             (cd $REBAR_DEPS_DIR/snappy && git archive --format=tar --prefix=snappy-$SNAPPY_VSN/ $SNAPPY_VSN) \
                 | tar xf -
             (cd snappy-$SNAPPY_VSN && \
-                sed -ibak '/^AC_ARG_WITH.*$/, /^fi$/d' configure.ac
+                sed -ibak1 '/^AC_ARG_WITH.*$/, /^fi$/d' configure.ac && \
+                perl -ibak2 -pe 's/LT_INIT/AM_PROG_AR\nLT_INIT/' configure.ac
             )
             (cd snappy-$SNAPPY_VSN && \
                 rm -rf autom4te.cache && \
