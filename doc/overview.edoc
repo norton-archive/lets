@@ -199,7 +199,7 @@ $ make dialyze
 +
 CAUTION: If you manually run dialyzer with the "-r" option, execute
 "make clean compile" first to avoid finding duplicate beam files
-underneath rebar\'s .eunit directory.  Check Makefile for further
+underneath rebar\'s .test directory.  Check Makefile for further
 information.
 
    3. Dialyze without specs
@@ -230,7 +230,7 @@ $ make eqc-compile
 3. Run 5,000 QuickCheck tests
 +
 ------
-$ cd working-directory-name/lib/lets/.eunit
+$ cd working-directory-name/lib/lets/.test
 $ erl -smp +A 5 -pz ../../sext/ebin -pz ../../qc/ebin
 
 1> qc_statem_lets:qc_run(5000).
@@ -290,7 +290,7 @@ $ make proper-compile
 3. Run 5,000 PropEr tests
 +
 ------
-$ cd working-directory-name/lib/lets/.eunit
+$ cd working-directory-name/lib/lets/.test
 $ erl -smp +A 5 -pz ../../sext/ebin -pz ../../qc/ebin
 
 1> qc_statem_lets:qc_run(5000).

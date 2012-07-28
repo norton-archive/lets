@@ -1,5 +1,5 @@
 *.o
-.eunit/
+.test/
 c_src/perftools-*/
 c_src/perftools/
 c_src/snappy-*/
