@@ -25,6 +25,14 @@
 -ifdef(QC).
 -ifdef(EQC).
 
+%% API
+-export([qc_run/1, qc_run/2]).
+-export([qc_sample/1]).
+-export([qc_prop/1]).
+-export([qc_counterexample/2]).
+-export([qc_counterexample_read/2]).
+-export([qc_counterexample_write/2]).
+
 %% qc_statem Callbacks
 -behaviour(qc_statem).
 -export([command_gen/2]).
@@ -33,7 +41,7 @@
 
 %% @NOTE For boilerplate exports, see "qc_statem.hrl"
 -include_lib("eqc/include/eqc_c.hrl").
--include_lib("qc/include/qc_statem.hrl").
+-include("qc_statem.hrl").
 
 
 %%%----------------------------------------------------------------------
@@ -53,6 +61,32 @@
           db=undefined   :: undefined | term(),
           objs=[]        :: [obj()]
          }).
+
+
+%%%----------------------------------------------------------------------
+%%% API
+%%%----------------------------------------------------------------------
+
+qc_run(NumTests) ->
+    qc_run(NumTests, []).
+
+qc_run(NumTests, Options) ->
+    qc_statem:qc_run(?MODULE, NumTests, Options).
+
+qc_sample(Options) ->
+    qc_statem:qc_sample(?MODULE, Options).
+
+qc_prop(Options) ->
+    qc_statem:qc_prop(?MODULE, Options).
+
+qc_counterexample(Options, CounterExample) ->
+    qc_statem:qc_counterexample(?MODULE, Options, CounterExample).
+
+qc_counterexample_read(Options, FileName) ->
+    qc_statem:qc_counterexample_read(?MODULE, Options, FileName).
+
+qc_counterexample_write(FileName, CounterExample) ->
+    qc_statem:qc_counterexample_write(FileName, CounterExample).
 
 
 %%%----------------------------------------------------------------------
