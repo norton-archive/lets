@@ -210,7 +210,7 @@ this recipe:</p>
 
 <pre><tt>$ mkdir working-directory-name
 $ cd working-directory-name
-$ git clone git://github.com/norton/lets.git lets
+$ git clone https://github.com/norton/lets.git lets
 $ cd lets
 $ ./rebar get-deps
 $ ./rebar clean
@@ -286,7 +286,7 @@ Create working directory
 
 <pre><tt>$ mkdir working-directory-name
 $ cd working-directory-name
-$ repo init -u git://github.com/norton/manifests.git -m lets-default.xml</tt></pre>
+$ repo init -u https://github.com/norton/manifests.git -m lets-default.xml</tt></pre>
 
 
 <table><tr>
@@ -486,7 +486,7 @@ Make sure QuickCheck is in your Erlang code path.  One simple way
 </p>
 
 
-<pre><tt>true = code:add_pathz(os:getenv("HOME")++"/.erlang.d/lib/quviq/eqc-X.Y.Z/ebin").</tt></pre>
+<pre><tt>true = code:add_pathz(os:getenv("HOME")++"/.erlang.d/deps/quviq/eqc-X.Y.Z/ebin").</tt></pre>
 
 </li>
 <li>
@@ -506,7 +506,7 @@ Run 5,000 QuickCheck tests
 </p>
 
 
-<pre><tt>$ cd working-directory-name/lib/lets/.test
+<pre><tt>$ cd working-directory-name/deps/lets/.test
 $ erl -smp +A 5 -pz ../../sext/ebin -pz ../../qc/ebin
 
 1> qc_statem_lets:qc_run(5000).
@@ -566,7 +566,7 @@ Make sure PropEr is in your Erlang code path.  One simple way to
 </p>
 
 
-<pre><tt>true = code:add_pathz(os:getenv("HOME")++"/.erlang.d/lib/proper/ebin").</tt></pre>
+<pre><tt>true = code:add_pathz(os:getenv("HOME")++"/.erlang.d/deps/proper/ebin").</tt></pre>
 
 </li>
 <li>
@@ -586,7 +586,7 @@ Run 5,000 PropEr tests
 </p>
 
 
-<pre><tt>$ cd working-directory-name/lib/lets/.test
+<pre><tt>$ cd working-directory-name/deps/lets/.test
 $ erl -smp +A 5 -pz ../../sext/ebin -pz ../../qc/ebin
 
 1> qc_statem_lets:qc_run(5000).

@@ -66,7 +66,7 @@ this recipe:
 ------
 $ mkdir working-directory-name
 $ cd working-directory-name
-$ git clone git://github.com/norton/lets.git lets
+$ git clone https://github.com/norton/lets.git lets
 $ cd lets
 $ ./rebar get-deps
 $ ./rebar clean
@@ -132,7 +132,7 @@ $ chmod a+x ~/bin/repo
 ------
 $ mkdir working-directory-name
 $ cd working-directory-name
-$ repo init -u git://github.com/norton/manifests.git -m lets-default.xml
+$ repo init -u https://github.com/norton/manifests.git -m lets-default.xml
 ------
 +
 NOTE: Your "Git" identity is needed during the init step.  Please
@@ -216,7 +216,7 @@ $ make dialyze-nospec
    resource file.
 +
 ------
-true = code:add_pathz(os:getenv("HOME")++"/.erlang.d/lib/quviq/eqc-X.Y.Z/ebin").
+true = code:add_pathz(os:getenv("HOME")++"/.erlang.d/deps/quviq/eqc-X.Y.Z/ebin").
 ------
 
 2. Compile for QuickCheck
@@ -230,7 +230,7 @@ $ make eqc-compile
 3. Run 5,000 QuickCheck tests
 +
 ------
-$ cd working-directory-name/lib/lets/.test
+$ cd working-directory-name/deps/lets/.test
 $ erl -smp +A 5 -pz ../../sext/ebin -pz ../../qc/ebin
 
 1> qc_statem_lets:qc_run(5000).
@@ -276,7 +276,7 @@ TIP: For testing LevelDB directly using the C bindings, try
    resource file.
 +
 ------
-true = code:add_pathz(os:getenv("HOME")++"/.erlang.d/lib/proper/ebin").
+true = code:add_pathz(os:getenv("HOME")++"/.erlang.d/deps/proper/ebin").
 ------
 
 2. Compile for PropEr
@@ -290,7 +290,7 @@ $ make proper-compile
 3. Run 5,000 PropEr tests
 +
 ------
-$ cd working-directory-name/lib/lets/.test
+$ cd working-directory-name/deps/lets/.test
 $ erl -smp +A 5 -pz ../../sext/ebin -pz ../../qc/ebin
 
 1> qc_statem_lets:qc_run(5000).

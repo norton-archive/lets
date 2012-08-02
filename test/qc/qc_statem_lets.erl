@@ -45,7 +45,7 @@
 -export([match31/3, match_object31/3, select31/3, select_reverse31/3]).
 
 %% @NOTE For boilerplate exports, see "qc_statem.hrl"
--include("qc_statem.hrl").
+-include_lib("qc/include/qc_statem.hrl").
 
 
 %%%----------------------------------------------------------------------
