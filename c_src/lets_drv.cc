@@ -157,7 +157,7 @@ driver_send_int(DrvData* d, const int i, ErlDrvTermData caller=0)
 {
     ErlDrvTermData spec[] = {
         ERL_DRV_PORT, driver_mk_port(d->port),
-        ERL_DRV_INT, i,
+        ERL_DRV_INT, (ErlDrvTermData) i,
         ERL_DRV_TUPLE, 2,
     };
     if (!caller) {
@@ -172,7 +172,7 @@ driver_send_binary(DrvData* d, ErlDrvBinary* bin, ErlDrvTermData caller=0)
     ErlDrvTermData spec[] = {
         ERL_DRV_PORT, driver_mk_port(d->port),
         ERL_DRV_INT, LETS_BINARY,
-        ERL_DRV_BINARY, (ErlDrvTermData) bin, bin->orig_size, 0,
+        ERL_DRV_BINARY, (ErlDrvTermData) bin, (ErlDrvTermData) bin->orig_size, 0,
         ERL_DRV_TUPLE, 3,
     };
     if (!caller) {
@@ -217,10 +217,10 @@ static ErlDrvEntry drv_driver_entry = {
     NULL,
     NULL,
     NULL,
-    ERL_DRV_EXTENDED_MARKER,
-    ERL_DRV_EXTENDED_MAJOR_VERSION,
-    ERL_DRV_EXTENDED_MINOR_VERSION,
-    ERL_DRV_FLAG_USE_PORT_LOCKING,
+    (int) ERL_DRV_EXTENDED_MARKER,
+    (int) ERL_DRV_EXTENDED_MAJOR_VERSION,
+    (int) ERL_DRV_EXTENDED_MINOR_VERSION,
+    (int) ERL_DRV_FLAG_USE_PORT_LOCKING,
     NULL,
     NULL,
     NULL
