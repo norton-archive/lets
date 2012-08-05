@@ -59,7 +59,7 @@ case "$1" in
                 LIBTOOLIZE=glibtoolize
                 ($LIBTOOLIZE --version) < /dev/null > /dev/null 2>&1 || {
                     echo
-                    echo "You must have libtool (& friends) installed to compile Judy."
+                    echo "You must have libtool (& friends) installed to compile LETS."
                     echo
                     exit -1
                 }

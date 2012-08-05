@@ -126,7 +126,7 @@ serial_command_gen(_Mod,#state{tab=undefined}=S) ->
           %% @TODO ++ [{call,?IMPL,destroy,[undefined,?TAB,gen_options(destroy,S)]}]
           %% @TODO ++ [{call,?IMPL,repair,[undefined,?TAB,gen_options(repair,S)]}]
          );
-serial_command_gen(_Mod,#state{tab=Tab, type=Type, impl=Impl}=S) ->
+serial_command_gen(_Mod,#state{tab=Tab, impl=Impl}=S) ->
     %% @TODO gen_db_write_options/2
     %% @TODO gen_db_read_options/2
     %% @TODO info/1, info/2
@@ -134,7 +134,7 @@ serial_command_gen(_Mod,#state{tab=Tab, type=Type, impl=Impl}=S) ->
           ++ [{call,?IMPL,insert_new,[Tab,oneof([gen_obj(S),gen_objs(S)])]} || Impl =:= ets]
           ++ [{call,?IMPL,delete,[Tab]}]
           ++ [{call,?IMPL,delete,[Tab,gen_key(S)]}]
-          ++ [{call,?IMPL,delete_all_objects,[Tab]} || Type =:= ets]
+          ++ [{call,?IMPL,delete_all_objects,[Tab]}]
           ++ [{call,?IMPL,member,[Tab,gen_key(S)]}]
           ++ [{call,?IMPL,lookup,[Tab,gen_key(S)]}]
           ++ [{call,?IMPL,lookup_element,[Tab,gen_key(S),choose(1,record_info(size,obj))]}]
@@ -166,6 +166,7 @@ parallel_command_gen(_Mod,#state{tab=Tab, type=Type}=S) ->
     oneof([{call,?IMPL,insert,[Tab,oneof([gen_obj(S),gen_objs(S)])]}]
           ++ [{call,?IMPL,insert_new,[Tab,oneof([gen_obj(S),gen_objs(S)])]} || Type =:= ets]
           ++ [{call,?IMPL,delete,[Tab,gen_key(S)]}]
+          ++ [{call,?IMPL,delete_all_objects,[Tab]}]
           ++ [{call,?IMPL,member,[Tab,gen_key(S)]}]
           ++ [{call,?IMPL,lookup,[Tab,gen_key(S)]}]
           ++ [{call,?IMPL,lookup_element,[Tab,gen_key(S),choose(1,record_info(size,obj))]}]
@@ -237,10 +238,8 @@ next_state(#state{exists=Exists}=S, _V, {call,_,delete,[_Tab]}) ->
     S#state{tab=undefined, exists=Exists};
 next_state(S, _V, {call,_,delete,[_Tab,Key]}) ->
     S#state{objs=keydelete(Key, S)};
-next_state(#state{impl=ets}=S, _V, {call,_,delete_all_objects,[_Tab]}) ->
-    S#state{objs=[]};
 next_state(S, _V, {call,_,delete_all_objects,[_Tab]}) ->
-    S;
+    S#state{objs=[]};
 next_state(S, _V, {call,_,match_delete,[_Tab,Pattern]}) ->
     match_delete(S, Pattern);
 next_state(S, _V, {call,_,select_delete,[_Tab,Spec]}) ->
@@ -303,10 +302,8 @@ postcondition(_S, {call,_,delete,[_Tab]}, Res) ->
     Res =:= true;
 postcondition(_S, {call,_,delete,[_Tab,_Key]}, Res) ->
     Res =:= true;
-postcondition(#state{impl=ets}=_S, {call,_,delete_all_objects,[_Tab]}, Res) ->
+postcondition(_S, {call,_,delete_all_objects,[_Tab]}, Res) ->
     Res =:= true;
-postcondition(_S, {call,_,delete_all_objects,[_Tab]}, {'EXIT',{badarg,_}}) ->
-    true;
 postcondition(S, {call,_,member,[_Tab,Key]}, Res) ->
     Res =:= keymember(Key, S);
 postcondition(S, {call,_,lookup,[_Tab,Key]}, Res) ->

@@ -76,6 +76,7 @@ teardown(Name) ->
     %% @TODO make this more robust
     catch ets:delete(Name),
     catch exit(whereis(Name), kill),
+    os:cmd("find . -name '" ++ ?MODULE_STRING ++ ".*' -exec rm -rf {} \;"),
     os:cmd("rm -rf " ++ ?MODULE_STRING).
 
 is_table(Res) ->

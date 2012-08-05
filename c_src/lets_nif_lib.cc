@@ -116,14 +116,16 @@ lets_create(lets_impl& impl,
             const char op)
 {
     leveldb::Status status;
+    leveldb::DB* db;
 
     // db
     switch (op) {
     case OPEN:
-        status = leveldb::DB::Open(impl.db_options, impl.name->c_str(), &(impl.db));
+        status = leveldb::DB::Open(impl.db_options, impl.name->c_str(), &db);
         if (!status.ok()) {
             return FALSE;
         } else {
+            impl.db.reset(db);
             // alive
             impl.alive = 1;
         }
@@ -138,6 +140,54 @@ lets_create(lets_impl& impl,
         status = RepairDB(impl.name->c_str(), impl.db_options);
         if (!status.ok()) {
             return FALSE;
+        }
+        break;
+    case DELETEALL:
+        // Prototype delete all objects implementation
+        {
+            lets_impl::DBPtr impldb = impl.db;
+            if (!impl.alive) {
+                return FALSE;
+            }
+
+            size_t templen = strlen(impl.name->c_str()) + 8;
+            char temp[templen];
+
+            snprintf(temp, templen, "%s.XXXXXX", impl.name->c_str());
+            if (mkdtemp(temp) == NULL) {
+                return false;
+            }
+            if (rmdir(temp) != 0) {
+                return false;
+            }
+            if (rename(impl.name->c_str(), temp) != 0) {
+                return false;
+            }
+
+            leveldb::Options db_options = impl.db_options;
+            db_options.create_if_missing = true;
+            db_options.error_if_exists = true;
+            status = leveldb::DB::Open(db_options, impl.name->c_str(), &db);
+            if (!status.ok()) {
+                if (rename(temp, impl.name->c_str()) != 0) {
+                    // TODO - add alert since recovery is not possible
+                }
+                return false;
+            } else {
+                lets_impl::DBPtr newdb(db);
+                leveldb::Options newdb_options = impl.db_options;
+                newdb_options.create_if_missing = false;
+                newdb_options.error_if_exists = false;
+                impl.db.swap(newdb);
+                impldb = impl.db;
+
+                // @TODO cleanup asynchronously
+                newdb.reset();
+                status = DestroyDB(temp, newdb_options);
+                if (!status.ok()) {
+                    return false;
+                }
+            }
         }
         break;
     default:
