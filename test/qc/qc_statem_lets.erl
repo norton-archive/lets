@@ -34,9 +34,9 @@
 
 %% qc_statem Callbacks
 -behaviour(qc_statem).
--export([command_gen/2]).
--export([initial_state/0, state_is_sane/1, next_state/3, precondition/2, postcondition/3]).
--export([setup/1, teardown/1, teardown/2, aggregate/1]).
+-export([scenario_gen/0, command_gen/1]).
+-export([initial_state/1, state_is_sane/1, next_state/3, precondition/2, postcondition/3]).
+-export([setup/0, setup/1, teardown/2, aggregate/1]).
 
 %% DEBUG
 -compile(export_all).
@@ -113,20 +113,22 @@ qc_counterexample_write(FileName, CounterExample) ->
 %%%----------------------------------------------------------------------
 %%% qc_statem Callbacks
 %%%----------------------------------------------------------------------
+scenario_gen() ->
+    undefined.
 
-command_gen(Mod,#state{parallel=false}=S) ->
-    serial_command_gen(Mod,S);
-command_gen(Mod,#state{parallel=true}=S) ->
-    parallel_command_gen(Mod,S).
+command_gen(#state{parallel=false}=S) ->
+    serial_command_gen(S);
+command_gen(#state{parallel=true}=S) ->
+    parallel_command_gen(S).
 
-serial_command_gen(_Mod,#state{tab=undefined, type=undefined, impl=undefined}=S) ->
+serial_command_gen(#state{tab=undefined, type=undefined, impl=undefined}=S) ->
     {call,?IMPL,new,[?TAB,gen_options(new,S)]};
-serial_command_gen(_Mod,#state{tab=undefined}=S) ->
+serial_command_gen(#state{tab=undefined}=S) ->
     oneof([{call,?IMPL,new,[undefined,?TAB,gen_options(new,S)]}]
           %% @TODO ++ [{call,?IMPL,destroy,[undefined,?TAB,gen_options(destroy,S)]}]
           %% @TODO ++ [{call,?IMPL,repair,[undefined,?TAB,gen_options(repair,S)]}]
          );
-serial_command_gen(_Mod,#state{tab=Tab, impl=Impl}=S) ->
+serial_command_gen(#state{tab=Tab, impl=Impl}=S) ->
     %% @TODO gen_db_write_options/2
     %% @TODO gen_db_read_options/2
     %% @TODO info/1, info/2
@@ -158,9 +160,9 @@ serial_command_gen(_Mod,#state{tab=Tab, impl=Impl}=S) ->
           ++ [{call,?MODULE,select_reverse31,[Tab, gen_spec(S), gen_pos_integer()]}]
          ).
 
-parallel_command_gen(_Mod,#state{tab=undefined, type=undefined, impl=undefined}=S) ->
+parallel_command_gen(#state{tab=undefined, type=undefined, impl=undefined}=S) ->
     {call,?IMPL,new,[?TAB,gen_options(new,S)]};
-parallel_command_gen(_Mod,#state{tab=Tab, type=Type}=S) ->
+parallel_command_gen(#state{tab=Tab, type=Type}=S) ->
     %% @TODO gen_db_write_options/2
     %% @TODO gen_db_read_options/2
     oneof([{call,?IMPL,insert,[Tab,oneof([gen_obj(S),gen_objs(S)])]}]
@@ -176,8 +178,8 @@ parallel_command_gen(_Mod,#state{tab=Tab, type=Type}=S) ->
           ++ [{call,?IMPL,prev,[Tab,gen_key(S)]}]
          ).
 
--spec initial_state() -> #state{}.
-initial_state() ->
+-spec initial_state(term()) -> #state{}.
+initial_state(_Scenario) ->
     ?LET(Parallel,parameter(parallel,false),
          #state{parallel=Parallel}).
 
@@ -413,19 +415,19 @@ postcondition(#state{type=ordered_set}=S, {call,_,select_reverse31,[_Tab,Spec,_L
 postcondition(_S, {call,_,_,_}, _Res) ->
     false.
 
--spec setup(boolean()) -> {ok, term()}.
-setup(_Hard) ->
-    ?IMPL:teardown(?TAB),
-    {ok, unused}.
-
--spec teardown(term()) -> ok.
-teardown(unused) ->
-    ?IMPL:teardown(?TAB),
+-spec setup() -> ok.
+setup() ->
     ok.
 
+-spec setup(term()) -> {ok, term()}.
+setup(_Scenario) ->
+    ?IMPL:teardown(?TAB),
+    {ok, undefined}.
+
 -spec teardown(term(), #state{}) -> ok.
-teardown(Ref, _State) ->
-    teardown(Ref).
+teardown(_Ref, _State) ->
+    ?IMPL:teardown(?TAB),
+    ok.
 
 -spec aggregate([{integer(), term(), term(), #state{}}])
                -> [{atom(), atom(), integer() | term()}].

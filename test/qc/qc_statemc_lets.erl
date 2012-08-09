@@ -35,9 +35,12 @@
 
 %% qc_statem Callbacks
 -behaviour(qc_statem).
--export([command_gen/2]).
--export([initial_state/0, state_is_sane/1, next_state/3, precondition/2, postcondition/3]).
--export([setup/1, teardown/1, teardown/2, aggregate/1]).
+-export([scenario_gen/0, command_gen/1]).
+-export([initial_state/1, state_is_sane/1, next_state/3, precondition/2, postcondition/3]).
+-export([setup/0, setup/1, teardown/2, aggregate/1]).
+
+%% DEBUG
+-compile(export_all).
 
 %% @NOTE For boilerplate exports, see "qc_statem.hrl"
 -include_lib("eqc/include/eqc_c.hrl").
@@ -92,20 +95,22 @@ qc_counterexample_write(FileName, CounterExample) ->
 %%%----------------------------------------------------------------------
 %%% qc_statem Callbacks
 %%%----------------------------------------------------------------------
+scenario_gen() ->
+    undefined.
 
-command_gen(Mod,#state{parallel=false}=S) ->
-    serial_command_gen(Mod,S);
-command_gen(Mod,#state{parallel=true}=S) ->
-    parallel_command_gen(Mod,S).
+command_gen(#state{parallel=false}=S) ->
+    serial_command_gen(S);
+command_gen(#state{parallel=true}=S) ->
+    parallel_command_gen(S).
 
-serial_command_gen(_Mod,#state{db=undefined, exists=false}) ->
+serial_command_gen(#state{db=undefined, exists=false}) ->
     {call,?IMPL,open,[ulist(gen_db_options())]};
-serial_command_gen(_Mod,#state{db=undefined, exists=true}) ->
+serial_command_gen(#state{db=undefined, exists=true}) ->
     oneof([{call,?IMPL,reopen,[ulist(gen_db_options())]}
            %% @TODO {call,?IMPL,destroy,[ulist(gen_db_options())]}
            %% @TODO {call,?IMPL,repair[ulist(gen_db_options())]}
           ]);
-serial_command_gen(_Mod,#state{db=Db}=S) ->
+serial_command_gen(#state{db=Db}=S) ->
     oneof([{call,?IMPL,close,[Db]},
            {call,?IMPL,put,[Db,gen_obj(S),ulist(gen_db_write_options())]},
            {call,?IMPL,delete,[Db,gen_key(S),ulist(gen_db_write_options())]},
@@ -116,16 +121,16 @@ serial_command_gen(_Mod,#state{db=Db}=S) ->
            {call,?IMPL,prev,[Db,gen_key(S),ulist(gen_db_read_options())]}
           ]).
 
-parallel_command_gen(_Mod,#state{db=undefined, exists=false}) ->
+parallel_command_gen(#state{db=undefined, exists=false}) ->
     {call,?IMPL,open,[ulist(gen_db_options())]};
-parallel_command_gen(_Mod,#state{db=Db}=S) ->
+parallel_command_gen(#state{db=Db}=S) ->
     oneof([{call,?IMPL,put,[Db,gen_obj(S),ulist(gen_db_write_options())]},
            {call,?IMPL,delete,[Db,gen_key(S),ulist(gen_db_write_options())]},
            {call,?IMPL,get,[Db,gen_key(S),ulist(gen_db_read_options())]}
           ]).
 
--spec initial_state() -> #state{}.
-initial_state() ->
+-spec initial_state(term()) -> #state{}.
+initial_state(_Scenario) ->
     ?LET(Parallel,parameter(parallel,false),
          #state{parallel=Parallel}).
 
@@ -214,20 +219,19 @@ postcondition(S, {call,_,prev,[_Db,Key,_Opts]}, Res) ->
 postcondition(_S, {call,_,_,_}, _Res) ->
     false.
 
--spec setup(boolean()) -> {ok, term()}.
-setup(_Hard) ->
-    ?IMPL:setup(),
-    teardown(),
-    {ok, unused}.
-
--spec teardown(term()) -> ok.
-teardown(unused) ->
-    teardown(),
+-spec setup() -> ok.
+setup() ->
     ok.
 
+-spec setup(term()) -> {ok, term()}.
+setup(_Scenario) ->
+    ?IMPL:setup(),
+    {ok, undefined}.
+
 -spec teardown(term(), #state{}) -> ok.
-teardown(Ref, _State) ->
-    teardown(Ref).
+teardown(_Ref, _State) ->
+    ?IMPL:teardown(),
+    ok.
 
 -spec aggregate([{integer(), term(), term(), #state{}}])
                -> [{atom(), atom(), integer() | term()}].
@@ -327,9 +331,6 @@ keymember(X, S) ->
 %%%----------------------------------------------------------------------
 %%% Internal - Implementation
 %%%----------------------------------------------------------------------
-
-teardown() ->
-    ?IMPL:teardown().
 
 -endif. %% -ifdef(EQC).
 -endif. %% -ifdef(QC).
