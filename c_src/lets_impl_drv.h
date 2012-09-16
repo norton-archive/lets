@@ -36,7 +36,7 @@ extern "C" {
 #endif
 
     // @doc driver init
-    DRIVER_INIT(lib_lets_drv);
+    DRIVER_INIT(lib_lets_impl_drv);
 
     // @doc driver callbacks
     int drv_init(void);

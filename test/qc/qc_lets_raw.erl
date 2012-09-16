@@ -29,6 +29,7 @@
          teardown/1
          , is_table/1
          %% lets
+         , all/1
          , new/2
          , new/3
          , destroy/3
@@ -74,13 +75,16 @@
 
 teardown(Name) ->
     %% @TODO make this more robust
-    catch ets:delete(Name),
+    _ = [ true=lets:delete(Tab) || Tab <- lets:all() ],
     catch exit(whereis(Name), kill),
-    os:cmd("find . -name '" ++ ?MODULE_STRING ++ ".*' -exec rm -rf {} \;"),
-    os:cmd("rm -rf " ++ ?MODULE_STRING).
+    _ = os:cmd("find . -name '" ++ ?MODULE_STRING ++ ".*' -exec rm -rf {} \;"),
+    _ = os:cmd("rm -rf " ++ ?MODULE_STRING).
 
 is_table(Res) ->
-    is_record(Res, tab).
+    is_record(Res, gen_tid).
+
+all(_Tab) ->
+    catch lets:all().
 
 new(Name, Options) ->
     ok = filelib:ensure_dir(?MODULE_STRING),

@@ -29,6 +29,7 @@
          teardown/1
          , is_table/1
          %% lets
+         , all/1
          , new/2
          , new/3
          , destroy/3
@@ -83,6 +84,9 @@ teardown(Name) ->
 
 is_table(Tab) ->
     is_pid(Tab).
+
+all(Tab) ->
+    gen_server:call(Tab, all).
 
 new(Name, Options) ->
     %% @NOTE needed for foldr's and foldl's anonymous funs
@@ -226,6 +230,9 @@ init([Name, Options]) ->
 %% @doc
 %% Handling call messages
 %%--------------------------------------------------------------------
+handle_call(all, _From, State) ->
+    Reply = qc_lets_raw:all(unused),
+    {reply, Reply, State};
 handle_call(delete, _From, #state{tab=Tab}=State) ->
     Reply = qc_lets_raw:delete(Tab),
     {stop, normal, Reply, State#state{tab=undefined}};

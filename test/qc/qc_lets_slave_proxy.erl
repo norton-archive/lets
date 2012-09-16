@@ -27,6 +27,7 @@
          teardown/1
          , is_table/1
          %% lets
+         , all/1
          , new/2
          , new/3
          , destroy/3
@@ -76,6 +77,9 @@ teardown(Name) ->
 
 is_table(Tab) ->
     qc_lets_proxy:is_table(Tab).
+
+all(Tab) ->
+    qc_lets_proxy:all(Tab).
 
 new(Name, Options) ->
     call_slave(new, [Name, Options]).

@@ -225,12 +225,12 @@ setup() ->
 
 -spec setup(term()) -> {ok, term()}.
 setup(_Scenario) ->
+    _ = ?IMPL:teardown(),
     ?IMPL:setup(),
     {ok, undefined}.
 
 -spec teardown(term(), #state{}) -> ok.
 teardown(_Ref, _State) ->
-    ?IMPL:teardown(),
     ok.
 
 -spec aggregate([{integer(), term(), term(), #state{}}])

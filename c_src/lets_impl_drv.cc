@@ -20,8 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "lets_drv.h"
-#include "lets_drv_lib.h"
+#include "lets_impl_drv.h"
+#include "lets_impl_drv_lib.h"
 
 #include <stdio.h>
 
@@ -212,7 +212,7 @@ static ErlDrvEntry drv_driver_entry = {
     drv_output,
     NULL,
     NULL,
-    (char*) "lets_drv",
+    (char*) "lets_impl_drv",
     NULL,
     NULL,
     NULL,
@@ -231,7 +231,7 @@ static ErlDrvEntry drv_driver_entry = {
     NULL
 };
 
-DRIVER_INIT (lets_drv) // must match name in driver_entry
+DRIVER_INIT (lets_impl_drv) // must match name in driver_entry
 {
     return &drv_driver_entry;
 }
@@ -239,7 +239,7 @@ DRIVER_INIT (lets_drv) // must match name in driver_entry
 int
 drv_init()
 {
-    if (!lets_drv_lib_init()) {
+    if (!lets_impl_drv_lib_init()) {
         return -1;
     }
 

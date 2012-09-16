@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "lets_nif_lib.h"
+#include "lets_impl_nif_lib.h"
 
 
 #if 0
@@ -62,7 +62,7 @@ ERL_NIF_TERM lets_atom_sync = 0;
 ERL_NIF_TERM lets_atom_end_of_table = 0;
 
 bool
-lets_nif_lib_init(ErlNifEnv* env)
+lets_impl_nif_lib_init(ErlNifEnv* env)
 {
     lets_atom_true = enif_make_atom(env, "true");
     lets_atom_false = enif_make_atom(env, "false");

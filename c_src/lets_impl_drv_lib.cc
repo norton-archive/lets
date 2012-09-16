@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "lets_drv_lib.h"
+#include "lets_impl_drv_lib.h"
 
 #include <ei.h>
 
@@ -38,7 +38,7 @@ return_false(unsigned line) {
 
 
 bool
-lets_drv_lib_init()
+lets_impl_drv_lib_init()
 {
     return true;
 }

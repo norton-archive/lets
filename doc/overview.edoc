@@ -9,14 +9,8 @@ storage implementation.  LETS tries to address some bad properties of
 ETS and DETS.  ETS is limited by physical memory.  DETS is limited by
 a 2 GB file size limitation and does not implement ordered sets.  LETS
 has neither of these limitations.  Data can also be automatically
-compressed using the Snappy compression library.
-
-For testing and comparison purposes, LETS supports three
-implementations:
-
-- +drv+ C++ Driver with LevelDB backend _(default)_
-- +nif+ C++ NIF with LevelDB backend
-- +ets+ Erlang ETS backend
+compressed using the Snappy compression library.  In addition, the
+name of a LETS table can be any Erlang term.
 
 LETS is not intended to be an exact clone of ETS.  The currently
 supported ETS APIs are:
@@ -54,6 +48,13 @@ supported ETS APIs are:
 - +select_reverse/2+
 - +select_reverse/3+
 - +tab2list/1+
+
+For testing and comparison purposes, LETS supports three backend
+implementations:
+
+- +drv+ C++ Driver with LevelDB backend _(default)_
+- +nif+ C++ NIF with LevelDB backend
+- +ets+ Erlang ETS backend
 
 _This repository is experimental in nature - use at your own risk and
 please contribute if you find LETS useful._

@@ -25,7 +25,8 @@
 -include("lets.hrl").
 
 %% External exports
--export([new/2
+-export([all/0
+         , new/2
          , destroy/2
          , repair/2
          , delete/1
@@ -62,104 +63,50 @@
          , tab2list/1
         ]).
 
--export_type([tab/0]).
+%% DEBUG -compile(export_all).
 
-%%
-%% ETS exports
-%%
-%% -export([all/0
-%%          , delete/1              %% mnesia
-%%          , delete/2              %% mnesia
-%%          , delete_all_objects/1
-%%          , delete_object/2
-%%          , file2tab/1
-%%          , file2tab/2
-%%          , filter/3              %% mnesia
-%%          , first/1               %% mnesia
-%%          , foldl/3               %% mnesia
-%%          , foldr/3
-%%          , from_dets/2
-%%          , fun2ms/1
-%%          , give_away/3
-%%          , i/0
-%%          , i/1
-%%          , info/1
-%%          , info/2                %% mnesia
-%%          , init_table/2          %% mnesia
-%%          , insert/2              %% mnesia
-%%          , insert_new/2
-%%          , is_compiled_ms/1
-%%          , last/1                %% mnesia
-%%          , lookup/2              %% mnesia
-%%          , lookup_element/3      %% mnesia
-%%          , match/1
-%%          , match/2               %% mnesia
-%%          , match/3
-%%          , match_delete/2        %% mnesia
-%%          , match_object/1
-%%          , match_object/2        %% mnesia
-%%          , match_object/3
-%%          , match_spec_compile/1
-%%          , match_spec_run/2      %% mnesia
-%%          , member/2
-%%          , new/2                 %% mnesia
-%%          , next/2                %% mnesia
-%%          , prev/2                %% mnesia
-%%          , rename/2
-%%          , repair_continuation/2 %% mnesia
-%%          , safe_fixtable/2
-%%          , select/1
-%%          , select/2
-%%          , select/3
-%%          , select_count/2
-%%          , select_delete/2
-%%          , select_reverse/1
-%%          , select_reverse/2
-%%          , select_reverse/3
-%%          , setopts/2
-%%          , slot/2                %% mnesia
-%%          , tab2file/2
-%%          , tab2file/3
-%%          , tab2list/1            %% mnesia
-%%          , tabfile_info/1
-%%          , table/1
-%%          , table/2
-%%          , test_ms/2
-%%          , to_dets/2
-%%          , update_counter/3      %% mnesia
-%%          , update_element/3
-%%         ]).
-
+-export_type([lets_tab/0, lets_tid/0, name/0, key/0, object/0, match_pattern/0, match_spec/0]).
 
 %%%----------------------------------------------------------------------
 %%% Types/Specs/Records
 %%%----------------------------------------------------------------------
 
--opaque tab()         :: #tab{}.
+-type lets_tid()      :: gen_ets_ns:gen_tid().
+-type lets_tab()      :: gen_ets_ns:gen_tab().
 
 -type opts()          :: [ets_opt() | impl_opt() | db_opts() | db_read_opts() | db_write_opts()].
--type ets_opt()       :: set | ordered_set | named_table | {key_pos,pos_integer()} | public | protected | private | compressed | async.
+-type ets_opt()       :: set | ordered_set | named_table | {keypos,pos_integer()} | public | protected | private | compressed | async.
 -type impl_opt()      :: drv | nif | ets.
 
 -type db_opts()       :: {db, [{path,file:filename()} | create_if_missing | {create_if_missing,boolean()} | error_if_exists | {error_if_exists,boolean()} | paranoid_checks | {paranoid_checks,boolean()} | {write_buffer_size,pos_integer()} | {max_open_files,pos_integer()} | {block_cache_size,pos_integer()} | {block_size,pos_integer()} | {block_restart_interval,pos_integer()} | {filter_policy,no | {bloom,pos_integer()}}]}.
 -type db_read_opts()  :: {db_read, [verify_checksums | {verify_checksums,boolean()} | fill_cache | {fill_cache,boolean()}]}.
 -type db_write_opts() :: {db_write, [sync | {sync,boolean()}]}.
 
--type key()           :: binary().
--type object()        :: term().
+-type key()           :: gen_ets_ns:key().
+-type object()        :: gen_ets_ns:object().
 
--type name()          :: atom().
+-type name()          :: gen_ets_ns:gen_name().
 -type item()          :: owner | name | named_table | type | keypos | protection | compressed | async | memory | size.
 -type pos()           :: pos_integer().
--type pattern()       :: atom() | tuple(). %% ets:match_pattern() is not exported!
--type spec()          :: ets:match_spec().
+-type match_pattern() :: gen_ets_ns:match_pattern().
+-type match_spec()    :: gen_ets_ns:match_spec().
 -type match()         :: term().
 -type limit()         :: pos_integer().
--opaque cont()        :: {cont, tab(), term()}.
+-opaque cont()        :: {cont, lets_tid(), term()}.
+
+-define(NS, lets_reg).
 
 %%%----------------------------------------------------------------------
 %%% API
 %%%----------------------------------------------------------------------
+
+%% @doc Returns a list of all tables at the node.
+%% @end
+%% @see ets:all/0
+
+-spec all() -> [lets_tab()].
+all() ->
+    gen_ets_ns:all(?NS).
 
 %% @doc Creates a new table and returns a table identifier which can
 %% be used in subsequent operations.  The table identifier can be sent
@@ -176,10 +123,9 @@
 %%   by the +<+ and +>+ operators.
 %%
 %% - +named_table+ If this option is present, the name +Name+ is
-%%   associated with the table identifier.  _only the ets
-%%   implementation_
+%%   associated with the table identifier.
 %%
-%% - +{key_pos,pos_integer()}+ Specfies which element in the stored
+%% - +{keypos,pos_integer()}+ Specfies which element in the stored
 %%   tuples should be used as key. By default, it is the first
 %%   element, i.e. +Pos=1+.
 %%
@@ -262,9 +208,9 @@
 %% @end
 %% @see ets:new/2
 
--spec new(name(), opts()) -> tab().
+-spec new(name(), opts()) -> lets_tab().
 new(Name, Opts) ->
-    create(open, Name, Opts).
+    create(new, Name, Opts).
 
 %% @doc Destroy the contents of the specified table.  This function
 %% only applies to +driver+ and +nif+ implementations.
@@ -289,27 +235,17 @@ repair(Name, Opts) ->
 %% @end
 %% @see ets:delete/1
 
--spec delete(tab()) -> true.
+-spec delete(lets_tab()) -> true.
 delete(Tab) ->
-    case check_access(Tab) of
-        undefined ->
-            erlang:error(badarg, [Tab]);
-        Mod ->
-            Mod:delete(Tab)
-    end.
+    gen_ets_ns:delete(?NS, Tab).
 
 %% @doc Deletes all objects with the key +Key+ from the table +Tab+.
 %% @end
 %% @see ets:delete/2
 
--spec delete(tab(), key()) -> true.
+-spec delete(lets_tab(), key()) -> true.
 delete(Tab, Key) ->
-    case check_access(Tab) of
-        undefined ->
-            erlang:error(badarg, [Tab]);
-        Mod ->
-            Mod:delete(Tab, Key)
-    end.
+    gen_ets_ns:delete(?NS, Tab, Key).
 
 %% @doc Delete all objects in the table +Tab+. The operation is
 %% guaranteed to be atomic and isolated.  This function only applies
@@ -317,56 +253,36 @@ delete(Tab, Key) ->
 %% @end
 %% @see ets:delete_all_objects/1
 
--spec delete_all_objects(tab()) -> true.
+-spec delete_all_objects(lets_tab()) -> true.
 delete_all_objects(Tab) ->
-    case check_access(Tab) of
-        undefined ->
-            erlang:error(badarg, [Tab]);
-        Mod ->
-            Mod:delete_all_objects(Tab)
-    end.
+    gen_ets_ns:delete_all_objects(?NS, Tab).
 
 %% @doc Returns the first key +Key+ in the table +Tab+.  If the table
 %% is empty, +'$end_of_table'+ will be returned.
 %% @end
 %% @see ets:first/1
 
--spec first(tab()) -> key() | '$end_of_table'.
+-spec first(lets_tab()) -> key() | '$end_of_table'.
 first(Tab) ->
-    case check_access(Tab) of
-        undefined ->
-            erlang:error(badarg, [Tab]);
-        Mod ->
-            Mod:first(Tab)
-    end.
+    gen_ets_ns:first(?NS, Tab).
 
 %% @doc Fold from left to right over the elements of the table.
 %% @end
 %% @see ets:foldl/3
 
--spec foldl(Fun, Acc0::term(), tab()) -> Acc1::term() when
+-spec foldl(Fun, Acc0::term(), lets_tab()) -> Acc1::term() when
       Fun :: fun((Element::term(), AccIn::term()) -> AccOut::term()).
 foldl(Function, Acc0, Tab) ->
-    case check_access(Tab) of
-        undefined ->
-            erlang:error(badarg, [Tab]);
-        Mod ->
-            Mod:foldl(Function, Acc0, Tab)
-    end.
+    gen_ets_ns:foldl(?NS, Function, Acc0, Tab).
 
 %% @doc Fold from right to left over the elements of the table.
 %% @end
 %% @see ets:foldr/3
 
--spec foldr(Fun, Acc0::term(), tab()) -> Acc1::term() when
+-spec foldr(Fun, Acc0::term(), lets_tab()) -> Acc1::term() when
       Fun :: fun((Element::term(), AccIn::term()) -> AccOut::term()).
 foldr(Function, Acc0, Tab) ->
-    case check_access(Tab) of
-        undefined ->
-            erlang:error(badarg, [Tab]);
-        Mod ->
-            Mod:foldr(Function, Acc0, Tab)
-    end.
+    gen_ets_ns:foldr(?NS, Function, Acc0, Tab).
 
 %% @doc Returns information about the table +Tab+ as a list of +{Item,
 %% Value}+ tuples.
@@ -374,23 +290,9 @@ foldr(Function, Acc0, Tab) ->
 %% @end
 %% @see info/2
 
--spec info(tab()) -> [{item(), term()}].
+-spec info(lets_tab()) -> [{item(), term()}].
 info(Tab) ->
-    case check_access(Tab) of
-        undefined ->
-            erlang:error(badarg, [Tab]);
-        Mod ->
-            [{owner, Tab#tab.owner},
-             {name, Tab#tab.name},
-             {named_table, Tab#tab.named_table},
-             {type, Tab#tab.type},
-             {keypos, Tab#tab.keypos},
-             {protection, Tab#tab.protection},
-             {compressed, Tab#tab.compressed},
-             {async, Tab#tab.async},
-             {memory, Mod:info_memory(Tab)},
-             {size, Mod:info_size(Tab)}]
-    end.
+    gen_ets_ns:info(?NS, Tab).
 
 %% @doc Returns the information associated with +Item+ for the table +Tab+.
 %%
@@ -410,51 +312,18 @@ info(Tab) ->
 %% @end
 %% @see ets:info/2
 
--spec info(tab(), item()) -> term().
+-spec info(lets_tab(), item()) -> term().
 info(Tab, Item) ->
-    case check_access(Tab) of
-        undefined ->
-            erlang:error(badarg, [Tab]);
-        Mod ->
-            case Item of
-                owner ->
-                    Tab#tab.owner;
-                name ->
-                    Tab#tab.name;
-                named_table ->
-                    Tab#tab.named_table;
-                type ->
-                    Tab#tab.type;
-                keypos ->
-                    Tab#tab.keypos;
-                protection ->
-                    Tab#tab.protection;
-                compressed ->
-                    Tab#tab.compressed;
-                async ->
-                    Tab#tab.async;
-                memory ->
-                    Mod:info_memory(Tab);
-                size ->
-                    Mod:info_size(Tab);
-                _ ->
-                    erlang:error(badarg, [Tab, Item])
-            end
-    end.
+    gen_ets_ns:info(?NS, Tab, Item).
 
 %% @doc Inserts the object or all of the objects in the list
 %% +ObjOrObjs+ into the table +Tab+.
 %% @end
 %% @see ets:insert/2
 
--spec insert(tab(), object() | [object()]) -> true.
+-spec insert(lets_tab(), object() | [object()]) -> true.
 insert(Tab, ObjOrObjs) ->
-    case check_access(Tab) of
-        undefined ->
-            erlang:error(badarg, [Tab]);
-        Mod ->
-            Mod:insert(Tab, ObjOrObjs)
-    end.
+    gen_ets_ns:insert(?NS, Tab, ObjOrObjs).
 
 %% @doc This function works exactly like +insert/2+, with the
 %% exception that instead of overwriting objects with the same key, it
@@ -463,70 +332,45 @@ insert(Tab, ObjOrObjs) ->
 %% @end
 %% @see ets:insert_new/2
 
--spec insert_new(tab(), object() | [object()]) -> true.
+-spec insert_new(lets_tab(), object() | [object()]) -> true.
 insert_new(Tab, ObjOrObjs) ->
-    case check_access(Tab) of
-        undefined ->
-            erlang:error(badarg, [Tab]);
-        Mod ->
-            Mod:insert_new(Tab, ObjOrObjs)
-    end.
+    gen_ets_ns:insert_new(?NS, Tab, ObjOrObjs).
 
 %% @doc Returns the last key +Key+ in the table +Tab+.  If the table
 %% is empty, +'$end_of_table'+ will be returned.
 %% @end
 %% @see ets:last/1
 
--spec last(tab()) -> key() | '$end_of_table'.
+-spec last(lets_tab()) -> key() | '$end_of_table'.
 last(Tab) ->
-    case check_access(Tab) of
-        undefined ->
-            erlang:error(badarg, [Tab]);
-        Mod ->
-            Mod:last(Tab)
-    end.
+    gen_ets_ns:last(?NS, Tab).
 
 %% @doc Returns a list of all objects with the key +Key+ in the table
 %% +Tab+.
 %% @end
 %% @see ets:lookup/2
 
--spec lookup(tab(), key()) -> [object()].
+-spec lookup(lets_tab(), key()) -> [object()].
 lookup(Tab, Key) ->
-    case check_access(Tab) of
-        undefined ->
-            erlang:error(badarg, [Tab]);
-        Mod ->
-            Mod:lookup(Tab, Key)
-    end.
+    gen_ets_ns:lookup(?NS, Tab, Key).
 
 %% @doc Returns the +Pos+:th element of the object with the key +Key+
 %% in the table +Tab+.
 %% @end
 %% @see ets:lookup_element/3
 
--spec lookup_element(tab(), key(), pos()) -> term().
+-spec lookup_element(lets_tab(), key(), pos()) -> term().
 lookup_element(Tab, Key, Pos) ->
-    case check_access(Tab) of
-        undefined ->
-            erlang:error(badarg, [Tab]);
-        Mod ->
-            Mod:lookup_element(Tab, Key, Pos)
-    end.
+    gen_ets_ns:lookup_element(?NS, Tab, Key, Pos).
 
 %% @doc Matches the objects in the table +Tab+ against the pattern
 %% +Pattern+.
 %% @end
 %% @see ets:match/2
 
--spec match(tab(), pattern()) -> [match()].
+-spec match(lets_tab(), match_pattern()) -> [match()].
 match(Tab, Pattern) ->
-    case check_access(Tab) of
-        undefined ->
-            erlang:error(badarg, [Tab]);
-        Mod ->
-            Mod:match(Tab, Pattern)
-    end.
+    gen_ets_ns:match(?NS, Tab, Pattern).
 
 %% @doc Matches the objects in the table +Tab+ against the pattern
 %% +Pattern+ and returns a limited (+Limit+) number of matching
@@ -534,57 +378,35 @@ match(Tab, Pattern) ->
 %% @end
 %% @see ets:match/3
 
--spec match(tab(), pattern(), limit()) -> {[match()], cont() | '$end_of_table'} | '$end_of_table'.
+-spec match(lets_tab(), match_pattern(), limit()) -> {[match()], cont() | '$end_of_table'} | '$end_of_table'.
 match(Tab, Pattern, Limit) ->
-    case check_access(Tab) of
-        undefined ->
-            erlang:error(badarg, [Tab]);
-        Mod ->
-            wrap_cont_reply(Tab, Mod:match(Tab, Pattern, Limit))
-    end.
+    gen_ets_ns:match(?NS, Tab, Pattern, Limit).
 
 %% @doc Continues a match started with +match/3+.
 %% @end
 %% @see ets:match/1
 
 -spec match(cont() | '$end_of_table') -> {[match()], cont() | '$end_of_table'} | '$end_of_table'.
-match({cont, Tab, Cont}) ->
-    case check_access(Tab) of
-        undefined ->
-            erlang:error(badarg, [Tab]);
-        Mod ->
-            wrap_cont_reply(Tab, Mod:match(Cont))
-    end;
-match('$end_of_table') ->
-    '$end_of_table'.
+match(Cont) ->
+    gen_ets_ns:match(?NS, Cont).
 
 %% @doc Deletes all objects which match the pattern +Pattern+ from the
 %% table +Tab+.
 %% @end
 %% @see ets:match_delete/2
 
--spec match_delete(tab(), pattern()) -> true.
+-spec match_delete(lets_tab(), match_pattern()) -> true.
 match_delete(Tab, Pattern) ->
-    case check_access(Tab) of
-        undefined ->
-            erlang:error(badarg, [Tab]);
-        Mod ->
-            Mod:match_delete(Tab, Pattern)
-    end.
+    gen_ets_ns:match_delete(?NS, Tab, Pattern).
 
 %% @doc Matches the objects in the table +Tab+ against the pattern
 %% +Pattern+.
 %% @end
 %% @see ets:match_object/2
 
--spec match_object(tab(), pattern()) -> [match()].
+-spec match_object(lets_tab(), match_pattern()) -> [match()].
 match_object(Tab, Pattern) ->
-    case check_access(Tab) of
-        undefined ->
-            erlang:error(badarg, [Tab]);
-        Mod ->
-            Mod:match_object(Tab, Pattern)
-    end.
+    gen_ets_ns:match_object(?NS, Tab, Pattern).
 
 %% @doc Matches the objects in the table +Tab+ against the pattern
 %% +Pattern+ and returns a limited (+Limit+) number of matching
@@ -592,43 +414,26 @@ match_object(Tab, Pattern) ->
 %% @end
 %% @see ets:match_object/3
 
--spec match_object(tab(), pattern(), limit()) -> {[match()], cont() | '$end_of_table'} | '$end_of_table'.
+-spec match_object(lets_tab(), match_pattern(), limit()) -> {[match()], cont() | '$end_of_table'} | '$end_of_table'.
 match_object(Tab, Pattern, Limit) ->
-    case check_access(Tab) of
-        undefined ->
-            erlang:error(badarg, [Tab]);
-        Mod ->
-            wrap_cont_reply(Tab, Mod:match_object(Tab, Pattern, Limit))
-    end.
+    gen_ets_ns:match_object(?NS, Tab, Pattern, Limit).
 
 %% @doc Continues a match started with +match_object/3+.
 %% @end
 %% @see ets:match_object/1
 
 -spec match_object(cont() | '$end_of_table') -> {[match()], cont() | '$end_of_table'} | '$end_of_table'.
-match_object({cont, Tab, Cont}) ->
-    case check_access(Tab) of
-        undefined ->
-            erlang:error(badarg, [Tab]);
-        Mod ->
-            wrap_cont_reply(Tab, Mod:match_object(Cont))
-    end;
-match_object('$end_of_table') ->
-    '$end_of_table'.
+match_object(Cont) ->
+    gen_ets_ns:match_object(?NS, Cont).
 
 %% @doc Returns +true+ if one or more elements in the table +Tab+ has
 %% the key +Key+, +false+ otherwise.
 %% @end
 %% @see ets:member/2
 
--spec member(tab(), key()) -> true | false.
+-spec member(lets_tab(), key()) -> true | false.
 member(Tab, Key) ->
-    case check_access(Tab) of
-        undefined ->
-            erlang:error(badarg, [Tab]);
-        Mod ->
-            Mod:member(Tab, Key)
-    end.
+    gen_ets_ns:member(?NS, Tab, Key).
 
 %% @doc Returns the next key +Key2+, following the key +Key1+ in the
 %% table +Tab+.  If there is no next key, +'$end_of_table'+ is
@@ -636,14 +441,9 @@ member(Tab, Key) ->
 %% @end
 %% @see ets:next/2
 
--spec next(tab(), key()) -> key() | '$end_of_table'.
+-spec next(lets_tab(), key()) -> key() | '$end_of_table'.
 next(Tab, Key) ->
-    case check_access(Tab) of
-        undefined ->
-            erlang:error(badarg, [Tab]);
-        Mod ->
-            Mod:next(Tab, Key)
-    end.
+    gen_ets_ns:next(?NS, Tab, Key).
 
 %% @doc Returns the previous key +Key2+, following the key +Key1+ in
 %% the table +Tab+.  If there is no previous key, +'$end_of_table'+ is
@@ -651,101 +451,62 @@ next(Tab, Key) ->
 %% @end
 %% @see ets:prev/2
 
--spec prev(tab(), key()) -> key() | '$end_of_table'.
+-spec prev(lets_tab(), key()) -> key() | '$end_of_table'.
 prev(Tab, Key) ->
-    case check_access(Tab) of
-        undefined ->
-            erlang:error(badarg, [Tab]);
-        Mod ->
-            Mod:prev(Tab, Key)
-    end.
-
-%% repair_continuation/2
+    gen_ets_ns:prev(?NS, Tab, Key).
 
 %% @doc Matches the objects in the table +Tab+ against the spec
 %% +Spec+.
 %% @end
 %% @see ets:select/2
 
--spec select(tab(), spec()) -> [match()].
+-spec select(lets_tab(), match_spec()) -> [match()].
 select(Tab, Spec) ->
-    case check_access(Tab) of
-        undefined ->
-            erlang:error(badarg, [Tab]);
-        Mod ->
-            Mod:select(Tab, Spec)
-    end.
+    gen_ets_ns:select(?NS, Tab, Spec).
 
 %% @doc Matches the objects in the table +Tab+ against the spec +Spec+
 %% and returns a limited (+Limit+) number of matching objects.
 %% @end
 %% @see ets:select/3
 
--spec select(tab(), spec(), limit()) -> {[match()], cont() | '$end_of_table'} | '$end_of_table'.
+-spec select(lets_tab(), match_spec(), limit()) -> {[match()], cont() | '$end_of_table'} | '$end_of_table'.
 select(Tab, Spec, Limit) ->
-    case check_access(Tab) of
-        undefined ->
-            erlang:error(badarg, [Tab]);
-        Mod ->
-            wrap_cont_reply(Tab, Mod:select(Tab, Spec, Limit))
-    end.
+    gen_ets_ns:select(?NS, Tab, Spec, Limit).
 
 %% @doc Continues a select started with +select/3+.
 %% @end
 %% @see ets:select/1
 
 -spec select(cont() | '$end_of_table') -> {[match()], cont() | '$end_of_table'} | '$end_of_table'.
-select({cont, Tab, Cont}) ->
-    case check_access(Tab) of
-        undefined ->
-            erlang:error(badarg, [Tab]);
-        Mod ->
-            wrap_cont_reply(Tab, Mod:select(Cont))
-    end;
-select('$end_of_table') ->
-    '$end_of_table'.
+select(Cont) ->
+    gen_ets_ns:select(?NS, Cont).
 
 %% @doc Counts all objects which match the spec +Spec+ from the
 %% table +Tab+ and returns the number matched.
 %% @end
 %% @see ets:select_count/2
 
--spec select_count(tab(), pattern()) -> pos_integer().
+-spec select_count(lets_tab(), match_spec()) -> pos_integer().
 select_count(Tab, Spec) ->
-    case check_access(Tab) of
-        undefined ->
-            erlang:error(badarg, [Tab]);
-        Mod ->
-            Mod:select_count(Tab, Spec)
-    end.
+    gen_ets_ns:select_count(?NS, Tab, Spec).
 
 %% @doc Deletes all objects which match the spec +Spec+ from the
 %% table +Tab+ and returns the number deleted.
 %% @end
 %% @see ets:select_delete/2
 
--spec select_delete(tab(), pattern()) -> pos_integer().
+-spec select_delete(lets_tab(), match_spec()) -> pos_integer().
 select_delete(Tab, Spec) ->
-    case check_access(Tab) of
-        undefined ->
-            erlang:error(badarg, [Tab]);
-        Mod ->
-            Mod:select_delete(Tab, Spec)
-    end.
+    gen_ets_ns:select_delete(?NS, Tab, Spec).
 
 %% @doc Matches in reverse the objects in the table +Tab+ against the
 %% spec +Spec+.
 %% @end
 %% @see ets:select_reverse/2
 
--spec select_reverse(tab(), spec()) -> [match()].
+-spec select_reverse(lets_tab(), match_spec()) -> [match()].
 select_reverse(Tab, Spec) ->
-    case check_access(Tab) of
-        undefined ->
-            erlang:error(badarg, [Tab]);
-        Mod ->
-            Mod:select_reverse(Tab, Spec)
-    end.
+    gen_ets_ns:select_reverse(?NS, Tab, Spec).
 
 %% @doc Matches in reverse the objects in the table +Tab+ against the
 %% spec +Spec+ and returns a limited (+Limit+) number of matching
@@ -753,62 +514,30 @@ select_reverse(Tab, Spec) ->
 %% @end
 %% @see ets:select_reverse/3
 
--spec select_reverse(tab(), spec(), limit()) -> {[match()], cont() | '$end_of_table'} | '$end_of_table'.
+-spec select_reverse(lets_tab(), match_spec(), limit()) -> {[match()], cont() | '$end_of_table'} | '$end_of_table'.
 select_reverse(Tab, Spec, Limit) ->
-    case check_access(Tab) of
-        undefined ->
-            erlang:error(badarg, [Tab]);
-        Mod ->
-            wrap_cont_reply(Tab, Mod:select_reverse(Tab, Spec, Limit))
-    end.
+    gen_ets_ns:select_reverse(?NS, Tab, Spec, Limit).
 
 %% @doc Continues a select reverse started with +select_reverse/3+.
 %% @end
 %% @see ets:select_reverse/1
 
 -spec select_reverse(cont() | '$end_of_table') -> {[match()], cont() | '$end_of_table'} | '$end_of_table'.
-select_reverse({cont, Tab, Cont}) ->
-    case check_access(Tab) of
-        undefined ->
-            erlang:error(badarg, [Tab]);
-        Mod ->
-            wrap_cont_reply(Tab, Mod:select_reverse(Cont))
-    end;
-select_reverse('$end_of_table') ->
-    '$end_of_table'.
+select_reverse(Cont) ->
+    gen_ets_ns:select_reverse(?NS, Cont).
 
 %% @doc Returns a list of all objects in the table +Tab+. The
 %% operation is *not* guaranteed to be atomic and isolated.
 %% @end
 %% @see ets:tab2list/1
 
--spec tab2list(tab()) -> [object()].
+-spec tab2list(lets_tab()) -> [object()].
 tab2list(Tab) ->
-    case check_access(Tab) of
-        undefined ->
-            erlang:error(badarg, [Tab]);
-        Mod ->
-            Mod:tab2list(Tab)
-    end.
-
+    gen_ets_ns:tab2list(?NS, Tab).
 
 %%%----------------------------------------------------------------------
 %%% Internal functions
 %%%----------------------------------------------------------------------
-
-check_access(#tab{impl=undefined}) ->
-    undefined;
-check_access(#tab{protection=Protection, owner=Owner, impl=Impl})
-  when Protection==public orelse Owner==self() ->
-    if is_port(Impl) ->
-            lets_drv;
-       is_atom(Impl) orelse is_integer(Impl) ->
-            lets_ets;
-       true ->
-            lets_nif
-    end;
-check_access(_Tab) ->
-    undefined.
 
 create(Op, Name, Opts) ->
     case options(Opts) of
@@ -818,7 +547,6 @@ create(Op, Name, Opts) ->
             erlang:error(badarg, [Name, BadArgs])
     end,
 
-    Owner = self(),
     NamedTable = proplists:get_bool(named_table, POpts),
     Type =
         case proplists:get_bool(ordered_set, POpts) of
@@ -847,34 +575,36 @@ create(Op, Name, Opts) ->
         end,
     Compressed = proplists:get_bool(compressed, POpts),
     Async = proplists:get_bool(async, POpts),
+
     Drv = proplists:get_bool(drv, POpts),
     Nif = proplists:get_bool(nif, POpts),
     Ets = proplists:get_bool(ets, POpts),
 
-    Tab = #tab{owner=Owner,
-               name=Name,
-               named_table=NamedTable,
-               type=Type,
-               keypos=KeyPos,
-               protection=Protection,
-               compressed=Compressed,
-               async=Async},
-
-    DBOptions = fix_db_options(Tab, proplists:get_value(db, POpts, [])),
+    DBOptions = fix_db_options(Name, Compressed, Async, proplists:get_value(db, POpts, [])),
     DBReadOptions = proplists:get_value(db_read, POpts, []),
     DBWriteOptions = proplists:get_value(db_write, POpts, []),
 
+    GenOpts = [Type, {keypos, KeyPos}, Protection] ++
+        [ named_table || NamedTable ] ++
+        [ compressed || Compressed ] ++
+        [ async || Async ],
+    DBOpts = [{db, DBOptions}, {db_read, DBReadOptions}, {db_write, DBWriteOptions}],
+
     if Drv ->
-            lets_drv:Op(Tab, DBOptions, DBReadOptions, DBWriteOptions);
+            DrvOpts = [{impl, {lets_impl_drv, DBOpts}} | GenOpts],
+            gen_ets_ns:Op(?NS, Name, DrvOpts);
        Nif ->
-            lets_nif:Op(Tab, DBOptions, DBReadOptions, DBWriteOptions);
+            NifOpts = [{impl, {lets_impl_nif, DBOpts}} | GenOpts],
+            gen_ets_ns:Op(?NS, Name, NifOpts);
        Ets ->
-            lets_ets:Op(Tab);
+            EtsOpts = [{impl, {gen_ets_impl_ets, []}} | GenOpts],
+            gen_ets_ns:Op(?NS, Name, EtsOpts);
        true ->
-            lets_drv:Op(Tab, DBOptions, DBReadOptions, DBWriteOptions)
+            DrvOpts = [{impl, {lets_impl_drv, DBOpts}} | GenOpts],
+            gen_ets_ns:Op(?NS, Name, DrvOpts)
     end.
 
-fix_db_options(#tab{name=Name, compressed=Compressed, async=Async}, Options0) ->
+fix_db_options(Name, Compressed, Async, Options0) ->
     Options1 = fix_db_options_path(Name, Options0),
     Options2 = fix_db_options_compression(Compressed, Options1),
     Options3 = fix_db_options_async(Async, Options2),
@@ -950,10 +680,3 @@ sub_options(Key, Value, Options, Keys, L, SubKeys) ->
         {_NewValue, _} ->
             options(Options, Keys, L)
     end.
-
-wrap_cont_reply(_Tab, '$end_of_table'=Reply) ->
-    Reply;
-wrap_cont_reply(_Tab, {_Match, '$end_of_table'}=Reply) ->
-    Reply;
-wrap_cont_reply(Tab, {_Match, Cont}=Reply) ->
-    setelement(2, Reply, {cont, Tab, Cont}).

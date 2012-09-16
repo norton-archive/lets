@@ -20,8 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "lets_nif.h"
-#include "lets_nif_lib.h"
+#include "lets_impl_nif.h"
+#include "lets_impl_nif_lib.h"
 
 #include <stdio.h>
 
@@ -43,41 +43,41 @@ make_badarg(ErlNifEnv* env, const leveldb::Status& status, unsigned line=0) {
 typedef struct
 {
     lets_impl impl;
-} lets_nif_handle;
+} lets_impl_nif_handle;
 
-static ErlNifResourceType* lets_nif_RESOURCE = NULL;
-static unsigned lets_nif_RESOURCE_SIZE = sizeof(lets_nif_handle);
+static ErlNifResourceType* lets_impl_nif_RESOURCE = NULL;
+static unsigned lets_impl_nif_RESOURCE_SIZE = sizeof(lets_impl_nif_handle);
 static ErlNifFunc nif_funcs[] =
     {
-        {"impl_open", 6, lets_nif_open6},
-        {"impl_destroy", 6, lets_nif_destroy6},
-        {"impl_repair", 6, lets_nif_repair6},
-        {"impl_insert", 2, lets_nif_insert2},
-        {"impl_insert", 3, lets_nif_insert3},
-        {"impl_insert_new", 2, lets_nif_insert_new2},
-        {"impl_insert_new", 3, lets_nif_insert_new3},
-        {"impl_delete", 1, lets_nif_delete1},
-        {"impl_delete", 2, lets_nif_delete2},
-        {"impl_delete_all_objects", 1, lets_nif_delete_all_objects1},
-        {"impl_lookup", 2, lets_nif_lookup2},
-        {"impl_member", 2, lets_nif_member2},
-        {"impl_first", 1, lets_nif_first1},
-        {"impl_first_iter", 1, lets_nif_first_iter1},
-        {"impl_last", 1, lets_nif_last1},
-        {"impl_last_iter", 1, lets_nif_last_iter1},
-        {"impl_next", 2, lets_nif_next2},
-        {"impl_next_iter", 2, lets_nif_next_iter2},
-        {"impl_prev", 2, lets_nif_prev2},
-        {"impl_prev_iter", 2, lets_nif_prev_iter2},
-        {"impl_info_memory", 1, lets_nif_info_memory1},
-        {"impl_info_size", 1, lets_nif_info_size1},
+        {"impl_open", 6, lets_impl_nif_open6},
+        {"impl_destroy", 6, lets_impl_nif_destroy6},
+        {"impl_repair", 6, lets_impl_nif_repair6},
+        {"impl_insert", 2, lets_impl_nif_insert2},
+        {"impl_insert", 3, lets_impl_nif_insert3},
+        {"impl_insert_new", 2, lets_impl_nif_insert_new2},
+        {"impl_insert_new", 3, lets_impl_nif_insert_new3},
+        {"impl_delete", 1, lets_impl_nif_delete1},
+        {"impl_delete", 2, lets_impl_nif_delete2},
+        {"impl_delete_all_objects", 1, lets_impl_nif_delete_all_objects1},
+        {"impl_lookup", 2, lets_impl_nif_lookup2},
+        {"impl_member", 2, lets_impl_nif_member2},
+        {"impl_first", 1, lets_impl_nif_first1},
+        {"impl_first_iter", 1, lets_impl_nif_first_iter1},
+        {"impl_last", 1, lets_impl_nif_last1},
+        {"impl_last_iter", 1, lets_impl_nif_last_iter1},
+        {"impl_next", 2, lets_impl_nif_next2},
+        {"impl_next_iter", 2, lets_impl_nif_next_iter2},
+        {"impl_prev", 2, lets_impl_nif_prev2},
+        {"impl_prev_iter", 2, lets_impl_nif_prev_iter2},
+        {"impl_info_memory", 1, lets_impl_nif_info_memory1},
+        {"impl_info_size", 1, lets_impl_nif_info_size1},
     };
 
 static void
-lets_nif_resource_dtor(ErlNifEnv* env, void* arg)
+lets_impl_nif_resource_dtor(ErlNifEnv* env, void* arg)
 {
     (void) env;
-    lets_nif_handle* h = (lets_nif_handle*) arg;
+    lets_impl_nif_handle* h = (lets_impl_nif_handle*) arg;
 
     // alive
     h->impl.alive = 0;
@@ -101,26 +101,26 @@ on_load(ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info)
     (void) priv_data;
     (void) load_info;
 
-    if (!lets_nif_lib_init(env)) {
+    if (!lets_impl_nif_lib_init(env)) {
         return -1;
     }
 
     ErlNifResourceFlags flags = (ErlNifResourceFlags) (ERL_NIF_RT_CREATE | ERL_NIF_RT_TAKEOVER);
-    lets_nif_RESOURCE = enif_open_resource_type(env, NULL,
-                                                "lets_nif_resource",
-                                                &lets_nif_resource_dtor,
+    lets_impl_nif_RESOURCE = enif_open_resource_type(env, NULL,
+                                                "lets_impl_nif_resource",
+                                                &lets_impl_nif_resource_dtor,
                                                 flags, NULL);
-    if (lets_nif_RESOURCE == NULL) {
+    if (lets_impl_nif_RESOURCE == NULL) {
         return -1;
     }
 
     return 0;
 }
 
-ERL_NIF_INIT(lets_nif, nif_funcs, &on_load, NULL, NULL, NULL);
+ERL_NIF_INIT(lets_impl_nif, nif_funcs, &on_load, NULL, NULL, NULL);
 
 static ERL_NIF_TERM
-db_create6(const char op, ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[], lets_nif_handle** reth)
+db_create6(const char op, ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[], lets_impl_nif_handle** reth)
 {
     (void) argc;
 
@@ -172,11 +172,11 @@ db_create6(const char op, ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[], l
     }
     write_options = argv[5];
 
-    lets_nif_handle* h = (lets_nif_handle*) enif_alloc_resource(lets_nif_RESOURCE, lets_nif_RESOURCE_SIZE);
+    lets_impl_nif_handle* h = (lets_impl_nif_handle*) enif_alloc_resource(lets_impl_nif_RESOURCE, lets_impl_nif_RESOURCE_SIZE);
     if (!h) {
         return MAKEBADARG(env, status);
     }
-    memset(h, 0, lets_nif_RESOURCE_SIZE);
+    memset(h, 0, lets_impl_nif_RESOURCE_SIZE);
 
     if (!lets_init(h->impl, type, privacy, (const char*) path.data, path.size)) {
         enif_release_resource(h);
@@ -206,9 +206,9 @@ db_create6(const char op, ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[], l
 }
 
 ERL_NIF_TERM
-lets_nif_open6(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+lets_impl_nif_open6(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
-    lets_nif_handle* h = NULL;
+    lets_impl_nif_handle* h = NULL;
     ERL_NIF_TERM badarg = db_create6(OPEN, env, argc, argv, &h);
 
     if (!h) {
@@ -221,9 +221,9 @@ lets_nif_open6(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 ERL_NIF_TERM
-lets_nif_destroy6(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+lets_impl_nif_destroy6(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
-    lets_nif_handle* h = NULL;
+    lets_impl_nif_handle* h = NULL;
     ERL_NIF_TERM badarg = db_create6(DESTROY, env, argc, argv, &h);
 
     if (!h) {
@@ -235,9 +235,9 @@ lets_nif_destroy6(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 ERL_NIF_TERM
-lets_nif_repair6(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+lets_impl_nif_repair6(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
-    lets_nif_handle* h = NULL;
+    lets_impl_nif_handle* h = NULL;
     ERL_NIF_TERM badarg = db_create6(REPAIR, env, argc, argv, &h);
 
     if (!h) {
@@ -249,11 +249,11 @@ lets_nif_repair6(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 ERL_NIF_TERM
-lets_nif_insert2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+lets_impl_nif_insert2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
-    lets_nif_handle* h;
+    lets_impl_nif_handle* h;
     ERL_NIF_TERM list;
     unsigned list_len;
     ERL_NIF_TERM head, tail;
@@ -264,7 +264,7 @@ lets_nif_insert2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     leveldb::WriteBatch batch;
     leveldb::Status status;
 
-    if (!enif_get_resource(env, argv[0], lets_nif_RESOURCE, (void**)&h)) {
+    if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);
     }
     if (!enif_get_list_length(env, argv[1], &list_len)) {
@@ -304,17 +304,17 @@ lets_nif_insert2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 ERL_NIF_TERM
-lets_nif_insert3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+lets_impl_nif_insert3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
-    lets_nif_handle* h;
+    lets_impl_nif_handle* h;
     ErlNifBinary key;
     ErlNifBinary blob;
     leveldb::WriteBatch batch;
     leveldb::Status status;
 
-    if (!enif_get_resource(env, argv[0], lets_nif_RESOURCE, (void**)&h)) {
+    if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);
     }
     if (!enif_inspect_binary(env, argv[1], &key)) {
@@ -342,7 +342,7 @@ lets_nif_insert3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 ERL_NIF_TERM
-lets_nif_insert_new2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+lets_impl_nif_insert_new2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
     (void) argv;
@@ -353,7 +353,7 @@ lets_nif_insert_new2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 ERL_NIF_TERM
-lets_nif_insert_new3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+lets_impl_nif_insert_new3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
     (void) argv;
@@ -364,16 +364,16 @@ lets_nif_insert_new3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 ERL_NIF_TERM
-lets_nif_delete1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+lets_impl_nif_delete1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
-    lets_nif_handle* h;
+    lets_impl_nif_handle* h;
     leveldb::WriteOptions db_write_options;
     leveldb::WriteBatch batch;
     leveldb::Status status;
 
-    if (!enif_get_resource(env, argv[0], lets_nif_RESOURCE, (void**)&h)) {
+    if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);
     }
 
@@ -398,16 +398,16 @@ lets_nif_delete1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 ERL_NIF_TERM
-lets_nif_delete2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+lets_impl_nif_delete2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
-    lets_nif_handle* h;
+    lets_impl_nif_handle* h;
     ErlNifBinary key;
     leveldb::WriteBatch batch;
     leveldb::Status status;
 
-    if (!enif_get_resource(env, argv[0], lets_nif_RESOURCE, (void**)&h)) {
+    if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);
     }
     if (!enif_inspect_binary(env, argv[1], &key)) {
@@ -431,14 +431,14 @@ lets_nif_delete2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 ERL_NIF_TERM
-lets_nif_delete_all_objects1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+lets_impl_nif_delete_all_objects1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
-    lets_nif_handle* h;
+    lets_impl_nif_handle* h;
     leveldb::Status status;
 
-    if (!enif_get_resource(env, argv[0], lets_nif_RESOURCE, (void**)&h)) {
+    if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);
     }
 
@@ -450,16 +450,16 @@ lets_nif_delete_all_objects1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]
 }
 
 ERL_NIF_TERM
-lets_nif_lookup2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+lets_impl_nif_lookup2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
-    lets_nif_handle* h;
+    lets_impl_nif_handle* h;
     ErlNifBinary key;
     ERL_NIF_TERM blob = 0;
     leveldb::Status status;
 
-    if (!enif_get_resource(env, argv[0], lets_nif_RESOURCE, (void**)&h)) {
+    if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);
     }
     if (!enif_inspect_binary(env, argv[1], &key)) {
@@ -496,15 +496,15 @@ lets_nif_lookup2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 ERL_NIF_TERM
-lets_nif_member2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+lets_impl_nif_member2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
-    lets_nif_handle* h;
+    lets_impl_nif_handle* h;
     ErlNifBinary key;
     leveldb::Status status;
 
-    if (!enif_get_resource(env, argv[0], lets_nif_RESOURCE, (void**)&h)) {
+    if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);
     }
     if (!enif_inspect_binary(env, argv[1], &key)) {
@@ -533,15 +533,15 @@ lets_nif_member2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 ERL_NIF_TERM
-lets_nif_first1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+lets_impl_nif_first1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
-    lets_nif_handle* h;
+    lets_impl_nif_handle* h;
     ERL_NIF_TERM first = 0;
     leveldb::Status status;
 
-    if (!enif_get_resource(env, argv[0], lets_nif_RESOURCE, (void**)&h)) {
+    if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);
     }
 
@@ -574,15 +574,15 @@ lets_nif_first1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 ERL_NIF_TERM
-lets_nif_first_iter1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+lets_impl_nif_first_iter1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
-    lets_nif_handle* h;
+    lets_impl_nif_handle* h;
     ERL_NIF_TERM first = 0;
     leveldb::Status status;
 
-    if (!enif_get_resource(env, argv[0], lets_nif_RESOURCE, (void**)&h)) {
+    if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);
     }
 
@@ -615,15 +615,15 @@ lets_nif_first_iter1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 ERL_NIF_TERM
-lets_nif_last1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+lets_impl_nif_last1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
-    lets_nif_handle* h;
+    lets_impl_nif_handle* h;
     ERL_NIF_TERM last = 0;
     leveldb::Status status;
 
-    if (!enif_get_resource(env, argv[0], lets_nif_RESOURCE, (void**)&h)) {
+    if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);
     }
 
@@ -656,15 +656,15 @@ lets_nif_last1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 ERL_NIF_TERM
-lets_nif_last_iter1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+lets_impl_nif_last_iter1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
-    lets_nif_handle* h;
+    lets_impl_nif_handle* h;
     ERL_NIF_TERM last = 0;
     leveldb::Status status;
 
-    if (!enif_get_resource(env, argv[0], lets_nif_RESOURCE, (void**)&h)) {
+    if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);
     }
 
@@ -697,16 +697,16 @@ lets_nif_last_iter1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 ERL_NIF_TERM
-lets_nif_next2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+lets_impl_nif_next2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
-    lets_nif_handle* h;
+    lets_impl_nif_handle* h;
     ErlNifBinary key;
     ERL_NIF_TERM next = 0;
     leveldb::Status status;
 
-    if (!enif_get_resource(env, argv[0], lets_nif_RESOURCE, (void**)&h)) {
+    if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);
     }
     if (!enif_inspect_binary(env, argv[1], &key)) {
@@ -751,16 +751,16 @@ lets_nif_next2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 ERL_NIF_TERM
-lets_nif_next_iter2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+lets_impl_nif_next_iter2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
-    lets_nif_handle* h;
+    lets_impl_nif_handle* h;
     ErlNifBinary key;
     ERL_NIF_TERM next = 0;
     leveldb::Status status;
 
-    if (!enif_get_resource(env, argv[0], lets_nif_RESOURCE, (void**)&h)) {
+    if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);
     }
     if (!enif_inspect_binary(env, argv[1], &key)) {
@@ -805,16 +805,16 @@ lets_nif_next_iter2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 ERL_NIF_TERM
-lets_nif_prev2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+lets_impl_nif_prev2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
-    lets_nif_handle* h;
+    lets_impl_nif_handle* h;
     ErlNifBinary key;
     ERL_NIF_TERM prev = 0;
     leveldb::Status status;
 
-    if (!enif_get_resource(env, argv[0], lets_nif_RESOURCE, (void**)&h)) {
+    if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);
     }
     if (!enif_inspect_binary(env, argv[1], &key)) {
@@ -857,16 +857,16 @@ lets_nif_prev2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 ERL_NIF_TERM
-lets_nif_prev_iter2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+lets_impl_nif_prev_iter2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
-    lets_nif_handle* h;
+    lets_impl_nif_handle* h;
     ErlNifBinary key;
     ERL_NIF_TERM prev = 0;
     leveldb::Status status;
 
-    if (!enif_get_resource(env, argv[0], lets_nif_RESOURCE, (void**)&h)) {
+    if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);
     }
     if (!enif_inspect_binary(env, argv[1], &key)) {
@@ -909,15 +909,15 @@ lets_nif_prev_iter2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 ERL_NIF_TERM
-lets_nif_info_memory1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+lets_impl_nif_info_memory1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
-    lets_nif_handle* h;
+    lets_impl_nif_handle* h;
     // ERL_NIF_TERM info;
     leveldb::Status status;
 
-    if (!enif_get_resource(env, argv[0], lets_nif_RESOURCE, (void**)&h)) {
+    if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);
     }
 
@@ -933,15 +933,15 @@ lets_nif_info_memory1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 ERL_NIF_TERM
-lets_nif_info_size1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+lets_impl_nif_info_size1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
-    lets_nif_handle* h;
+    lets_impl_nif_handle* h;
     // ERL_NIF_TERM info;
     leveldb::Status status;
 
-    if (!enif_get_resource(env, argv[0], lets_nif_RESOURCE, (void**)&h)) {
+    if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);
     }
 

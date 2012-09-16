@@ -42,7 +42,7 @@
 -compile(export_all).
 
 %% Implementation
--export([match31/3, match_object31/3, select31/3, select_reverse31/3]).
+-export([fold_helper/2, match31/3, match_object31/3, select31/3, select_reverse31/3]).
 
 %% @NOTE For boilerplate exports, see "qc_statem.hrl"
 -include_lib("qc/include/qc_statem.hrl").
@@ -75,11 +75,11 @@
 
 -record(state, {
           parallel=false :: boolean(),
-          type=undefined :: undefined | ets_type(),
-          impl=undefined :: undefined | ets_impl(),
+          type           :: ets_type(),
+          impl           :: ets_impl(),
           exists=false   :: boolean(),
           options=[]     :: proplists:proplist(),
-          tab=undefined  :: undefined | tuple(),
+          tab            :: tuple() | pid(),
           objs=[]        :: [obj()]
          }).
 
@@ -132,7 +132,8 @@ serial_command_gen(#state{tab=Tab, impl=Impl}=S) ->
     %% @TODO gen_db_write_options/2
     %% @TODO gen_db_read_options/2
     %% @TODO info/1, info/2
-    oneof([{call,?IMPL,insert,[Tab,oneof([gen_obj(S),gen_objs(S)])]}]
+    oneof([{call,?IMPL,all,[Tab]}]
+          ++ [{call,?IMPL,insert,[Tab,oneof([gen_obj(S),gen_objs(S)])]}]
           ++ [{call,?IMPL,insert_new,[Tab,oneof([gen_obj(S),gen_objs(S)])]} || Impl =:= ets]
           ++ [{call,?IMPL,delete,[Tab]}]
           ++ [{call,?IMPL,delete,[Tab,gen_key(S)]}]
@@ -144,8 +145,8 @@ serial_command_gen(#state{tab=Tab, impl=Impl}=S) ->
           ++ [{call,?IMPL,last,[Tab]}]
           ++ [{call,?IMPL,next,[Tab,gen_key(S)]}]
           ++ [{call,?IMPL,prev,[Tab,gen_key(S)]}]
-          ++ [{call,?IMPL,foldl,[fun(X, Acc) -> [X|Acc] end, [], Tab]}]
-          ++ [{call,?IMPL,foldr,[fun(X, Acc) -> [X|Acc] end, [], Tab]}]
+          ++ [{call,?IMPL,foldl,[fun ?MODULE:fold_helper/2, [], Tab]}]
+          ++ [{call,?IMPL,foldr,[fun ?MODULE:fold_helper/2, [], Tab]}]
           ++ [{call,?IMPL,tab2list,[Tab]}]
           ++ [{call,?IMPL,match,[Tab, gen_pattern(S)]}]
           ++ [{call,?MODULE,match31,[Tab, gen_pattern(S), gen_pos_integer()]}]
@@ -162,11 +163,12 @@ serial_command_gen(#state{tab=Tab, impl=Impl}=S) ->
 
 parallel_command_gen(#state{tab=undefined, type=undefined, impl=undefined}=S) ->
     {call,?IMPL,new,[?TAB,gen_options(new,S)]};
-parallel_command_gen(#state{tab=Tab, type=Type}=S) ->
+parallel_command_gen(#state{tab=Tab, impl=Impl}=S) ->
     %% @TODO gen_db_write_options/2
     %% @TODO gen_db_read_options/2
-    oneof([{call,?IMPL,insert,[Tab,oneof([gen_obj(S),gen_objs(S)])]}]
-          ++ [{call,?IMPL,insert_new,[Tab,oneof([gen_obj(S),gen_objs(S)])]} || Type =:= ets]
+    oneof([{call,?IMPL,all,[Tab]}]
+          ++ [{call,?IMPL,insert,[Tab,oneof([gen_obj(S),gen_objs(S)])]}]
+          ++ [{call,?IMPL,insert_new,[Tab,oneof([gen_obj(S),gen_objs(S)])]} || Impl =:= ets]
           ++ [{call,?IMPL,delete,[Tab,gen_key(S)]}]
           ++ [{call,?IMPL,delete_all_objects,[Tab]}]
           ++ [{call,?IMPL,member,[Tab,gen_key(S)]}]
@@ -177,6 +179,9 @@ parallel_command_gen(#state{tab=Tab, type=Type}=S) ->
           ++ [{call,?IMPL,next,[Tab,gen_key(S)]}]
           ++ [{call,?IMPL,prev,[Tab,gen_key(S)]}]
          ).
+
+fold_helper(X, Acc) ->
+    [X|Acc].
 
 -spec initial_state(term()) -> #state{}.
 initial_state(_Scenario) ->
@@ -277,8 +282,23 @@ precondition(_S, {call,_,_,_}) ->
     true.
 
 -spec postcondition(#state{}, tuple(), term()) -> boolean().
-postcondition(#state{tab=undefined}, {call,_,new,[?TAB,_Options]}, Res) ->
-    ?IMPL:is_table(Res);
+postcondition(#state{tab=Tab}, {call,_,all,[_Tab]}, Res) ->
+    if is_pid(Tab) ->
+            true;
+       true ->
+            Res =:= [Tab]
+    end;
+postcondition(#state{tab=undefined}, {call,_,new,[?TAB,Options]}, Res) ->
+    if is_pid(Res) ->
+            true;
+       true ->
+            NamedTable = proplists:get_bool(named_table, Options),
+            if NamedTable ->
+                    Res =:= ?TAB;
+               true ->
+                    ?IMPL:is_table(Res)
+            end
+    end;
 postcondition(_S, {call,_,new,[?TAB,_Options]}, Res) ->
     case Res of
         {'EXIT', {badarg, _}} ->
@@ -286,8 +306,17 @@ postcondition(_S, {call,_,new,[?TAB,_Options]}, Res) ->
         _ ->
             false
     end;
-postcondition(#state{tab=undefined}, {call,_,new,[_Tab,?TAB,_Options]}, Res) ->
-    ?IMPL:is_table(Res);
+postcondition(#state{tab=undefined}, {call,_,new,[_Tab,?TAB,Options]}, Res) ->
+    if is_pid(Res) ->
+            true;
+       true ->
+            NamedTable = proplists:get_bool(named_table, Options),
+            if NamedTable ->
+                    Res =:= ?TAB;
+               true ->
+                    ?IMPL:is_table(Res)
+            end
+    end;
 postcondition(_S, {call,_,destroy,[_Tab,?TAB,_Options]}, Res) ->
     Res =:= true;
 postcondition(_S, {call,_,repair,[_Tab,?TAB,_Options]}, Res) ->
@@ -421,12 +450,11 @@ setup() ->
 
 -spec setup(term()) -> {ok, term()}.
 setup(_Scenario) ->
-    ?IMPL:teardown(?TAB),
+    _ = ?IMPL:teardown(?TAB),
     {ok, undefined}.
 
 -spec teardown(term(), #state{}) -> ok.
 teardown(_Ref, _State) ->
-    ?IMPL:teardown(?TAB),
     ok.
 
 -spec aggregate([{integer(), term(), term(), #state{}}])
@@ -445,19 +473,22 @@ filter_reply(_) ->
 %%%----------------------------------------------------------------------
 
 gen_options(Op,#state{type=undefined, impl=undefined, tab=undefined}=S) ->
-    ?LET({Type,Impl}, {gen_ets_type(), gen_ets_impl()},
+    ?LET({Type,Impl}, {lets_type(), lets_impl()},
          gen_options(Op,S#state{type=Type, impl=Impl}));
 gen_options(Op,#state{type=Type, impl=drv=Impl}=S) ->
-    [Type, public, named_table, {keypos,#obj.key},
-     {compressed, gen_boolean()}, {async, gen_boolean()}, Impl]
-        ++ gen_leveldb_options(Op,S);
+    Defaults = [Type, Impl]
+        ++ [public, {keypos,#obj.key}, {compressed, gen_boolean()}, {async, gen_boolean()}]
+        ++ gen_leveldb_options(Op,S),
+    oneof([Defaults, [named_table|Defaults]]);
 gen_options(Op,#state{type=Type, impl=nif=Impl}=S) ->
-    [Type, public, named_table, {keypos,#obj.key},
-     {compressed, gen_boolean()}, {async, gen_boolean()}, Impl]
-        ++ gen_leveldb_options(Op,S);
+    Defaults = [Type, Impl]
+        ++ [public, {keypos,#obj.key}, {compressed, gen_boolean()}]
+        ++ gen_leveldb_options(Op,S),
+    oneof([Defaults, [named_table|Defaults]]);
 gen_options(_Op,#state{type=Type, impl=ets=Impl}) ->
-    [Type, public, named_table, {keypos,#obj.key},
-     {compressed, gen_boolean()}, Impl].
+    Defaults = [Type, Impl]
+        ++ [public, {keypos,#obj.key}, {compressed, gen_boolean()}],
+    oneof([Defaults, [named_table|Defaults]]).
 
 gen_leveldb_options(Op,S) ->
     [gen_db_options(Op,S), gen_db_read_options(Op,S), gen_db_write_options(Op,S)].
@@ -489,10 +520,10 @@ gen_boolean() ->
 gen_pos_integer() ->
     ?LET(N, nat(), N+1).
 
-gen_ets_type() ->
+lets_type() ->
     noshrink(oneof([set, ordered_set])).
 
-gen_ets_impl() ->
+lets_impl() ->
     %% @NOTE Remove one or two of these to restrict to a particular
     %% implementation.
     noshrink(oneof([drv,nif,ets])).

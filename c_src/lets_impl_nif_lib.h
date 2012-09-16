@@ -20,8 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef LETS_DRV_LIB_H
-#define LETS_DRV_LIB_H
+#ifndef LETS_NIF_LIB_H
+#define LETS_NIF_LIB_H
 
 #include <string>
 #include <boost/shared_ptr.hpp>
@@ -32,7 +32,7 @@
 #include "leveldb/write_batch.h"
 #include "leveldb/filter_policy.h"
 
-#include "lets_drv.h"
+#include "erl_nif.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -78,31 +78,53 @@ extern "C" {
         int db_filter_policy_bloom_bits_per_key;
         const leveldb::FilterPolicy* db_filter_policy;
         DBPtr db;
-        ErlDrvUInt64 db_memory;
-        ErlDrvUInt64 db_size;
+        ErlNifUInt64 db_memory;
+        ErlNifUInt64 db_size;
     } lets_impl;
 
+    extern ERL_NIF_TERM lets_atom_true;
+    extern ERL_NIF_TERM lets_atom_false;
+    extern ERL_NIF_TERM lets_atom_set;
+    extern ERL_NIF_TERM lets_atom_ordered_set;
+    extern ERL_NIF_TERM lets_atom_private;
+    extern ERL_NIF_TERM lets_atom_protected;
+    extern ERL_NIF_TERM lets_atom_public;
+    extern ERL_NIF_TERM lets_atom_create_if_missing;
+    extern ERL_NIF_TERM lets_atom_error_if_exists;
+    extern ERL_NIF_TERM lets_atom_paranoid_checks;
+    extern ERL_NIF_TERM lets_atom_write_buffer_size;
+    extern ERL_NIF_TERM lets_atom_max_open_files;
+    extern ERL_NIF_TERM lets_atom_block_cache_size;
+    extern ERL_NIF_TERM lets_atom_block_size;
+    extern ERL_NIF_TERM lets_atom_block_restart_interval;
+    extern ERL_NIF_TERM lets_atom_compression;
+    extern ERL_NIF_TERM lets_atom_no;
+    extern ERL_NIF_TERM lets_atom_snappy;
+    extern ERL_NIF_TERM lets_atom_async;
+    extern ERL_NIF_TERM lets_atom_filter_policy;
+    extern ERL_NIF_TERM lets_atom_bloom;
+    extern ERL_NIF_TERM lets_atom_verify_checksums;
+    extern ERL_NIF_TERM lets_atom_fill_cache;
+    extern ERL_NIF_TERM lets_atom_sync;
+    extern ERL_NIF_TERM lets_atom_end_of_table;
+
     // prototypes
-    extern bool lets_drv_lib_init();
+    extern bool lets_impl_nif_lib_init(ErlNifEnv* env);
 
     extern bool lets_init(lets_impl& impl,
                           const char type, const char privacy, const char* name, const size_t namelen);
     extern bool lets_create(lets_impl& impl,
                             const char op);
 
-    extern bool lets_parse_options(lets_impl& impl,
-                                   const char* buf, ErlDrvSizeT len);
-    extern bool lets_parse_read_options(lets_impl& impl,
-                                        const char* buf, ErlDrvSizeT len);
-    extern bool lets_parse_write_options(lets_impl& impl,
-                                         const char* buf, ErlDrvSizeT len);
-
-    // helpers
-    extern int ei_inspect_atom(const char *buf, int *index, char *p);
-    extern int ei_inspect_binary(const char *buf, int *index, void **p, long *lenp);
+    extern bool lets_parse_options(ErlNifEnv* env, lets_impl& impl,
+                                   ERL_NIF_TERM& options, const ERL_NIF_TERM& options_len);
+    extern bool lets_parse_read_options(ErlNifEnv* env, lets_impl& impl,
+                                        ERL_NIF_TERM& options, const ERL_NIF_TERM& options_len);
+    extern bool lets_parse_write_options(ErlNifEnv* env, lets_impl& impl,
+                                         ERL_NIF_TERM& options, const ERL_NIF_TERM& options_len);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* LETS_DRV_LIB_H */
+#endif /* LETS_NIF_LIB_H */

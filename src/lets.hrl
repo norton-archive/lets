@@ -23,17 +23,6 @@
 -ifndef(lets).
 -define(lets, true).
 
--opaque nif() :: term().
-
--record(tab, {owner :: pid(),
-              name :: atom(),
-              named_table=false :: boolean(),
-              type=set :: set|ordered_set,
-              keypos=1 :: pos_integer(),
-              protection=protected :: public|protected|private,
-              compressed=false :: boolean(),
-              async=false :: boolean(),
-              impl :: port() | nif() | ets:tab() | undefined
-             }).
+-include_lib("gen_ets/include/gen_ets.hrl").
 
 -endif. % -ifndef(lets).
