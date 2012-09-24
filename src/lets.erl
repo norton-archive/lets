@@ -26,6 +26,7 @@
 
 %% External exports
 -export([all/0
+         , tid/1
          , new/2
          , destroy/2
          , repair/2
@@ -107,6 +108,13 @@
 -spec all() -> [lets_tab()].
 all() ->
     gen_ets_ns:all(?NS).
+
+%% @doc Returns a table's identifier.
+%% @end
+
+-spec tid(lets_tab()) -> lets_tid().
+tid(Tab) ->
+    gen_ets_ns:tid(?NS, Tab).
 
 %% @doc Creates a new table and returns a table identifier which can
 %% be used in subsequent operations.  The table identifier can be sent
