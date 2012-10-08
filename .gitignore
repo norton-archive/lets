@@ -1,10 +1,10 @@
 *.o
-.test/
-c_src/perftools-*/
-c_src/perftools/
-c_src/snappy-*/
-c_src/snappy/
+.eunit/
 c_src/leveldb-*/
 c_src/leveldb/
+c_src/snappy-*/
+c_src/snappy/
+deps/
 ebin/
+erl_crash.dump
 priv/lib/

@@ -454,7 +454,7 @@ Caution
 </td>
 <td class="content">If you manually run dialyzer with the "-r" option, execute
 "make clean compile" first to avoid finding duplicate beam files
-underneath rebar's .test directory.  Check Makefile for further
+underneath rebar's .eunit directory.  Check Makefile for further
 information.</td>
 </tr></table>
 
@@ -506,7 +506,7 @@ Run 5,000 QuickCheck tests
 </p>
 
 
-<pre><tt>$ cd working-directory-name/deps/lets/.test
+<pre><tt>$ cd working-directory-name/deps/lets/.eunit
 $ erl -smp +A 5 -pz ../../sext/ebin -pz ../../qc/ebin
 
 1> qc_statem_lets:qc_run(5000).
@@ -586,7 +586,7 @@ Run 5,000 PropEr tests
 </p>
 
 
-<pre><tt>$ cd working-directory-name/deps/lets/.test
+<pre><tt>$ cd working-directory-name/deps/lets/.eunit
 $ erl -smp +A 5 -pz ../../sext/ebin -pz ../../qc/ebin
 
 1> qc_statem_lets:qc_run(5000).
