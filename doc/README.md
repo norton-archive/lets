@@ -507,7 +507,7 @@ Run 5,000 QuickCheck tests
 
 
 <pre><tt>$ cd working-directory-name/deps/lets/.eunit
-$ erl -smp +A 5 -pz ../../sext/ebin -pz ../../qc/ebin
+$ erl -smp +A 5 -pz ../../sext/ebin -pz ../../gen_ets/ebin -pz ../../qc/ebin
 
 1> qc_statem_lets:qc_run(5000).
 ....
@@ -587,7 +587,7 @@ Run 5,000 PropEr tests
 
 
 <pre><tt>$ cd working-directory-name/deps/lets/.eunit
-$ erl -smp +A 5 -pz ../../sext/ebin -pz ../../qc/ebin
+$ erl -smp +A 5 -pz ../../sext/ebin -pz ../../gen_ets/ebin -pz ../../qc/ebin
 
 1> qc_statem_lets:qc_run(5000).
 ....
