@@ -1,5 +1,7 @@
-*.o
+.eqc-info
 .eunit/
+.qc/
+c_src/*.o
 c_src/leveldb-*/
 c_src/leveldb/
 c_src/snappy-*/
