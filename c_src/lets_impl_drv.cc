@@ -69,7 +69,6 @@ typedef struct {
 } DrvData;
 
 struct DrvAsync {
-    lets_impl::DBPtr db;
     DrvData* drvdata;
     ErlDrvTermData caller;
     int command;
@@ -84,18 +83,14 @@ struct DrvAsync {
     DrvAsync(DrvData* d, ErlDrvTermData c, int cmd) :
         drvdata(d), caller(c), command(cmd), binary(NULL), reply(LETS_TRUE) {
     }
-    DrvAsync(lets_impl::DBPtr& db, DrvData* d, ErlDrvTermData c, int cmd) :
-        db(db), drvdata(d), caller(c), command(cmd), binary(NULL), reply(LETS_TRUE) {
-    }
-    DrvAsync(lets_impl::DBPtr& db, DrvData* d, ErlDrvTermData c, int cmd, const char* key, int keylen) :
-        db(db), drvdata(d), caller(c), command(cmd), binary(NULL), reply(LETS_TRUE) {
+    DrvAsync(DrvData* d, ErlDrvTermData c, int cmd, const char* key, int keylen) :
+        drvdata(d), caller(c), command(cmd), binary(NULL), reply(LETS_TRUE) {
         binary = driver_alloc_binary(keylen);
         assert(binary);
         memcpy(binary->orig_bytes, key, binary->orig_size);
     }
 
     ~DrvAsync() {
-        db.reset();
         if (binary) {
             driver_free_binary(binary);
         }
@@ -118,43 +113,43 @@ static void lets_async_create6(void* async_data);
 static void lets_output_open6(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 static void lets_output_destroy6(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 static void lets_output_repair6(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
-static void lets_output_insert2(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
+static void lets_output_insert2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 static void lets_async_insert2(void* async_data);
-static void lets_output_insert3(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
+static void lets_output_insert3(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 static void lets_async_insert3(void* async_data);
-// static void lets_output_insert_new2(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
+// static void lets_output_insert_new2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 // static void lets_async_insert_new2(void* async_data);
-// static void lets_output_insert_new3(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
+// static void lets_output_insert_new3(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 // static void lets_async_insert_new3(void* async_data);
-static void lets_output_delete1(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
+static void lets_output_delete1(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 static void lets_async_delete1(void* async_data);
-static void lets_output_delete2(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
+static void lets_output_delete2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 static void lets_async_delete2(void* async_data);
-static void lets_output_delete_all_objects1(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
-static void lets_async_delete_all_objects1(void* async_data);
-static void lets_output_lookup2(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
+// static void lets_output_delete_all_objects1(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
+// static void lets_async_delete_all_objects1(void* async_data);
+static void lets_output_lookup2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 static void lets_async_lookup2(void* async_data);
-static void lets_output_member2(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
+static void lets_output_member2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 static void lets_async_member2(void* async_data);
-static void lets_output_first1(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
+static void lets_output_first1(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 static void lets_async_first1(void* async_data);
-static void lets_output_first_iter1(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
+static void lets_output_first_iter1(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 static void lets_async_first_iter1(void* async_data);
-static void lets_output_last1(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
+static void lets_output_last1(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 static void lets_async_last1(void* async_data);
-static void lets_output_last_iter1(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
+static void lets_output_last_iter1(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 static void lets_async_last_iter1(void* async_data);
-static void lets_output_next2(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
+static void lets_output_next2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 static void lets_async_next2(void* async_data);
-static void lets_output_next_iter2(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
+static void lets_output_next_iter2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 static void lets_async_next_iter2(void* async_data);
-static void lets_output_prev2(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
+static void lets_output_prev2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 static void lets_async_prev2(void* async_data);
-static void lets_output_prev_iter2(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
+static void lets_output_prev_iter2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 static void lets_async_prev_iter2(void* async_data);
-// static void lets_output_info_memory1(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
+// static void lets_output_info_memory1(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 // static void lets_async_info_memory1(void* async_data);
-// static void lets_output_info_size1(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
+// static void lets_output_info_size1(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 // static void lets_async_info_size1(void* async_data);
 
 static void
@@ -279,7 +274,7 @@ drv_stop(ErlDrvData handle)
     d->impl.alive = 0;
 
     // db
-    d->impl.db.reset();
+    delete d->impl.db;
 
     // db_block_cache
     delete d->impl.db_block_cache;
@@ -351,156 +346,99 @@ drv_output(ErlDrvData handle, char* buf, ErlDrvSizeT len)
         lets_output_repair6(d, buf, len, &index, items);
         break;
     case LETS_INSERT2:
-        {
-            lets_impl::DBPtr db = d->impl.db;
-            ng = (items != 1 || !d->impl.alive);
-            if (ng) GOTOBADARG;
-            lets_output_insert2(db, d, buf, len, &index, items);
-        }
+        ng = (items != 1 || !d->impl.alive);
+        if (ng) GOTOBADARG;
+        lets_output_insert2(d, buf, len, &index, items);
         break;
     case LETS_INSERT3:
-        {
-            lets_impl::DBPtr db = d->impl.db;
-            ng = (items != 2 || !d->impl.alive);
-            if (ng) GOTOBADARG;
-            lets_output_insert3(db, d, buf, len, &index, items);
-        }
+        ng = (items != 2 || !d->impl.alive);
+        if (ng) GOTOBADARG;
+        lets_output_insert3(d, buf, len, &index, items);
         break;
     case LETS_INSERT_NEW2:
-        {
-            lets_impl::DBPtr db = d->impl.db;
-            ng = (items != 1 || !d->impl.alive);
-            if (ng) GOTOBADARG;
-            GOTOBADARG;
-        }
+        ng = (items != 1 || !d->impl.alive);
+        if (ng) GOTOBADARG;
+        GOTOBADARG;
         break;
     case LETS_INSERT_NEW3:
-        {
-            lets_impl::DBPtr db = d->impl.db;
-            ng = (items != 2 || !d->impl.alive);
-            if (ng) GOTOBADARG;
-            GOTOBADARG;
-        }
+        ng = (items != 2 || !d->impl.alive);
+        if (ng) GOTOBADARG;
+        GOTOBADARG;
         break;
     case LETS_DELETE1:
-        {
-            lets_impl::DBPtr db = d->impl.db;
-            ng = (items != 0 || !d->impl.alive);
-            if (ng) GOTOBADARG;
-            lets_output_delete1(db, d, buf, len, &index, items);
-        }
+        ng = (items != 0 || !d->impl.alive);
+        if (ng) GOTOBADARG;
+        lets_output_delete1(d, buf, len, &index, items);
         break;
     case LETS_DELETE2:
-        {
-            lets_impl::DBPtr db = d->impl.db;
-            ng = (items != 1 || !d->impl.alive);
-            if (ng) GOTOBADARG;
-            lets_output_delete2(db, d, buf, len, &index, items);
-        }
+        ng = (items != 1 || !d->impl.alive);
+        if (ng) GOTOBADARG;
+        lets_output_delete2(d, buf, len, &index, items);
         break;
     case LETS_DELETE_ALL_OBJECTS1:
-        {
-            lets_impl::DBPtr db = d->impl.db;
-            ng = (items != 0 || !d->impl.alive);
-            if (ng) GOTOBADARG;
-            lets_output_delete_all_objects1(db, d, buf, len, &index, items);
-        }
+        ng = (items != 0 || !d->impl.alive);
+        if (ng) GOTOBADARG;
+        GOTOBADARG;
         break;
     case LETS_LOOKUP2:
-        {
-            lets_impl::DBPtr db = d->impl.db;
-            ng = (items != 1 || !d->impl.alive);
-            if (ng) GOTOBADARG;
-            lets_output_lookup2(db, d, buf, len, &index, items);
-        }
+        ng = (items != 1 || !d->impl.alive);
+        if (ng) GOTOBADARG;
+        lets_output_lookup2(d, buf, len, &index, items);
         break;
     case LETS_MEMBER2:
-        {
-            lets_impl::DBPtr db = d->impl.db;
-            ng = (items != 1 || !d->impl.alive);
-            if (ng) GOTOBADARG;
-            lets_output_member2(db, d, buf, len, &index, items);
-        }
+        ng = (items != 1 || !d->impl.alive);
+        if (ng) GOTOBADARG;
+        lets_output_member2(d, buf, len, &index, items);
         break;
     case LETS_FIRST1:
-        {
-            lets_impl::DBPtr db = d->impl.db;
-            ng = (items != 0 || !d->impl.alive);
-            if (ng) GOTOBADARG;
-            lets_output_first1(db, d, buf, len, &index, items);
-        }
+        ng = (items != 0 || !d->impl.alive);
+        if (ng) GOTOBADARG;
+        lets_output_first1(d, buf, len, &index, items);
         break;
     case LETS_FIRST_ITER1:
-        {
-            lets_impl::DBPtr db = d->impl.db;
-            ng = (items != 0 || !d->impl.alive);
-            if (ng) GOTOBADARG;
-            lets_output_first_iter1(db, d, buf, len, &index, items);
-        }
+        ng = (items != 0 || !d->impl.alive);
+        if (ng) GOTOBADARG;
+        lets_output_first_iter1(d, buf, len, &index, items);
         break;
     case LETS_LAST1:
-        {
-            lets_impl::DBPtr db = d->impl.db;
-            ng = (items != 0 || !d->impl.alive);
-            if (ng) GOTOBADARG;
-            lets_output_last1(db, d, buf, len, &index, items);
-        }
+        ng = (items != 0 || !d->impl.alive);
+        if (ng) GOTOBADARG;
+        lets_output_last1(d, buf, len, &index, items);
         break;
     case LETS_LAST_ITER1:
-        {
-            lets_impl::DBPtr db = d->impl.db;
-            ng = (items != 0 || !d->impl.alive);
-            if (ng) GOTOBADARG;
-            lets_output_last_iter1(db, d, buf, len, &index, items);
-        }
+        ng = (items != 0 || !d->impl.alive);
+        if (ng) GOTOBADARG;
+        lets_output_last_iter1(d, buf, len, &index, items);
         break;
     case LETS_NEXT2:
-        {
-            lets_impl::DBPtr db = d->impl.db;
-            ng = (items != 1 || !d->impl.alive);
-            if (ng) GOTOBADARG;
-            lets_output_next2(db, d, buf, len, &index, items);
-        }
+        ng = (items != 1 || !d->impl.alive);
+        if (ng) GOTOBADARG;
+        lets_output_next2(d, buf, len, &index, items);
         break;
     case LETS_NEXT_ITER2:
-        {
-            lets_impl::DBPtr db = d->impl.db;
-            ng = (items != 1 || !d->impl.alive);
-            if (ng) GOTOBADARG;
-            lets_output_next_iter2(db, d, buf, len, &index, items);
-        }
+        ng = (items != 1 || !d->impl.alive);
+        if (ng) GOTOBADARG;
+        lets_output_next_iter2(d, buf, len, &index, items);
         break;
     case LETS_PREV2:
-        {
-            lets_impl::DBPtr db = d->impl.db;
-            ng = (items != 1 || !d->impl.alive);
-            if (ng) GOTOBADARG;
-            lets_output_prev2(db, d, buf, len, &index, items);
-        }
+        ng = (items != 1 || !d->impl.alive);
+        if (ng) GOTOBADARG;
+        lets_output_prev2(d, buf, len, &index, items);
         break;
     case LETS_PREV_ITER2:
-        {
-            lets_impl::DBPtr db = d->impl.db;
-            ng = (items != 1 || !d->impl.alive);
-            if (ng) GOTOBADARG;
-            lets_output_prev_iter2(db, d, buf, len, &index, items);
-        }
+        ng = (items != 1 || !d->impl.alive);
+        if (ng) GOTOBADARG;
+        lets_output_prev_iter2(d, buf, len, &index, items);
         break;
     case LETS_INFO_MEMORY1:
-        {
-            lets_impl::DBPtr db = d->impl.db;
-            ng = (items != 0 || !d->impl.alive);
-            if (ng) GOTOBADARG;
-            GOTOBADARG;
-        }
+        ng = (items != 0 || !d->impl.alive);
+        if (ng) GOTOBADARG;
+        GOTOBADARG;
         break;
     case LETS_INFO_SIZE1:
-        {
-            lets_impl::DBPtr db = d->impl.db;
-            ng = (items != 0 || !d->impl.alive);
-            if (ng) GOTOBADARG;
-            GOTOBADARG;
-        }
+        ng = (items != 0 || !d->impl.alive);
+        if (ng) GOTOBADARG;
+        GOTOBADARG;
         break;
     default:
         GOTOBADARG;
@@ -688,7 +626,7 @@ lets_output_repair6(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int item
 }
 
 static void
-lets_output_insert2(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
+lets_output_insert2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
     (void) len;
 
@@ -710,7 +648,7 @@ lets_output_insert2(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len
     }
 
     if (d->impl.async) {
-        drv_async = new DrvAsync(db, d, driver_caller(d->port), LETS_INSERT2);
+        drv_async = new DrvAsync(d, driver_caller(d->port), LETS_INSERT2);
         if (!drv_async) {
             GOTOBADARG;
         }
@@ -744,7 +682,7 @@ lets_output_insert2(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len
     if (drv_async) {
         driver_async(d->port, NULL, lets_async_insert2, drv_async, drv_async_free);
     } else {
-        status = db->Write(d->impl.db_write_options, &batch);
+        status = d->impl.db->Write(d->impl.db_write_options, &batch);
         if (!status.ok()) {
             GOTOBADARG;
         }
@@ -766,7 +704,7 @@ lets_async_insert2(void* async_data)
     assert(a != NULL);
     DrvData* d = a->drvdata;
 
-    leveldb::Status status = a->db->Write(d->impl.db_write_options, &(a->batch));
+    leveldb::Status status = d->impl.db->Write(d->impl.db_write_options, &(a->batch));
     if (!status.ok()) {
         a->reply = LETS_BADARG;
     } else {
@@ -775,7 +713,7 @@ lets_async_insert2(void* async_data)
 }
 
 static void
-lets_output_insert3(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
+lets_output_insert3(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
     (void) len;
     (void) items;
@@ -795,7 +733,7 @@ lets_output_insert3(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len
     if (ng) GOTOBADARG;
 
     if (d->impl.async) {
-        drv_async = new DrvAsync(db, d, driver_caller(d->port), LETS_INSERT3);
+        drv_async = new DrvAsync(d, driver_caller(d->port), LETS_INSERT3);
         if (!drv_async) {
             GOTOBADARG;
         }
@@ -809,7 +747,7 @@ lets_output_insert3(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len
     if (drv_async) {
         driver_async(d->port, NULL, lets_async_insert3, drv_async, drv_async_free);
     } else {
-        status = db->Write(d->impl.db_write_options, &batch);
+        status = d->impl.db->Write(d->impl.db_write_options, &batch);
         if (!status.ok()) {
             GOTOBADARG;
         }
@@ -831,7 +769,7 @@ lets_async_insert3(void* async_data)
     assert(a != NULL);
     DrvData* d = a->drvdata;
 
-    leveldb::Status status = a->db->Write(d->impl.db_write_options, &(a->batch));
+    leveldb::Status status = d->impl.db->Write(d->impl.db_write_options, &(a->batch));
     if (!status.ok()) {
         a->reply = LETS_BADARG;
     } else {
@@ -840,7 +778,7 @@ lets_async_insert3(void* async_data)
 }
 
 static void
-lets_output_delete1(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
+lets_output_delete1(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
     (void) buf;
     (void) len;
@@ -856,20 +794,21 @@ lets_output_delete1(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len
     d->impl.alive = 0;
 
     if (d->impl.async) {
-        drv_async = new DrvAsync(db, d, driver_caller(d->port), LETS_DELETE1);
+        drv_async = new DrvAsync(d, driver_caller(d->port), LETS_DELETE1);
         if (!drv_async) {
             GOTOBADARG;
         }
         driver_async(d->port, NULL, lets_async_delete1, drv_async, drv_async_free);
     } else {
         db_write_options.sync = true;
-        status = db->Write(db_write_options, &batch);
+        status = d->impl.db->Write(db_write_options, &batch);
         if (!status.ok()) {
             GOTOBADARG;
         }
 
-        d->impl.db.reset();
-        db.reset();
+        // @TBD This is quite risky ... need to re-consider.
+        // delete d->impl.db;
+        // d->impl.db = NULL;
 
         driver_send_int(d, LETS_TRUE);
     }
@@ -891,18 +830,19 @@ lets_async_delete1(void* async_data)
     leveldb::WriteOptions db_write_options;
     leveldb::WriteBatch batch;
     db_write_options.sync = true;
-    leveldb::Status status = a->db->Write(d->impl.db_write_options, &batch);
+    leveldb::Status status = d->impl.db->Write(d->impl.db_write_options, &batch);
     if (!status.ok()) {
         a->reply = LETS_BADARG;
     } else {
-        d->impl.db.reset();
-        a->db.reset();
+        // @TBD This is quite risky ... need to re-consider.
+        // delete d->impl.db;
+        // d->impl.db = NULL;
         a->reply = LETS_TRUE;
     }
 }
 
 static void
-lets_output_delete2(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
+lets_output_delete2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
     (void) len;
     (void) items;
@@ -918,7 +858,7 @@ lets_output_delete2(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len
     if (ng) GOTOBADARG;
 
     if (d->impl.async) {
-        drv_async = new DrvAsync(db, d, driver_caller(d->port), LETS_INSERT2);
+        drv_async = new DrvAsync(d, driver_caller(d->port), LETS_INSERT2);
         if (!drv_async) {
             GOTOBADARG;
         }
@@ -931,7 +871,7 @@ lets_output_delete2(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len
     if (drv_async) {
         driver_async(d->port, NULL, lets_async_delete2, drv_async, drv_async_free);
     } else {
-        status = db->Write(d->impl.db_write_options, &batch);
+        status = d->impl.db->Write(d->impl.db_write_options, &batch);
         if (!status.ok()) {
             GOTOBADARG;
         }
@@ -953,7 +893,7 @@ lets_async_delete2(void* async_data)
     assert(a != NULL);
     DrvData* d = a->drvdata;
 
-    leveldb::Status status = a->db->Write(d->impl.db_write_options, &(a->batch));
+    leveldb::Status status = d->impl.db->Write(d->impl.db_write_options, &(a->batch));
     if (!status.ok()) {
         a->reply = LETS_BADARG;
     } else {
@@ -962,60 +902,7 @@ lets_async_delete2(void* async_data)
 }
 
 static void
-lets_output_delete_all_objects1(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
-{
-    (void) buf;
-    (void) len;
-    (void) index;
-    (void) items;
-
-    DrvAsync* drv_async = NULL;
-    leveldb::WriteOptions db_write_options;
-    leveldb::WriteBatch batch;
-    leveldb::Status status;
-
-    if (d->impl.async) {
-        drv_async = new DrvAsync(db, d, driver_caller(d->port), LETS_DELETE_ALL_OBJECTS1);
-        if (!drv_async) {
-            GOTOBADARG;
-        }
-        driver_async(d->port, NULL, lets_async_delete_all_objects1, drv_async, drv_async_free);
-    } else {
-        if (!lets_create(d->impl, DELETEALL)) {
-            GOTOBADARG;
-        } else {
-            db = d->impl.db;
-        }
-
-        driver_send_int(d, LETS_TRUE);
-    }
-    return;
-
- badarg:
-    if (drv_async) { delete drv_async; }
-    driver_send_int(d, LETS_BADARG);
-    return;
-}
-
-static void
-lets_async_delete_all_objects1(void* async_data)
-{
-    DrvAsync* a = (DrvAsync*) async_data;
-    assert(a != NULL);
-    DrvData* d = a->drvdata;
-
-    if (!lets_create(d->impl, DELETEALL)) {
-        a->reply = LETS_BADARG;
-        return;
-    } else {
-        a->db = d->impl.db;
-    }
-
-    a->reply = LETS_TRUE;
-}
-
-static void
-lets_output_lookup2(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
+lets_output_lookup2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
     (void) len;
     (void) items;
@@ -1029,13 +916,13 @@ lets_output_lookup2(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len
     if (ng) GOTOBADARG;
 
     if (d->impl.async) {
-        drv_async = new DrvAsync(db, d, driver_caller(d->port), LETS_LOOKUP2, (const char*) key, keylen);
+        drv_async = new DrvAsync(d, driver_caller(d->port), LETS_LOOKUP2, (const char*) key, keylen);
         if (!drv_async) {
             GOTOBADARG;
         }
         driver_async(d->port, NULL, lets_async_lookup2, drv_async, drv_async_free);
     } else {
-        leveldb::Iterator* it = db->NewIterator(d->impl.db_read_options);
+        leveldb::Iterator* it = d->impl.db->NewIterator(d->impl.db_read_options);
         if (!it) {
             GOTOBADARG;
         }
@@ -1066,7 +953,7 @@ lets_async_lookup2(void* async_data)
     assert(a != NULL);
     DrvData* d = a->drvdata;
 
-    leveldb::Iterator* it = a->db->NewIterator(d->impl.db_read_options);
+    leveldb::Iterator* it = d->impl.db->NewIterator(d->impl.db_read_options);
     if (!it) {
         a->reply = LETS_BADARG;
         return;
@@ -1093,7 +980,7 @@ lets_async_lookup2(void* async_data)
 }
 
 static void
-lets_output_member2(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
+lets_output_member2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
     (void) len;
     (void) items;
@@ -1107,13 +994,13 @@ lets_output_member2(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len
     if (ng) GOTOBADARG;
 
     if (d->impl.async) {
-        drv_async = new DrvAsync(db, d, driver_caller(d->port), LETS_MEMBER2, (const char*) key, keylen);
+        drv_async = new DrvAsync(d, driver_caller(d->port), LETS_MEMBER2, (const char*) key, keylen);
         if (!drv_async) {
             GOTOBADARG;
         }
         driver_async(d->port, NULL, lets_async_member2, drv_async, drv_async_free);
     } else {
-        leveldb::Iterator* it = db->NewIterator(d->impl.db_read_options);
+        leveldb::Iterator* it = d->impl.db->NewIterator(d->impl.db_read_options);
         if (!it) {
             GOTOBADARG;
         }
@@ -1144,7 +1031,7 @@ lets_async_member2(void* async_data)
     assert(a != NULL);
     DrvData* d = a->drvdata;
 
-    leveldb::Iterator* it = a->db->NewIterator(d->impl.db_read_options);
+    leveldb::Iterator* it = d->impl.db->NewIterator(d->impl.db_read_options);
     if (!it) {
         a->reply = LETS_BADARG;
         return;
@@ -1163,7 +1050,7 @@ lets_async_member2(void* async_data)
 }
 
 static void
-lets_output_first1(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
+lets_output_first1(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
     (void) buf;
     (void) len;
@@ -1173,13 +1060,13 @@ lets_output_first1(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len,
     DrvAsync* drv_async = NULL;
 
     if (d->impl.async) {
-        drv_async = new DrvAsync(db, d, driver_caller(d->port), LETS_FIRST1);
+        drv_async = new DrvAsync(d, driver_caller(d->port), LETS_FIRST1);
         if (!drv_async) {
             GOTOBADARG;
         }
         driver_async(d->port, NULL, lets_async_first1, drv_async, drv_async_free);
     } else  {
-        leveldb::Iterator* it = db->NewIterator(d->impl.db_read_options);
+        leveldb::Iterator* it = d->impl.db->NewIterator(d->impl.db_read_options);
         if (!it) {
             GOTOBADARG;
         }
@@ -1209,7 +1096,7 @@ lets_async_first1(void* async_data)
     assert(a != NULL);
     DrvData* d = a->drvdata;
 
-    leveldb::Iterator* it = a->db->NewIterator(d->impl.db_read_options);
+    leveldb::Iterator* it = d->impl.db->NewIterator(d->impl.db_read_options);
     if (!it) {
         a->reply = LETS_BADARG;
         return;
@@ -1235,7 +1122,7 @@ lets_async_first1(void* async_data)
 }
 
 static void
-lets_output_first_iter1(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
+lets_output_first_iter1(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
     (void) buf;
     (void) len;
@@ -1245,13 +1132,13 @@ lets_output_first_iter1(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT
     DrvAsync* drv_async = NULL;
 
     if (d->impl.async) {
-        drv_async = new DrvAsync(db, d, driver_caller(d->port), LETS_FIRST_ITER1);
+        drv_async = new DrvAsync(d, driver_caller(d->port), LETS_FIRST_ITER1);
         if (!drv_async) {
             GOTOBADARG;
         }
         driver_async(d->port, NULL, lets_async_first_iter1, drv_async, drv_async_free);
     } else  {
-        leveldb::Iterator* it = db->NewIterator(d->impl.db_read_options);
+        leveldb::Iterator* it = d->impl.db->NewIterator(d->impl.db_read_options);
         if (!it) {
             GOTOBADARG;
         }
@@ -1281,7 +1168,7 @@ lets_async_first_iter1(void* async_data)
     assert(a != NULL);
     DrvData* d = a->drvdata;
 
-    leveldb::Iterator* it = a->db->NewIterator(d->impl.db_read_options);
+    leveldb::Iterator* it = d->impl.db->NewIterator(d->impl.db_read_options);
     if (!it) {
         a->reply = LETS_BADARG;
         return;
@@ -1307,7 +1194,7 @@ lets_async_first_iter1(void* async_data)
 }
 
 static void
-lets_output_last1(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
+lets_output_last1(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
     (void) buf;
     (void) len;
@@ -1317,13 +1204,13 @@ lets_output_last1(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, 
     DrvAsync* drv_async = NULL;
 
     if (d->impl.async) {
-        drv_async = new DrvAsync(db, d, driver_caller(d->port), LETS_LAST1);
+        drv_async = new DrvAsync(d, driver_caller(d->port), LETS_LAST1);
         if (!drv_async) {
             GOTOBADARG;
         }
         driver_async(d->port, NULL, lets_async_last1, drv_async, drv_async_free);
     } else  {
-        leveldb::Iterator* it = db->NewIterator(d->impl.db_read_options);
+        leveldb::Iterator* it = d->impl.db->NewIterator(d->impl.db_read_options);
         if (!it) {
             GOTOBADARG;
         }
@@ -1353,7 +1240,7 @@ lets_async_last1(void* async_data)
     assert(a != NULL);
     DrvData* d = a->drvdata;
 
-    leveldb::Iterator* it = a->db->NewIterator(d->impl.db_read_options);
+    leveldb::Iterator* it = d->impl.db->NewIterator(d->impl.db_read_options);
     if (!it) {
         a->reply = LETS_BADARG;
         return;
@@ -1380,7 +1267,7 @@ lets_async_last1(void* async_data)
 
 
 static void
-lets_output_last_iter1(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
+lets_output_last_iter1(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
     (void) buf;
     (void) len;
@@ -1390,13 +1277,13 @@ lets_output_last_iter1(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT 
     DrvAsync* drv_async = NULL;
 
     if (d->impl.async) {
-        drv_async = new DrvAsync(db, d, driver_caller(d->port), LETS_LAST_ITER1);
+        drv_async = new DrvAsync(d, driver_caller(d->port), LETS_LAST_ITER1);
         if (!drv_async) {
             GOTOBADARG;
         }
         driver_async(d->port, NULL, lets_async_last_iter1, drv_async, drv_async_free);
     } else  {
-        leveldb::Iterator* it = db->NewIterator(d->impl.db_read_options);
+        leveldb::Iterator* it = d->impl.db->NewIterator(d->impl.db_read_options);
         if (!it) {
             GOTOBADARG;
         }
@@ -1426,7 +1313,7 @@ lets_async_last_iter1(void* async_data)
     assert(a != NULL);
     DrvData* d = a->drvdata;
 
-    leveldb::Iterator* it = a->db->NewIterator(d->impl.db_read_options);
+    leveldb::Iterator* it = d->impl.db->NewIterator(d->impl.db_read_options);
     if (!it) {
         a->reply = LETS_BADARG;
         return;
@@ -1452,7 +1339,7 @@ lets_async_last_iter1(void* async_data)
 }
 
 static void
-lets_output_next2(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
+lets_output_next2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
     (void) len;
     (void) items;
@@ -1466,13 +1353,13 @@ lets_output_next2(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, 
     if (ng) GOTOBADARG;
 
     if (d->impl.async) {
-        drv_async = new DrvAsync(db, d, driver_caller(d->port), LETS_NEXT2, (const char*) key, keylen);
+        drv_async = new DrvAsync(d, driver_caller(d->port), LETS_NEXT2, (const char*) key, keylen);
         if (!drv_async) {
             GOTOBADARG;
         }
         driver_async(d->port, NULL, lets_async_next2, drv_async, drv_async_free);
     } else {
-        leveldb::Iterator* it = db->NewIterator(d->impl.db_read_options);
+        leveldb::Iterator* it = d->impl.db->NewIterator(d->impl.db_read_options);
         if (!it) {
             GOTOBADARG;
         }
@@ -1511,7 +1398,7 @@ lets_async_next2(void* async_data)
     assert(a != NULL);
     DrvData* d = a->drvdata;
 
-    leveldb::Iterator* it = a->db->NewIterator(d->impl.db_read_options);
+    leveldb::Iterator* it = d->impl.db->NewIterator(d->impl.db_read_options);
     if (!it) {
         a->reply = LETS_BADARG;
         return;
@@ -1548,7 +1435,7 @@ lets_async_next2(void* async_data)
 
 
 static void
-lets_output_next_iter2(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
+lets_output_next_iter2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
     (void) len;
     (void) items;
@@ -1562,13 +1449,13 @@ lets_output_next_iter2(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT 
     if (ng) GOTOBADARG;
 
     if (d->impl.async) {
-        drv_async = new DrvAsync(db, d, driver_caller(d->port), LETS_NEXT_ITER2, (const char*) key, keylen);
+        drv_async = new DrvAsync(d, driver_caller(d->port), LETS_NEXT_ITER2, (const char*) key, keylen);
         if (!drv_async) {
             GOTOBADARG;
         }
         driver_async(d->port, NULL, lets_async_next_iter2, drv_async, drv_async_free);
     } else {
-        leveldb::Iterator* it = db->NewIterator(d->impl.db_read_options);
+        leveldb::Iterator* it = d->impl.db->NewIterator(d->impl.db_read_options);
         if (!it) {
             GOTOBADARG;
         }
@@ -1607,7 +1494,7 @@ lets_async_next_iter2(void* async_data)
     assert(a != NULL);
     DrvData* d = a->drvdata;
 
-    leveldb::Iterator* it = a->db->NewIterator(d->impl.db_read_options);
+    leveldb::Iterator* it = d->impl.db->NewIterator(d->impl.db_read_options);
     if (!it) {
         a->reply = LETS_BADARG;
         return;
@@ -1643,7 +1530,7 @@ lets_async_next_iter2(void* async_data)
 }
 
 static void
-lets_output_prev2(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
+lets_output_prev2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
     (void) len;
     (void) items;
@@ -1657,13 +1544,13 @@ lets_output_prev2(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, 
     if (ng) GOTOBADARG;
 
     if (d->impl.async) {
-        drv_async = new DrvAsync(db, d, driver_caller(d->port), LETS_PREV2, (const char*) key, keylen);
+        drv_async = new DrvAsync(d, driver_caller(d->port), LETS_PREV2, (const char*) key, keylen);
         if (!drv_async) {
             GOTOBADARG;
         }
         driver_async(d->port, NULL, lets_async_prev2, drv_async, drv_async_free);
     } else {
-        leveldb::Iterator* it = db->NewIterator(d->impl.db_read_options);
+        leveldb::Iterator* it = d->impl.db->NewIterator(d->impl.db_read_options);
         if (!it) {
             GOTOBADARG;
         }
@@ -1699,7 +1586,7 @@ lets_async_prev2(void* async_data)
     assert(a != NULL);
     DrvData* d = a->drvdata;
 
-    leveldb::Iterator* it = a->db->NewIterator(d->impl.db_read_options);
+    leveldb::Iterator* it = d->impl.db->NewIterator(d->impl.db_read_options);
     if (!it) {
         a->reply = LETS_BADARG;
         return;
@@ -1732,7 +1619,7 @@ lets_async_prev2(void* async_data)
 }
 
 static void
-lets_output_prev_iter2(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
+lets_output_prev_iter2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
     (void) len;
     (void) items;
@@ -1746,13 +1633,13 @@ lets_output_prev_iter2(lets_impl::DBPtr& db, DrvData* d, char* buf, ErlDrvSizeT 
     if (ng) GOTOBADARG;
 
     if (d->impl.async) {
-        drv_async = new DrvAsync(db, d, driver_caller(d->port), LETS_PREV_ITER2, (const char*) key, keylen);
+        drv_async = new DrvAsync(d, driver_caller(d->port), LETS_PREV_ITER2, (const char*) key, keylen);
         if (!drv_async) {
             GOTOBADARG;
         }
         driver_async(d->port, NULL, lets_async_prev_iter2, drv_async, drv_async_free);
     } else {
-        leveldb::Iterator* it = db->NewIterator(d->impl.db_read_options);
+        leveldb::Iterator* it = d->impl.db->NewIterator(d->impl.db_read_options);
         if (!it) {
             GOTOBADARG;
         }
@@ -1788,7 +1675,7 @@ lets_async_prev_iter2(void* async_data)
     assert(a != NULL);
     DrvData* d = a->drvdata;
 
-    leveldb::Iterator* it = a->db->NewIterator(d->impl.db_read_options);
+    leveldb::Iterator* it = d->impl.db->NewIterator(d->impl.db_read_options);
     if (!it) {
         a->reply = LETS_BADARG;
         return;

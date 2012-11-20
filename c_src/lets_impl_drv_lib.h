@@ -24,7 +24,6 @@
 #define LETS_DRV_LIB_H
 
 #include <string>
-#include <boost/shared_ptr.hpp>
 
 #include "leveldb/db.h"
 #include "leveldb/cache.h"
@@ -57,14 +56,11 @@ extern "C" {
     enum DBOpType {
         OPEN        = 0x0,
         DESTROY     = 0x1,
-        REPAIR      = 0x2,
-        DELETEALL   = 0x3
+        REPAIR      = 0x2
     };
 
     typedef struct
     {
-        typedef boost::shared_ptr<leveldb::DB> DBPtr;
-
         bool async;
         bool alive;
         char type;
@@ -77,7 +73,7 @@ extern "C" {
         leveldb::Cache* db_block_cache;
         int db_filter_policy_bloom_bits_per_key;
         const leveldb::FilterPolicy* db_filter_policy;
-        DBPtr db;
+        leveldb::DB* db;
         ErlDrvUInt64 db_memory;
         ErlDrvUInt64 db_size;
     } lets_impl;

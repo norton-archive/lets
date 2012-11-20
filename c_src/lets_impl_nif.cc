@@ -83,7 +83,7 @@ lets_impl_nif_resource_dtor(ErlNifEnv* env, void* arg)
     h->impl.alive = 0;
 
     // db
-    h->impl.db.reset();
+    delete h->impl.db;
 
     // db_block_cache
     delete h->impl.db_block_cache;
@@ -272,7 +272,6 @@ lets_impl_nif_insert2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     }
     list = argv[1];
 
-    lets_impl::DBPtr db = h->impl.db;
     if (!h->impl.alive) {
         return MAKEBADARG(env, status);
     }
@@ -295,7 +294,7 @@ lets_impl_nif_insert2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         list = tail;
     }
 
-    status = db->Write(h->impl.db_write_options, &batch);
+    status = h->impl.db->Write(h->impl.db_write_options, &batch);
     if (!status.ok()) {
         return MAKEBADARG(env, status);
     }
@@ -324,7 +323,6 @@ lets_impl_nif_insert3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         return MAKEBADARG(env, status);
     }
 
-    lets_impl::DBPtr db = h->impl.db;
     if (!h->impl.alive) {
         return MAKEBADARG(env, status);
     }
@@ -333,7 +331,7 @@ lets_impl_nif_insert3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     leveldb::Slice sblob((const char*) blob.data, blob.size);
     batch.Put(skey, sblob);
 
-    status = db->Write(h->impl.db_write_options, &batch);
+    status = h->impl.db->Write(h->impl.db_write_options, &batch);
     if (!status.ok()) {
         return MAKEBADARG(env, status);
     }
@@ -377,7 +375,6 @@ lets_impl_nif_delete1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         return MAKEBADARG(env, status);
     }
 
-    lets_impl::DBPtr db = h->impl.db;
     if (!h->impl.alive) {
         return MAKEBADARG(env, status);
     }
@@ -386,13 +383,14 @@ lets_impl_nif_delete1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     h->impl.alive = 0;
 
     db_write_options.sync = true;
-    status = db->Write(db_write_options, &batch);
+    status = h->impl.db->Write(db_write_options, &batch);
     if (!status.ok()) {
         return MAKEBADARG(env, status);
     }
 
-    h->impl.db.reset();
-    db.reset();
+    // @TBD This is quite risky ... need to re-consider.
+    // delete h->impl.db;
+    // h->impl.db = NULL;
 
     return lets_atom_true;
 }
@@ -414,7 +412,6 @@ lets_impl_nif_delete2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         return MAKEBADARG(env, status);
     }
 
-    lets_impl::DBPtr db = h->impl.db;
     if (!h->impl.alive) {
         return MAKEBADARG(env, status);
     }
@@ -422,7 +419,7 @@ lets_impl_nif_delete2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     leveldb::Slice skey((const char*) key.data, key.size);
     batch.Delete(skey);
 
-    status = db->Write(h->impl.db_write_options, &batch);
+    status = h->impl.db->Write(h->impl.db_write_options, &batch);
     if (!status.ok()) {
         return MAKEBADARG(env, status);
     }
@@ -434,19 +431,11 @@ ERL_NIF_TERM
 lets_impl_nif_delete_all_objects1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
+    (void) argv;
 
-    lets_impl_nif_handle* h;
     leveldb::Status status;
-
-    if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
-        return MAKEBADARG(env, status);
-    }
-
-    if (!lets_create(h->impl, DELETEALL)) {
-        return MAKEBADARG(env, status);
-    }
-
-    return lets_atom_true;
+    // @TODO not supported by leveldb
+    return MAKEBADARG(env, status);
 }
 
 ERL_NIF_TERM
@@ -466,12 +455,11 @@ lets_impl_nif_lookup2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         return MAKEBADARG(env, status);
     }
 
-    lets_impl::DBPtr db = h->impl.db;
     if (!h->impl.alive) {
         return MAKEBADARG(env, status);
     }
 
-    leveldb::Iterator* it = db->NewIterator(h->impl.db_read_options);
+    leveldb::Iterator* it = h->impl.db->NewIterator(h->impl.db_read_options);
     if (!it) {
         return MAKEBADARG(env, status);
     }
@@ -511,12 +499,11 @@ lets_impl_nif_member2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         return MAKEBADARG(env, status);
     }
 
-    lets_impl::DBPtr db = h->impl.db;
     if (!h->impl.alive) {
         return MAKEBADARG(env, status);
     }
 
-    leveldb::Iterator* it = db->NewIterator(h->impl.db_read_options);
+    leveldb::Iterator* it = h->impl.db->NewIterator(h->impl.db_read_options);
     if (!it) {
         return MAKEBADARG(env, status);
     }
@@ -545,12 +532,11 @@ lets_impl_nif_first1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         return MAKEBADARG(env, status);
     }
 
-    lets_impl::DBPtr db = h->impl.db;
     if (!h->impl.alive) {
         return MAKEBADARG(env, status);
     }
 
-    leveldb::Iterator* it = db->NewIterator(h->impl.db_read_options);
+    leveldb::Iterator* it = h->impl.db->NewIterator(h->impl.db_read_options);
     if (!it) {
         return MAKEBADARG(env, status);
     }
@@ -586,12 +572,11 @@ lets_impl_nif_first_iter1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         return MAKEBADARG(env, status);
     }
 
-    lets_impl::DBPtr db = h->impl.db;
     if (!h->impl.alive) {
         return MAKEBADARG(env, status);
     }
 
-    leveldb::Iterator* it = db->NewIterator(h->impl.db_read_options);
+    leveldb::Iterator* it = h->impl.db->NewIterator(h->impl.db_read_options);
     if (!it) {
         return MAKEBADARG(env, status);
     }
@@ -627,12 +612,11 @@ lets_impl_nif_last1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         return MAKEBADARG(env, status);
     }
 
-    lets_impl::DBPtr db = h->impl.db;
     if (!h->impl.alive) {
         return MAKEBADARG(env, status);
     }
 
-    leveldb::Iterator* it = db->NewIterator(h->impl.db_read_options);
+    leveldb::Iterator* it = h->impl.db->NewIterator(h->impl.db_read_options);
     if (!it) {
         return MAKEBADARG(env, status);
     }
@@ -668,12 +652,11 @@ lets_impl_nif_last_iter1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         return MAKEBADARG(env, status);
     }
 
-    lets_impl::DBPtr db = h->impl.db;
     if (!h->impl.alive) {
         return MAKEBADARG(env, status);
     }
 
-    leveldb::Iterator* it = db->NewIterator(h->impl.db_read_options);
+    leveldb::Iterator* it = h->impl.db->NewIterator(h->impl.db_read_options);
     if (!it) {
         return MAKEBADARG(env, status);
     }
@@ -713,12 +696,11 @@ lets_impl_nif_next2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         return MAKEBADARG(env, status);
     }
 
-    lets_impl::DBPtr db = h->impl.db;
     if (!h->impl.alive) {
         return MAKEBADARG(env, status);
     }
 
-    leveldb::Iterator* it = db->NewIterator(h->impl.db_read_options);
+    leveldb::Iterator* it = h->impl.db->NewIterator(h->impl.db_read_options);
     if (!it) {
         return MAKEBADARG(env, status);
     }
@@ -767,12 +749,11 @@ lets_impl_nif_next_iter2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         return MAKEBADARG(env, status);
     }
 
-    lets_impl::DBPtr db = h->impl.db;
     if (!h->impl.alive) {
         return MAKEBADARG(env, status);
     }
 
-    leveldb::Iterator* it = db->NewIterator(h->impl.db_read_options);
+    leveldb::Iterator* it = h->impl.db->NewIterator(h->impl.db_read_options);
     if (!it) {
         return MAKEBADARG(env, status);
     }
@@ -821,12 +802,11 @@ lets_impl_nif_prev2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         return MAKEBADARG(env, status);
     }
 
-    lets_impl::DBPtr db = h->impl.db;
     if (!h->impl.alive) {
         return MAKEBADARG(env, status);
     }
 
-    leveldb::Iterator* it = db->NewIterator(h->impl.db_read_options);
+    leveldb::Iterator* it = h->impl.db->NewIterator(h->impl.db_read_options);
     if (!it) {
         return MAKEBADARG(env, status);
     }
@@ -873,12 +853,11 @@ lets_impl_nif_prev_iter2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         return MAKEBADARG(env, status);
     }
 
-    lets_impl::DBPtr db = h->impl.db;
     if (!h->impl.alive) {
         return MAKEBADARG(env, status);
     }
 
-    leveldb::Iterator* it = db->NewIterator(h->impl.db_read_options);
+    leveldb::Iterator* it = h->impl.db->NewIterator(h->impl.db_read_options);
     if (!it) {
         return MAKEBADARG(env, status);
     }

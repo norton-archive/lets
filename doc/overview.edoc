@@ -17,7 +17,7 @@ supported ETS APIs are:
 
 - +delete/1+
 - +delete/2+
-- +delete_all_objects/1+
+- +delete_all_objects/1+ _only ets implementation_
 - +first/1+
 - +foldl/3+
 - +foldr/3+
@@ -372,7 +372,7 @@ true
   * +insert_new/2+
     (http://code.google.com/p/leveldb/issues/detail?id=42)
 
-  * Native LevelDB support for +delete_all_objects/1+
+  * +delete_all_objects/1+
     (http://code.google.com/p/leveldb/issues/detail?id=43)
 
   * Add custom (i.e. not supported by native ETS) APIs for providing
@@ -380,7 +380,7 @@ true
     implementations.
 
 - Existing APIs (TBD)
-  * Native LevelDB support for +delete/1+
+  * +delete/1+
     (http://code.google.com/p/leveldb/issues/detail?id=48)
 
   * +new/2+ -
