@@ -15,6 +15,7 @@ name of a LETS table can be any Erlang term.
 LETS is not intended to be an exact clone of ETS.  The currently
 supported ETS APIs are:
 
+- +all/0+
 - +delete/1+
 - +delete/2+
 - +delete_all_objects/1+ _only ets implementation_
@@ -69,9 +70,50 @@ $ mkdir working-directory-name
 $ cd working-directory-name
 $ git clone https://github.com/norton/lets.git lets
 $ cd lets
-$ ./rebar get-deps
-$ ./rebar clean
-$ ./rebar compile
+$ make deps clean compile
+------
+
+_OR_ if QuickCheck is available then follow this recipe:
+
+------
+$ mkdir working-directory-name
+$ cd working-directory-name
+$ git clone https://github.com/norton/lets.git lets
+$ cd lets
+$ make deps clean eqc
+$ (cd .qc; erl -smp +A 5 -pz ../deps/sext/ebin -pz ../deps/gen_ets/ebin -pz ../deps/qc/ebin)
+
+1> qc_statem_lets:qc_run(5000).
+....
+OK, passed 5000 tests
+
+9.022% {delete,ok}
+7.800% {new,ok}
+4.535% {match_delete,ok}
+4.491% {lookup,ok}
+4.399% {select,ok}
+4.352% {select_delete,ok}
+4.348% {tab2list,ok}
+4.341% {member,ok}
+4.334% {last,ok}
+4.315% {foldl,ok}
+4.308% {select_reverse,ok}
+4.301% {select_count,ok}
+4.293% {select31,ok}
+4.264% {first,ok}
+4.216% {foldr,ok}
+4.202% {match_object,ok}
+4.184% {match,ok}
+4.056% {insert,ok}
+3.997% {prev,ok}
+3.774% {next,ok}
+3.416% {lookup_element,{error,badarg}}
+1.298% {insert_new,ok}
+0.757% {lookup_element,ok}
+0.516% {next,{error,badarg}}
+0.483% {prev,{error,badarg}}
+true
+.......
 ------
 
 For an alternative recipe with other "features" albeit more complex,
@@ -151,20 +193,20 @@ $ cd working-directory-name
 $ repo sync
 ------
 
-For futher information and help for related tools, please refer to the
+For further information and help for related tools, please refer to the
 following links:
 
 - Erlang - http://www.erlang.org/
-  * *R14 or newer, R15B01 has been tested most recently*
+  * *R15 or newer, R15B02 has been tested most recently*
 - Git - http://git-scm.com/
-  * *Git 1.5.4 or newer, Git 1.7.10 has been tested recently*
+  * *Git 1.5.4 or newer, Git 1.8.0 has been tested most recently*
   * _required for Repo and GitHub_
 - GitHub - https://github.com
 - Python - http://www.python.org
-  * *Python 2.4 or newer, Python 2.7.1 has been tested most recently
+  * *Python 2.4 or newer, Python 2.7.2 has been tested most recently
     (CAUTION: Python 3.x might be too new)*
 * _required for Repo_
-  - Rebar - https://github.com/basho/rebar/wiki
+  - Rebar - https://github.com/rebar/rebar/wiki
   - Repo - http://source.android.com/source/git-repo.html
 
 == To build - basic recipe
@@ -225,13 +267,13 @@ true = code:add_pathz(os:getenv("HOME")++"/.erlang.d/deps/quviq/eqc-X.Y.Z/ebin")
 ------
 $ cd working-directory-name
 $ make clean
-$ make eqc-compile
+$ make compile-for-eqc
 ------
 
 3. Run 5,000 QuickCheck tests
 +
 ------
-$ cd working-directory-name/deps/lets/.eunit
+$ cd working-directory-name/deps/lets/.qc
 $ erl -smp +A 5 -pz ../../sext/ebin -pz ../../gen_ets/ebin -pz ../../qc/ebin
 
 1> qc_statem_lets:qc_run(5000).
@@ -285,13 +327,13 @@ true = code:add_pathz(os:getenv("HOME")++"/.erlang.d/deps/proper/ebin").
 ------
 $ cd working-directory-name
 $ make clean
-$ make proper-compile
+$ make compile-for-proper
 ------
 
 3. Run 5,000 PropEr tests
 +
 ------
-$ cd working-directory-name/deps/lets/.eunit
+$ cd working-directory-name/deps/lets/.qc
 $ erl -smp +A 5 -pz ../../sext/ebin -pz ../../gen_ets/ebin -pz ../../qc/ebin
 
 1> qc_statem_lets:qc_run(5000).
@@ -395,5 +437,4 @@ true
   * consider adding explicit read_options and write_options for LET\'s
     operations (rather than just +new/2+, +destroy/2+, and +repair/2+
     operations).
-
 @end
