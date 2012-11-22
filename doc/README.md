@@ -10,192 +10,198 @@ storage implementation.  LETS tries to address some bad properties of
 ETS and DETS.  ETS is limited by physical memory.  DETS is limited by
 a 2 GB file size limitation and does not implement ordered sets.  LETS
 has neither of these limitations.  Data can also be automatically
-compressed using the Snappy compression library.</p>
-<p>For testing and comparison purposes, LETS supports three
-implementations:</p>
-<ul>
-<li>
-<p>
-<tt>drv</tt> C++ Driver with LevelDB backend <em>(default)</em>
-</p>
-</li>
-<li>
-<p>
-<tt>nif</tt> C++ NIF with LevelDB backend
-</p>
-</li>
-<li>
-<p>
-<tt>ets</tt> Erlang ETS backend
-</p>
-</li>
-</ul>
+compressed using the Snappy compression library.  In addition, the
+name of a LETS table can be any Erlang term.</p>
 <p>LETS is not intended to be an exact clone of ETS.  The currently
 supported ETS APIs are:</p>
 <ul>
 <li>
 <p>
-<tt>delete/1</tt>
+<code>all/0</code>
 </p>
 </li>
 <li>
 <p>
-<tt>delete/2</tt>
+<code>delete/1</code>
 </p>
 </li>
 <li>
 <p>
-<tt>delete_all_objects/1</tt> <em>only ets implementation</em>
+<code>delete/2</code>
 </p>
 </li>
 <li>
 <p>
-<tt>first/1</tt>
+<code>delete_all_objects/1</code> <em>only ets implementation</em>
 </p>
 </li>
 <li>
 <p>
-<tt>foldl/3</tt>
+<code>first/1</code>
 </p>
 </li>
 <li>
 <p>
-<tt>foldr/3</tt>
+<code>foldl/3</code>
 </p>
 </li>
 <li>
 <p>
-<tt>info/1</tt> <em>only a subset of items</em>
+<code>foldr/3</code>
 </p>
 </li>
 <li>
 <p>
-<tt>info/2</tt> <em>only a subset of items</em>
+<code>info/1</code> <em>only a subset of items</em>
 </p>
 </li>
 <li>
 <p>
-<tt>insert/2</tt>
+<code>info/2</code> <em>only a subset of items</em>
 </p>
 </li>
 <li>
 <p>
-<tt>insert_new/2</tt> <em>only ets implementation</em>
+<code>insert/2</code>
 </p>
 </li>
 <li>
 <p>
-<tt>last/1</tt>
+<code>insert_new/2</code> <em>only ets implementation</em>
 </p>
 </li>
 <li>
 <p>
-<tt>lookup/2</tt>
+<code>last/1</code>
 </p>
 </li>
 <li>
 <p>
-<tt>lookup_element/3</tt>
+<code>lookup/2</code>
 </p>
 </li>
 <li>
 <p>
-<tt>match/1</tt>
+<code>lookup_element/3</code>
 </p>
 </li>
 <li>
 <p>
-<tt>match/2</tt>
+<code>match/1</code>
 </p>
 </li>
 <li>
 <p>
-<tt>match/3</tt>
+<code>match/2</code>
 </p>
 </li>
 <li>
 <p>
-<tt>match_delete/2</tt>
+<code>match/3</code>
 </p>
 </li>
 <li>
 <p>
-<tt>match_object/1</tt>
+<code>match_delete/2</code>
 </p>
 </li>
 <li>
 <p>
-<tt>match_object/2</tt>
+<code>match_object/1</code>
 </p>
 </li>
 <li>
 <p>
-<tt>match_object/3</tt>
+<code>match_object/2</code>
 </p>
 </li>
 <li>
 <p>
-<tt>member/2</tt>
+<code>match_object/3</code>
 </p>
 </li>
 <li>
 <p>
-<tt>new/2</tt>
+<code>member/2</code>
 </p>
 </li>
 <li>
 <p>
-<tt>next/2</tt>
+<code>new/2</code>
 </p>
 </li>
 <li>
 <p>
-<tt>prev/2</tt>
+<code>next/2</code>
 </p>
 </li>
 <li>
 <p>
-<tt>select/1</tt>
+<code>prev/2</code>
 </p>
 </li>
 <li>
 <p>
-<tt>select/2</tt>
+<code>select/1</code>
 </p>
 </li>
 <li>
 <p>
-<tt>select/3</tt>
+<code>select/2</code>
 </p>
 </li>
 <li>
 <p>
-<tt>select_count/2</tt>
+<code>select/3</code>
 </p>
 </li>
 <li>
 <p>
-<tt>select_delete/2</tt>
+<code>select_count/2</code>
 </p>
 </li>
 <li>
 <p>
-<tt>select_reverse/1</tt>
+<code>select_delete/2</code>
 </p>
 </li>
 <li>
 <p>
-<tt>select_reverse/2</tt>
+<code>select_reverse/1</code>
 </p>
 </li>
 <li>
 <p>
-<tt>select_reverse/3</tt>
+<code>select_reverse/2</code>
 </p>
 </li>
 <li>
 <p>
-<tt>tab2list/1</tt>
+<code>select_reverse/3</code>
+</p>
+</li>
+<li>
+<p>
+<code>tab2list/1</code>
+</p>
+</li>
+</ul>
+<p>For testing and comparison purposes, LETS supports three backend
+implementations:</p>
+<ul>
+<li>
+<p>
+<code>drv</code> C++ Driver with LevelDB backend <em>(default)</em>
+</p>
+</li>
+<li>
+<p>
+<code>nif</code> C++ NIF with LevelDB backend
+</p>
+</li>
+<li>
+<p>
+<code>ets</code> Erlang ETS backend
 </p>
 </li>
 </ul>
@@ -208,13 +214,53 @@ please contribute if you find LETS useful.</em></p>
 this recipe:</p>
 
 
-<pre><tt>$ mkdir working-directory-name
+<pre><code>$ mkdir working-directory-name
 $ cd working-directory-name
 $ git clone https://github.com/norton/lets.git lets
 $ cd lets
-$ ./rebar get-deps
-$ ./rebar clean
-$ ./rebar compile</tt></pre>
+$ make deps clean compile</code></pre>
+
+<p><em>OR</em> if QuickCheck is available then follow this recipe:</p>
+
+
+<pre><code>$ mkdir working-directory-name
+$ cd working-directory-name
+$ git clone https://github.com/norton/lets.git lets
+$ cd lets
+$ make deps clean eqc
+$ (cd .qc; erl -smp +A 5 -pz ../deps/sext/ebin -pz ../deps/gen_ets/ebin -pz ../deps/qc/ebin)
+
+1> qc_statem_lets:qc_run(5000).
+....
+OK, passed 5000 tests
+
+9.022% {delete,ok}
+7.800% {new,ok}
+4.535% {match_delete,ok}
+4.491% {lookup,ok}
+4.399% {select,ok}
+4.352% {select_delete,ok}
+4.348% {tab2list,ok}
+4.341% {member,ok}
+4.334% {last,ok}
+4.315% {foldl,ok}
+4.308% {select_reverse,ok}
+4.301% {select_count,ok}
+4.293% {select31,ok}
+4.264% {first,ok}
+4.216% {foldr,ok}
+4.202% {match_object,ok}
+4.184% {match,ok}
+4.056% {insert,ok}
+3.997% {prev,ok}
+3.774% {next,ok}
+3.416% {lookup_element,{error,badarg}}
+1.298% {insert_new,ok}
+0.757% {lookup_element,ok}
+0.516% {next,{error,badarg}}
+0.483% {prev,{error,badarg}}
+true
+.......</code></pre>
 
 <p>For an alternative recipe with other "features" albeit more complex,
 please read further.</p>
@@ -263,8 +309,8 @@ Configure your e-mail and name for Git
 </p>
 
 
-<pre><tt>$ git config \--global user.email "you@example.com"
-$ git config \--global user.name "Your Name"</tt></pre>
+<pre><code>$ git config \--global user.email "you@example.com"
+$ git config \--global user.name "Your Name"</code></pre>
 
 </li>
 <li>
@@ -273,9 +319,9 @@ Install Repo
 </p>
 
 
-<pre><tt>$ mkdir -p ~/bin
+<pre><code>$ mkdir -p ~/bin
 $ wget -O - https://dl-ssl.google.com/dl/googlesource/git-repo/repo > ~/bin/repo
-$ chmod a+x ~/bin/repo</tt></pre>
+$ chmod a+x ~/bin/repo</code></pre>
 
 </li>
 <li>
@@ -284,9 +330,9 @@ Create working directory
 </p>
 
 
-<pre><tt>$ mkdir working-directory-name
+<pre><code>$ mkdir working-directory-name
 $ cd working-directory-name
-$ repo init -u https://github.com/norton/manifests.git -m lets-default.xml</tt></pre>
+$ repo init -u https://github.com/norton/manifests.git -m lets-default.xml</code></pre>
 
 
 <table><tr>
@@ -315,12 +361,12 @@ Download Git repositories
 </p>
 
 
-<pre><tt>$ cd working-directory-name
-$ repo sync</tt></pre>
+<pre><code>$ cd working-directory-name
+$ repo sync</code></pre>
 
 </li>
 </ol>
-<p>For futher information and help for related tools, please refer to the
+<p>For further information and help for related tools, please refer to the
 following links:</p>
 <ul>
 <li>
@@ -330,7 +376,7 @@ Erlang - <a href="http://www.erlang.org/">http://www.erlang.org/</a>
 <ul>
 <li>
 <p>
-<strong>R14 or newer, R15B01 has been tested most recently</strong>
+<strong>R15 or newer, R15B02 has been tested most recently</strong>
 </p>
 </li>
 </ul>
@@ -342,7 +388,7 @@ Git - <a href="http://git-scm.com/">http://git-scm.com/</a>
 <ul>
 <li>
 <p>
-<strong>Git 1.5.4 or newer, Git 1.7.10 has been tested recently</strong>
+<strong>Git 1.5.4 or newer, Git 1.8.0 has been tested most recently</strong>
 </p>
 </li>
 <li>
@@ -364,7 +410,7 @@ Python - <a href="http://www.python.org">http://www.python.org</a>
 <ul>
 <li>
 <p>
-<strong>Python 2.4 or newer, Python 2.7.1 has been tested most recently
+<strong>Python 2.4 or newer, Python 2.7.2 has been tested most recently
     (CAUTION: Python 3.x might be too new)</strong>
 </p>
 </li>
@@ -377,7 +423,7 @@ Python - <a href="http://www.python.org">http://www.python.org</a>
 </li>
 <li>
 <p>
-Rebar - <a href="https://github.com/basho/rebar/wiki">https://github.com/basho/rebar/wiki</a>
+Rebar - <a href="https://github.com/rebar/rebar/wiki">https://github.com/rebar/rebar/wiki</a>
 </p>
 </li>
 <li>
@@ -403,8 +449,8 @@ Build
 </p>
 
 
-<pre><tt>$ cd working-directory-name
-$ make compile</tt></pre>
+<pre><code>$ cd working-directory-name
+$ make compile</code></pre>
 
 </li>
 </ol>
@@ -425,8 +471,8 @@ Build Dialyzer's PLT <em>(required once)</em>
 </p>
 
 
-<pre><tt>$ cd working-directory-name
-$ make build-plt</tt></pre>
+<pre><code>$ cd working-directory-name
+$ make build-plt</code></pre>
 
 
 <table><tr>
@@ -444,8 +490,8 @@ Dialyze with specs
 </p>
 
 
-<pre><tt>$ cd working-directory-name
-$ make dialyze</tt></pre>
+<pre><code>$ cd working-directory-name
+$ make dialyze</code></pre>
 
 
 <table><tr>
@@ -465,8 +511,8 @@ Dialyze without specs
 </p>
 
 
-<pre><tt>$ cd working-directory-name
-$ make dialyze-nospec</tt></pre>
+<pre><code>$ cd working-directory-name
+$ make dialyze-nospec</code></pre>
 
 </li>
 </ol>
@@ -481,12 +527,12 @@ $ make dialyze-nospec</tt></pre>
 <li>
 <p>
 Make sure QuickCheck is in your Erlang code path.  One simple way
-   to accomplish this is by adding the code path to your <tt>~/.erlang</tt>
+   to accomplish this is by adding the code path to your <code>~/.erlang</code>
    resource file.
 </p>
 
 
-<pre><tt>true = code:add_pathz(os:getenv("HOME")++"/.erlang.d/deps/quviq/eqc-X.Y.Z/ebin").</tt></pre>
+<pre><code>true = code:add_pathz(os:getenv("HOME")++"/.erlang.d/deps/quviq/eqc-X.Y.Z/ebin").</code></pre>
 
 </li>
 <li>
@@ -495,9 +541,9 @@ Compile for QuickCheck
 </p>
 
 
-<pre><tt>$ cd working-directory-name
+<pre><code>$ cd working-directory-name
 $ make clean
-$ make eqc-compile</tt></pre>
+$ make compile-for-eqc</code></pre>
 
 </li>
 <li>
@@ -506,7 +552,7 @@ Run 5,000 QuickCheck tests
 </p>
 
 
-<pre><tt>$ cd working-directory-name/deps/lets/.eunit
+<pre><code>$ cd working-directory-name/deps/lets/.qc
 $ erl -smp +A 5 -pz ../../sext/ebin -pz ../../gen_ets/ebin -pz ../../qc/ebin
 
 1> qc_statem_lets:qc_run(5000).
@@ -539,15 +585,14 @@ OK, passed 5000 tests
 0.516% {next,{error,badarg}}
 0.483% {prev,{error,badarg}}
 true
-.......</tt></pre>
+.......</code></pre>
 
 
 <table><tr>
 <td class="icon">
 Tip
 </td>
-<td class="content">For testing LevelDB directly using the C bindings, try
-     <tt>qc_statemc_lets:qc_run(5000)</tt>.</td>
+<td class="content">For testing LevelDB directly using the C bindings, try<code>qc_statemc_lets:qc_run(5000)</code>.</td>
 </tr></table>
 
 </li>
@@ -561,12 +606,12 @@ Tip
 <li>
 <p>
 Make sure PropEr is in your Erlang code path.  One simple way to
-   accomplish this is by adding the code path to your <tt>~/.erlang</tt>
+   accomplish this is by adding the code path to your <code>~/.erlang</code>
    resource file.
 </p>
 
 
-<pre><tt>true = code:add_pathz(os:getenv("HOME")++"/.erlang.d/deps/proper/ebin").</tt></pre>
+<pre><code>true = code:add_pathz(os:getenv("HOME")++"/.erlang.d/deps/proper/ebin").</code></pre>
 
 </li>
 <li>
@@ -575,9 +620,9 @@ Compile for PropEr
 </p>
 
 
-<pre><tt>$ cd working-directory-name
+<pre><code>$ cd working-directory-name
 $ make clean
-$ make proper-compile</tt></pre>
+$ make compile-for-proper</code></pre>
 
 </li>
 <li>
@@ -586,7 +631,7 @@ Run 5,000 PropEr tests
 </p>
 
 
-<pre><tt>$ cd working-directory-name/deps/lets/.eunit
+<pre><code>$ cd working-directory-name/deps/lets/.qc
 $ erl -smp +A 5 -pz ../../sext/ebin -pz ../../gen_ets/ebin -pz ../../qc/ebin
 
 1> qc_statem_lets:qc_run(5000).
@@ -619,7 +664,7 @@ OK: Passed 5000 test(s).
 0% {lookup_element,ok}
 0% {next,{error,badarg}}
 true
-.......</tt></pre>
+.......</code></pre>
 
 </li>
 </ol>
@@ -780,20 +825,20 @@ New APIs (TBD)
 <ul>
 <li>
 <p>
-<tt>insert_new/2</tt>
+<code>insert_new/2</code>
     (<a href="http://code.google.com/p/leveldb/issues/detail?id=42">http://code.google.com/p/leveldb/issues/detail?id=42</a>)
 </p>
 </li>
 <li>
 <p>
-<tt>delete_all_objects/1</tt>
+<code>delete_all_objects/1</code>
     (<a href="http://code.google.com/p/leveldb/issues/detail?id=43">http://code.google.com/p/leveldb/issues/detail?id=43</a>)
 </p>
 </li>
 <li>
 <p>
 Add custom (i.e. not supported by native ETS) APIs for providing
-    access to LevelDB's iterators for <tt>drv</tt> and <tt>nif</tt> backend
+    access to LevelDB's iterators for <code>drv</code> and <code>nif</code> backend
     implementations.
 </p>
 </li>
@@ -806,32 +851,32 @@ Existing APIs (TBD)
 <ul>
 <li>
 <p>
-<tt>delete/1</tt>
+<code>delete/1</code>
     (<a href="http://code.google.com/p/leveldb/issues/detail?id=48">http://code.google.com/p/leveldb/issues/detail?id=48</a>)
 </p>
 </li>
 <li>
 <p>
-<tt>new/2</tt> -
+<code>new/2</code> -
     (<a href="http://code.google.com/p/leveldb/issues/detail?id=49">http://code.google.com/p/leveldb/issues/detail?id=49</a>)
 </p>
 </li>
 <li>
 <p>
-<tt>new/2</tt> - investigate if LevelDB's snapshot feature is useful (or
+<code>new/2</code> - investigate if LevelDB's snapshot feature is useful (or
     not) for LETS
 </p>
 </li>
 <li>
 <p>
-<tt>info/2</tt> - investigate if LevelDB's implementation can (easily)
+<code>info/2</code> - investigate if LevelDB's implementation can (easily)
     support size and memory info items
 </p>
 </li>
 <li>
 <p>
 consider adding explicit read_options and write_options for LET's
-    operations (rather than just <tt>new/2</tt>, <tt>destroy/2</tt>, and <tt>repair/2</tt>
+    operations (rather than just <code>new/2</code>, <code>destroy/2</code>, and <code>repair/2</code>
     operations).
 </p>
 </li>
@@ -847,7 +892,6 @@ consider adding explicit read_options and write_options for LET's
 
 <table width="100%" border="0" summary="list of modules">
 <tr><td><a href="lets.md" class="module">lets</a></td></tr>
-<tr><td><a href="lets_drv.md" class="module">lets_drv</a></td></tr>
-<tr><td><a href="lets_ets.md" class="module">lets_ets</a></td></tr>
-<tr><td><a href="lets_nif.md" class="module">lets_nif</a></td></tr></table>
+<tr><td><a href="lets_impl_drv.md" class="module">lets_impl_drv</a></td></tr>
+<tr><td><a href="lets_impl_nif.md" class="module">lets_impl_nif</a></td></tr></table>
 

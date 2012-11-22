@@ -1,3 +1,3 @@
 {application,lets}.
 {packages,[]}.
-{modules,[lets,lets_drv,lets_ets,lets_nif]}.
+{modules,[lets,lets_impl_drv,lets_impl_nif]}.
