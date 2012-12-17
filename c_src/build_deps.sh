@@ -22,14 +22,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-set -e
-set -o pipefail
+set -eo pipefail
 
 SNAPPY_VSN=HEAD
 LEVELDB_VSN=HEAD
 
 if [ `basename $PWD` != "c_src" ]; then
-    pushd c_src
+    pushd c_src > /dev/null 2>&1
 fi
 
 BASEDIR="$PWD"
