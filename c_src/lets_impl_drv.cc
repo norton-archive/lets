@@ -155,22 +155,24 @@ static void lets_async_prev_iter2(void* async_data);
 static void
 driver_send_int(DrvData* d, const int i, ErlDrvTermData caller=0)
 {
+    ErlDrvTermData port = driver_mk_port(d->port);
     ErlDrvTermData spec[] = {
-        ERL_DRV_PORT, driver_mk_port(d->port),
+        ERL_DRV_PORT, port,
         ERL_DRV_INT, (ErlDrvTermData) i,
         ERL_DRV_TUPLE, 2,
     };
     if (!caller) {
         caller = driver_caller(d->port);
     }
-    driver_send_term(d->port, caller, spec, sizeof(spec) / sizeof(spec[0]));
+    erl_drv_send_term(port, caller, spec, sizeof(spec) / sizeof(spec[0]));
 }
 
 static void
 driver_send_binary(DrvData* d, ErlDrvBinary* bin, ErlDrvTermData caller=0)
 {
+    ErlDrvTermData port = driver_mk_port(d->port);
     ErlDrvTermData spec[] = {
-        ERL_DRV_PORT, driver_mk_port(d->port),
+        ERL_DRV_PORT, port,
         ERL_DRV_INT, LETS_BINARY,
         ERL_DRV_BINARY, (ErlDrvTermData) bin, (ErlDrvTermData) bin->orig_size, 0,
         ERL_DRV_TUPLE, 3,
@@ -178,14 +180,15 @@ driver_send_binary(DrvData* d, ErlDrvBinary* bin, ErlDrvTermData caller=0)
     if (!caller) {
         caller = driver_caller(d->port);
     }
-    driver_send_term(d->port, caller, spec, sizeof(spec) / sizeof(spec[0]));
+    erl_drv_send_term(port, caller, spec, sizeof(spec) / sizeof(spec[0]));
 }
 
 static void
 driver_send_buf(DrvData* d, const char *buf, const ErlDrvUInt len, ErlDrvTermData caller=0)
 {
+    ErlDrvTermData port = driver_mk_port(d->port);
     ErlDrvTermData spec[] = {
-        ERL_DRV_PORT, driver_mk_port(d->port),
+        ERL_DRV_PORT, port,
         ERL_DRV_INT, LETS_BINARY,
         ERL_DRV_BUF2BINARY, (ErlDrvTermData) buf, len,
         ERL_DRV_TUPLE, 3,
@@ -193,7 +196,7 @@ driver_send_buf(DrvData* d, const char *buf, const ErlDrvUInt len, ErlDrvTermDat
     if (!caller) {
         caller = driver_caller(d->port);
     }
-    driver_send_term(d->port, caller, spec, sizeof(spec) / sizeof(spec[0]));
+    erl_drv_send_term(port, caller, spec, sizeof(spec) / sizeof(spec[0]));
 }
 
 
