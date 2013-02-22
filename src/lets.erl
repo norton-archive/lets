@@ -1,6 +1,6 @@
 %%% The MIT License
 %%%
-%%% Copyright (C) 2011-2012 by Joseph Wayne Norton <norton@alum.mit.edu>
+%%% Copyright (C) 2011-2013 by Joseph Wayne Norton <norton@alum.mit.edu>
 %%%
 %%% Permission is hereby granted, free of charge, to any person obtaining a copy
 %%% of this software and associated documentation files (the "Software"), to deal
@@ -66,7 +66,7 @@
 
 %% DEBUG -compile(export_all).
 
--export_type([lets_tab/0, lets_tid/0, name/0, key/0, object/0, match_pattern/0, match_spec/0]).
+-export_type([lets_tab/0, lets_tid/0, name/0, key/0, object/0, match_pattern/0, match_spec/0, cont/0]).
 
 %%%----------------------------------------------------------------------
 %%% Types/Specs/Records
