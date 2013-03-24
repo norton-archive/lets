@@ -376,7 +376,7 @@ Erlang - <a href="http://www.erlang.org/">http://www.erlang.org/</a>
 <ul>
 <li>
 <p>
-<strong>R15 or newer, R15B02 has been tested most recently</strong>
+<strong>R16B or newer, R16B has been tested most recently</strong>
 </p>
 </li>
 </ul>

@@ -197,7 +197,7 @@ For further information and help for related tools, please refer to the
 following links:
 
 - Erlang - http://www.erlang.org/
-  * *R15 or newer, R15B02 has been tested most recently*
+  * *R16B or newer, R16B has been tested most recently*
 - Git - http://git-scm.com/
   * *Git 1.5.4 or newer, Git 1.8.0 has been tested most recently*
   * _required for Repo and GitHub_
