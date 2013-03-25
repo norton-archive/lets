@@ -199,11 +199,11 @@ following links:
 - Erlang - http://www.erlang.org/
   * *R16B or newer, R16B has been tested most recently*
 - Git - http://git-scm.com/
-  * *Git 1.5.4 or newer, Git 1.8.0 has been tested most recently*
+  * *Git 1.5.4 or newer, Git 1.8.2 has been tested most recently*
   * _required for Repo and GitHub_
 - GitHub - https://github.com
 - Python - http://www.python.org
-  * *Python 2.4 or newer, Python 2.7.2 has been tested most recently
+  * *Python 2.4 or newer, Python 2.7.3 has been tested most recently
     (CAUTION: Python 3.x might be too new)*
 * _required for Repo_
   - Rebar - https://github.com/rebar/rebar/wiki

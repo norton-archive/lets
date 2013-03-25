@@ -1,3 +1,4 @@
+%% encoding: UTF-8
 {application,lets}.
 {packages,[]}.
 {modules,[lets,lets_impl_drv,lets_impl_nif]}.

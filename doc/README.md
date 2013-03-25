@@ -376,7 +376,7 @@ Erlang - <a href="http://www.erlang.org/">http://www.erlang.org/</a>
 <ul>
 <li>
 <p>
-<strong>R15 or newer, R15B02 has been tested most recently</strong>
+<strong>R16B or newer, R16B has been tested most recently</strong>
 </p>
 </li>
 </ul>
@@ -388,7 +388,7 @@ Git - <a href="http://git-scm.com/">http://git-scm.com/</a>
 <ul>
 <li>
 <p>
-<strong>Git 1.5.4 or newer, Git 1.8.0 has been tested most recently</strong>
+<strong>Git 1.5.4 or newer, Git 1.8.2 has been tested most recently</strong>
 </p>
 </li>
 <li>
@@ -410,7 +410,7 @@ Python - <a href="http://www.python.org">http://www.python.org</a>
 <ul>
 <li>
 <p>
-<strong>Python 2.4 or newer, Python 2.7.2 has been tested most recently
+<strong>Python 2.4 or newer, Python 2.7.3 has been tested most recently
     (CAUTION: Python 3.x might be too new)</strong>
 </p>
 </li>
@@ -428,7 +428,7 @@ Rebar - <a href="https://github.com/rebar/rebar/wiki">https://github.com/rebar/r
 </li>
 <li>
 <p>
-Repo - <a href="http://source.android.com/source/git-repo.md">http://source.android.com/source/git-repo.html</a>
+Repo - <a href="http://source.android.com/source/git-repo.html">http://source.android.com/source/git-repo.html</a>
 </p>
 </li>
 </ul>
