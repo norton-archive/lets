@@ -1,6 +1,6 @@
 
 
-#Module lets#
+# Module lets #
 * [Data Types](#types)
 * [Function Index](#index)
 * [Function Details](#functions)
@@ -9,155 +9,223 @@
 
 <a name="types"></a>
 
-##Data Types##
+## Data Types ##
 
 
 
 
-###<a name="type-cont">cont()</a>##
-
+### <a name="type-cont">cont()</a> ###
 
 
 __abstract datatype__: `cont()`
 
 
 
-###<a name="type-db_opts">db_opts()</a>##
 
+### <a name="type-db_opts">db_opts()</a> ###
 
 
-<pre>db_opts() = {db, [{path, <a href="file.md#type-filename">file:filename()</a>} | create_if_missing | {create_if_missing, boolean()} | error_if_exists | {error_if_exists, boolean()} | paranoid_checks | {paranoid_checks, boolean()} | {write_buffer_size, pos_integer()} | {max_open_files, pos_integer()} | {block_cache_size, pos_integer()} | {block_size, pos_integer()} | {block_restart_interval, pos_integer()} | {filter_policy, no | {bloom, pos_integer()}}]}</pre>
 
+<pre><code>
+db_opts() = {db, [{path, <a href="file.md#type-filename">file:filename()</a>} | create_if_missing | {create_if_missing, boolean()} | error_if_exists | {error_if_exists, boolean()} | paranoid_checks | {paranoid_checks, boolean()} | {write_buffer_size, pos_integer()} | {max_open_files, pos_integer()} | {block_cache_size, pos_integer()} | {block_size, pos_integer()} | {block_restart_interval, pos_integer()} | {filter_policy, no | {bloom, pos_integer()}}]}
+</code></pre>
 
 
-###<a name="type-db_read_opts">db_read_opts()</a>##
 
 
 
-<pre>db_read_opts() = {db_read, [verify_checksums | {verify_checksums, boolean()} | fill_cache | {fill_cache, boolean()}]}</pre>
+### <a name="type-db_read_opts">db_read_opts()</a> ###
 
 
 
-###<a name="type-db_write_opts">db_write_opts()</a>##
+<pre><code>
+db_read_opts() = {db_read, [verify_checksums | {verify_checksums, boolean()} | fill_cache | {fill_cache, boolean()}]}
+</code></pre>
 
 
 
-<pre>db_write_opts() = {db_write, [sync | {sync, boolean()}]}</pre>
 
 
+### <a name="type-db_write_opts">db_write_opts()</a> ###
 
-###<a name="type-ets_opt">ets_opt()</a>##
 
 
+<pre><code>
+db_write_opts() = {db_write, [sync | {sync, boolean()}]}
+</code></pre>
 
-<pre>ets_opt() = set | ordered_set | named_table | {keypos, pos_integer()} | public | protected | private | compressed | async</pre>
 
 
 
-###<a name="type-impl_opt">impl_opt()</a>##
 
+### <a name="type-ets_opt">ets_opt()</a> ###
 
 
-<pre>impl_opt() = drv | nif | ets</pre>
 
+<pre><code>
+ets_opt() = set | ordered_set | named_table | {keypos, pos_integer()} | public | protected | private | compressed | async
+</code></pre>
 
 
-###<a name="type-item">item()</a>##
 
 
 
-<pre>item() = owner | name | named_table | type | keypos | protection | compressed | async | memory | size</pre>
+### <a name="type-impl_opt">impl_opt()</a> ###
 
 
 
-###<a name="type-key">key()</a>##
+<pre><code>
+impl_opt() = drv | nif | ets
+</code></pre>
 
 
 
-<pre>key() = <a href="gen_ets_ns.md#type-key">gen_ets_ns:key()</a></pre>
 
 
+### <a name="type-item">item()</a> ###
 
-###<a name="type-lets_tab">lets_tab()</a>##
 
 
+<pre><code>
+item() = owner | name | named_table | type | keypos | protection | compressed | async | memory | size
+</code></pre>
 
-<pre>lets_tab() = <a href="gen_ets_ns.md#type-gen_tab">gen_ets_ns:gen_tab()</a></pre>
 
 
 
-###<a name="type-lets_tid">lets_tid()</a>##
 
+### <a name="type-key">key()</a> ###
 
 
-<pre>lets_tid() = <a href="gen_ets_ns.md#type-gen_tid">gen_ets_ns:gen_tid()</a></pre>
 
+<pre><code>
+key() = <a href="gen_ets_ns.md#type-key">gen_ets_ns:key()</a>
+</code></pre>
 
 
-###<a name="type-limit">limit()</a>##
 
 
 
-<pre>limit() = pos_integer()</pre>
+### <a name="type-lets_tab">lets_tab()</a> ###
 
 
 
-###<a name="type-match">match()</a>##
+<pre><code>
+lets_tab() = <a href="gen_ets_ns.md#type-gen_tab">gen_ets_ns:gen_tab()</a>
+</code></pre>
 
 
 
-<pre>match() = term()</pre>
 
 
+### <a name="type-lets_tid">lets_tid()</a> ###
 
-###<a name="type-match_pattern">match_pattern()</a>##
 
 
+<pre><code>
+lets_tid() = <a href="gen_ets_ns.md#type-gen_tid">gen_ets_ns:gen_tid()</a>
+</code></pre>
 
-<pre>match_pattern() = <a href="gen_ets_ns.md#type-match_pattern">gen_ets_ns:match_pattern()</a></pre>
 
 
 
-###<a name="type-match_spec">match_spec()</a>##
 
+### <a name="type-limit">limit()</a> ###
 
 
-<pre>match_spec() = <a href="gen_ets_ns.md#type-match_spec">gen_ets_ns:match_spec()</a></pre>
 
+<pre><code>
+limit() = pos_integer()
+</code></pre>
 
 
-###<a name="type-name">name()</a>##
 
 
 
-<pre>name() = <a href="gen_ets_ns.md#type-gen_name">gen_ets_ns:gen_name()</a></pre>
+### <a name="type-match">match()</a> ###
 
 
 
-###<a name="type-object">object()</a>##
+<pre><code>
+match() = term()
+</code></pre>
 
 
 
-<pre>object() = <a href="gen_ets_ns.md#type-object">gen_ets_ns:object()</a></pre>
 
 
+### <a name="type-match_pattern">match_pattern()</a> ###
 
-###<a name="type-opts">opts()</a>##
 
 
+<pre><code>
+match_pattern() = <a href="gen_ets_ns.md#type-match_pattern">gen_ets_ns:match_pattern()</a>
+</code></pre>
 
-<pre>opts() = [<a href="#type-ets_opt">ets_opt()</a> | <a href="#type-impl_opt">impl_opt()</a> | <a href="#type-db_opts">db_opts()</a> | <a href="#type-db_read_opts">db_read_opts()</a> | <a href="#type-db_write_opts">db_write_opts()</a>]</pre>
 
 
 
-###<a name="type-pos">pos()</a>##
 
+### <a name="type-match_spec">match_spec()</a> ###
 
 
-<pre>pos() = pos_integer()</pre>
+
+<pre><code>
+match_spec() = <a href="gen_ets_ns.md#type-match_spec">gen_ets_ns:match_spec()</a>
+</code></pre>
+
+
+
+
+
+### <a name="type-name">name()</a> ###
+
+
+
+<pre><code>
+name() = <a href="gen_ets_ns.md#type-gen_name">gen_ets_ns:gen_name()</a>
+</code></pre>
+
+
+
+
+
+### <a name="type-object">object()</a> ###
+
+
+
+<pre><code>
+object() = <a href="gen_ets_ns.md#type-object">gen_ets_ns:object()</a>
+</code></pre>
+
+
+
+
+
+### <a name="type-opts">opts()</a> ###
+
+
+
+<pre><code>
+opts() = [<a href="#type-ets_opt">ets_opt()</a> | <a href="#type-impl_opt">impl_opt()</a> | <a href="#type-db_opts">db_opts()</a> | <a href="#type-db_read_opts">db_read_opts()</a> | <a href="#type-db_write_opts">db_write_opts()</a>]
+</code></pre>
+
+
+
+
+
+### <a name="type-pos">pos()</a> ###
+
+
+
+<pre><code>
+pos() = pos_integer()
+</code></pre>
+
+
 <a name="index"></a>
 
-##Function Index##
+## Function Index ##
 
 
 <table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#all-0">all/0</a></td><td><p>Returns a list of all tables at the node.</p>.</td></tr><tr><td valign="top"><a href="#delete-1">delete/1</a></td><td><p>Deletes the entire table <code>Tab</code>.</p>.</td></tr><tr><td valign="top"><a href="#delete-2">delete/2</a></td><td><p>Deletes all objects with the key <code>Key</code> from the table <code>Tab</code>.</p>.</td></tr><tr><td valign="top"><a href="#delete_all_objects-1">delete_all_objects/1</a></td><td><p>Delete all objects in the table <code>Tab</code>. The operation is
@@ -446,50 +514,65 @@ operation is <strong>not</strong> guaranteed to be atomic and isolated.</p>.</td
 
 <a name="functions"></a>
 
-##Function Details##
+## Function Details ##
 
 <a name="all-0"></a>
 
-###all/0##
+### all/0 ###
 
 
-<pre>all() -> [<a href="#type-lets_tab">lets_tab()</a>]</pre>
+<pre><code>
+all() -&gt; [<a href="#type-lets_tab">lets_tab()</a>]
+</code></pre>
+
 <br></br>
 
 
 <p>Returns a list of all tables at the node.</p>
 
 
-__See also:__ [ets:all/0](ets.md#all-0).<a name="delete-1"></a>
+__See also:__ [ets:all/0](ets.md#all-0).
+<a name="delete-1"></a>
 
-###delete/1##
+### delete/1 ###
 
 
-<pre>delete(Tab::<a href="#type-lets_tab">lets_tab()</a>) -> true</pre>
+<pre><code>
+delete(Tab::<a href="#type-lets_tab">lets_tab()</a>) -&gt; true
+</code></pre>
+
 <br></br>
 
 
 <p>Deletes the entire table <code>Tab</code>.</p>
 
 
-__See also:__ [ets:delete/1](ets.md#delete-1).<a name="delete-2"></a>
+__See also:__ [ets:delete/1](ets.md#delete-1).
+<a name="delete-2"></a>
 
-###delete/2##
+### delete/2 ###
 
 
-<pre>delete(Tab::<a href="#type-lets_tab">lets_tab()</a>, Key::<a href="#type-key">key()</a>) -> true</pre>
+<pre><code>
+delete(Tab::<a href="#type-lets_tab">lets_tab()</a>, Key::<a href="#type-key">key()</a>) -&gt; true
+</code></pre>
+
 <br></br>
 
 
 <p>Deletes all objects with the key <code>Key</code> from the table <code>Tab</code>.</p>
 
 
-__See also:__ [ets:delete/2](ets.md#delete-2).<a name="delete_all_objects-1"></a>
+__See also:__ [ets:delete/2](ets.md#delete-2).
+<a name="delete_all_objects-1"></a>
 
-###delete_all_objects/1##
+### delete_all_objects/1 ###
 
 
-<pre>delete_all_objects(Tab::<a href="#type-lets_tab">lets_tab()</a>) -> true</pre>
+<pre><code>
+delete_all_objects(Tab::<a href="#type-lets_tab">lets_tab()</a>) -&gt; true
+</code></pre>
+
 <br></br>
 
 
@@ -498,23 +581,31 @@ guaranteed to be atomic and isolated.  This function only applies
 to the <code>ets</code> implementation.</p>
 
 
-__See also:__ [ets:delete_all_objects/1](ets.md#delete_all_objects-1).<a name="destroy-2"></a>
+__See also:__ [ets:delete_all_objects/1](ets.md#delete_all_objects-1).
+<a name="destroy-2"></a>
 
-###destroy/2##
+### destroy/2 ###
 
 
-<pre>destroy(Name::<a href="#type-name">name()</a>, Opts::<a href="#type-opts">opts()</a>) -> true</pre>
+<pre><code>
+destroy(Name::<a href="#type-name">name()</a>, Opts::<a href="#type-opts">opts()</a>) -&gt; true
+</code></pre>
+
 <br></br>
 
 
 <p>Destroy the contents of the specified table.  This function
 only applies to <code>driver</code> and <code>nif</code> implementations.</p>
+
 <a name="first-1"></a>
 
-###first/1##
+### first/1 ###
 
 
-<pre>first(Tab::<a href="#type-lets_tab">lets_tab()</a>) -> <a href="#type-key">key()</a> | '$end_of_table'</pre>
+<pre><code>
+first(Tab::<a href="#type-lets_tab">lets_tab()</a>) -&gt; <a href="#type-key">key()</a> | '$end_of_table'
+</code></pre>
+
 <br></br>
 
 
@@ -522,34 +613,46 @@ only applies to <code>driver</code> and <code>nif</code> implementations.</p>
 is empty, <code><em>$end_of_table</em></code> will be returned.</p>
 
 
-__See also:__ [ets:first/1](ets.md#first-1).<a name="foldl-3"></a>
+__See also:__ [ets:first/1](ets.md#first-1).
+<a name="foldl-3"></a>
 
-###foldl/3##
+### foldl/3 ###
 
 
-<pre>foldl(Fun, Acc0::term(), Tab::<a href="#type-lets_tab">lets_tab()</a>) -> Acc1::term()</pre>
-<ul class="definitions"><li><pre>Fun = fun((Element::term(), AccIn::term()) -&gt; AccOut::term())</pre></li></ul>
+<pre><code>
+foldl(Fun, Acc0::term(), Tab::<a href="#type-lets_tab">lets_tab()</a>) -&gt; Acc1::term()
+</code></pre>
+
+<ul class="definitions"><li><code>Fun = fun((Element::term(), AccIn::term()) -&gt; AccOut::term())</code></li></ul>
 
 <p>Fold from left to right over the elements of the table.</p>
 
 
-__See also:__ [ets:foldl/3](ets.md#foldl-3).<a name="foldr-3"></a>
+__See also:__ [ets:foldl/3](ets.md#foldl-3).
+<a name="foldr-3"></a>
 
-###foldr/3##
+### foldr/3 ###
 
 
-<pre>foldr(Fun, Acc0::term(), Tab::<a href="#type-lets_tab">lets_tab()</a>) -> Acc1::term()</pre>
-<ul class="definitions"><li><pre>Fun = fun((Element::term(), AccIn::term()) -&gt; AccOut::term())</pre></li></ul>
+<pre><code>
+foldr(Fun, Acc0::term(), Tab::<a href="#type-lets_tab">lets_tab()</a>) -&gt; Acc1::term()
+</code></pre>
+
+<ul class="definitions"><li><code>Fun = fun((Element::term(), AccIn::term()) -&gt; AccOut::term())</code></li></ul>
 
 <p>Fold from right to left over the elements of the table.</p>
 
 
-__See also:__ [ets:foldr/3](ets.md#foldr-3).<a name="info-1"></a>
+__See also:__ [ets:foldr/3](ets.md#foldr-3).
+<a name="info-1"></a>
 
-###info/1##
+### info/1 ###
 
 
-<pre>info(Tab::<a href="#type-lets_tab">lets_tab()</a>) -> [{<a href="#type-item">item()</a>, term()}]</pre>
+<pre><code>
+info(Tab::<a href="#type-lets_tab">lets_tab()</a>) -&gt; [{<a href="#type-item">item()</a>, term()}]
+</code></pre>
+
 <br></br>
 
 
@@ -557,12 +660,16 @@ __See also:__ [ets:foldr/3](ets.md#foldr-3).<a name="info-1"></a>
 Value}</code> tuples.</p>
 
 
-__See also:__ [info/2](#info-2).<a name="info-2"></a>
+__See also:__ [info/2](#info-2).
+<a name="info-2"></a>
 
-###info/2##
+### info/2 ###
 
 
-<pre>info(Tab::<a href="#type-lets_tab">lets_tab()</a>, Item::<a href="#type-item">item()</a>) -> term()</pre>
+<pre><code>
+info(Tab::<a href="#type-lets_tab">lets_tab()</a>, Item::<a href="#type-item">item()</a>) -&gt; term()
+</code></pre>
+
 <br></br>
 
 
@@ -625,12 +732,16 @@ __See also:__ [info/2](#info-2).<a name="info-2"></a>
 </ul>
 
 
-__See also:__ [ets:info/2](ets.md#info-2).<a name="insert-2"></a>
+__See also:__ [ets:info/2](ets.md#info-2).
+<a name="insert-2"></a>
 
-###insert/2##
+### insert/2 ###
 
 
-<pre>insert(Tab::<a href="#type-lets_tab">lets_tab()</a>, ObjOrObjs::<a href="#type-object">object()</a> | [<a href="#type-object">object()</a>]) -> true</pre>
+<pre><code>
+insert(Tab::<a href="#type-lets_tab">lets_tab()</a>, ObjOrObjs::<a href="#type-object">object()</a> | [<a href="#type-object">object()</a>]) -&gt; true
+</code></pre>
+
 <br></br>
 
 
@@ -638,12 +749,16 @@ __See also:__ [ets:info/2](ets.md#info-2).<a name="insert-2"></a>
 <code>ObjOrObjs</code> into the table <code>Tab</code>.</p>
 
 
-__See also:__ [ets:insert/2](ets.md#insert-2).<a name="insert_new-2"></a>
+__See also:__ [ets:insert/2](ets.md#insert-2).
+<a name="insert_new-2"></a>
 
-###insert_new/2##
+### insert_new/2 ###
 
 
-<pre>insert_new(Tab::<a href="#type-lets_tab">lets_tab()</a>, ObjOrObjs::<a href="#type-object">object()</a> | [<a href="#type-object">object()</a>]) -> true</pre>
+<pre><code>
+insert_new(Tab::<a href="#type-lets_tab">lets_tab()</a>, ObjOrObjs::<a href="#type-object">object()</a> | [<a href="#type-object">object()</a>]) -&gt; true
+</code></pre>
+
 <br></br>
 
 
@@ -653,12 +768,16 @@ simply returns false.  This function only applies to the <code>ets</code>
 implementation.</p>
 
 
-__See also:__ [ets:insert_new/2](ets.md#insert_new-2).<a name="last-1"></a>
+__See also:__ [ets:insert_new/2](ets.md#insert_new-2).
+<a name="last-1"></a>
 
-###last/1##
+### last/1 ###
 
 
-<pre>last(Tab::<a href="#type-lets_tab">lets_tab()</a>) -> <a href="#type-key">key()</a> | '$end_of_table'</pre>
+<pre><code>
+last(Tab::<a href="#type-lets_tab">lets_tab()</a>) -&gt; <a href="#type-key">key()</a> | '$end_of_table'
+</code></pre>
+
 <br></br>
 
 
@@ -666,12 +785,16 @@ __See also:__ [ets:insert_new/2](ets.md#insert_new-2).<a name="last-1"></a>
 is empty, <code><em>$end_of_table</em></code> will be returned.</p>
 
 
-__See also:__ [ets:last/1](ets.md#last-1).<a name="lookup-2"></a>
+__See also:__ [ets:last/1](ets.md#last-1).
+<a name="lookup-2"></a>
 
-###lookup/2##
+### lookup/2 ###
 
 
-<pre>lookup(Tab::<a href="#type-lets_tab">lets_tab()</a>, Key::<a href="#type-key">key()</a>) -> [<a href="#type-object">object()</a>]</pre>
+<pre><code>
+lookup(Tab::<a href="#type-lets_tab">lets_tab()</a>, Key::<a href="#type-key">key()</a>) -&gt; [<a href="#type-object">object()</a>]
+</code></pre>
+
 <br></br>
 
 
@@ -679,12 +802,16 @@ __See also:__ [ets:last/1](ets.md#last-1).<a name="lookup-2"></a>
 <code>Tab</code>.</p>
 
 
-__See also:__ [ets:lookup/2](ets.md#lookup-2).<a name="lookup_element-3"></a>
+__See also:__ [ets:lookup/2](ets.md#lookup-2).
+<a name="lookup_element-3"></a>
 
-###lookup_element/3##
+### lookup_element/3 ###
 
 
-<pre>lookup_element(Tab::<a href="#type-lets_tab">lets_tab()</a>, Key::<a href="#type-key">key()</a>, Pos::<a href="#type-pos">pos()</a>) -> term()</pre>
+<pre><code>
+lookup_element(Tab::<a href="#type-lets_tab">lets_tab()</a>, Key::<a href="#type-key">key()</a>, Pos::<a href="#type-pos">pos()</a>) -&gt; term()
+</code></pre>
+
 <br></br>
 
 
@@ -692,24 +819,32 @@ __See also:__ [ets:lookup/2](ets.md#lookup-2).<a name="lookup_element-3"></a>
 in the table <code>Tab</code>.</p>
 
 
-__See also:__ [ets:lookup_element/3](ets.md#lookup_element-3).<a name="match-1"></a>
+__See also:__ [ets:lookup_element/3](ets.md#lookup_element-3).
+<a name="match-1"></a>
 
-###match/1##
+### match/1 ###
 
 
-<pre>match(Cont::<a href="#type-cont">cont()</a> | '$end_of_table') -> {[<a href="#type-match">match()</a>], <a href="#type-cont">cont()</a> | '$end_of_table'} | '$end_of_table'</pre>
+<pre><code>
+match(Cont::<a href="#type-cont">cont()</a> | '$end_of_table') -&gt; {[<a href="#type-match">match()</a>], <a href="#type-cont">cont()</a> | '$end_of_table'} | '$end_of_table'
+</code></pre>
+
 <br></br>
 
 
 <p>Continues a match started with <code>match/3</code>.</p>
 
 
-__See also:__ [ets:match/1](ets.md#match-1).<a name="match-2"></a>
+__See also:__ [ets:match/1](ets.md#match-1).
+<a name="match-2"></a>
 
-###match/2##
+### match/2 ###
 
 
-<pre>match(Tab::<a href="#type-lets_tab">lets_tab()</a>, Pattern::<a href="#type-match_pattern">match_pattern()</a>) -> [<a href="#type-match">match()</a>]</pre>
+<pre><code>
+match(Tab::<a href="#type-lets_tab">lets_tab()</a>, Pattern::<a href="#type-match_pattern">match_pattern()</a>) -&gt; [<a href="#type-match">match()</a>]
+</code></pre>
+
 <br></br>
 
 
@@ -717,12 +852,16 @@ __See also:__ [ets:match/1](ets.md#match-1).<a name="match-2"></a>
 <code>Pattern</code>.</p>
 
 
-__See also:__ [ets:match/2](ets.md#match-2).<a name="match-3"></a>
+__See also:__ [ets:match/2](ets.md#match-2).
+<a name="match-3"></a>
 
-###match/3##
+### match/3 ###
 
 
-<pre>match(Tab::<a href="#type-lets_tab">lets_tab()</a>, Pattern::<a href="#type-match_pattern">match_pattern()</a>, Limit::<a href="#type-limit">limit()</a>) -> {[<a href="#type-match">match()</a>], <a href="#type-cont">cont()</a> | '$end_of_table'} | '$end_of_table'</pre>
+<pre><code>
+match(Tab::<a href="#type-lets_tab">lets_tab()</a>, Pattern::<a href="#type-match_pattern">match_pattern()</a>, Limit::<a href="#type-limit">limit()</a>) -&gt; {[<a href="#type-match">match()</a>], <a href="#type-cont">cont()</a> | '$end_of_table'} | '$end_of_table'
+</code></pre>
+
 <br></br>
 
 
@@ -731,12 +870,16 @@ __See also:__ [ets:match/2](ets.md#match-2).<a name="match-3"></a>
 objects.</p>
 
 
-__See also:__ [ets:match/3](ets.md#match-3).<a name="match_delete-2"></a>
+__See also:__ [ets:match/3](ets.md#match-3).
+<a name="match_delete-2"></a>
 
-###match_delete/2##
+### match_delete/2 ###
 
 
-<pre>match_delete(Tab::<a href="#type-lets_tab">lets_tab()</a>, Pattern::<a href="#type-match_pattern">match_pattern()</a>) -> true</pre>
+<pre><code>
+match_delete(Tab::<a href="#type-lets_tab">lets_tab()</a>, Pattern::<a href="#type-match_pattern">match_pattern()</a>) -&gt; true
+</code></pre>
+
 <br></br>
 
 
@@ -744,24 +887,32 @@ __See also:__ [ets:match/3](ets.md#match-3).<a name="match_delete-2"></a>
 table <code>Tab</code>.</p>
 
 
-__See also:__ [ets:match_delete/2](ets.md#match_delete-2).<a name="match_object-1"></a>
+__See also:__ [ets:match_delete/2](ets.md#match_delete-2).
+<a name="match_object-1"></a>
 
-###match_object/1##
+### match_object/1 ###
 
 
-<pre>match_object(Cont::<a href="#type-cont">cont()</a> | '$end_of_table') -> {[<a href="#type-match">match()</a>], <a href="#type-cont">cont()</a> | '$end_of_table'} | '$end_of_table'</pre>
+<pre><code>
+match_object(Cont::<a href="#type-cont">cont()</a> | '$end_of_table') -&gt; {[<a href="#type-match">match()</a>], <a href="#type-cont">cont()</a> | '$end_of_table'} | '$end_of_table'
+</code></pre>
+
 <br></br>
 
 
 <p>Continues a match started with <code>match_object/3</code>.</p>
 
 
-__See also:__ [ets:match_object/1](ets.md#match_object-1).<a name="match_object-2"></a>
+__See also:__ [ets:match_object/1](ets.md#match_object-1).
+<a name="match_object-2"></a>
 
-###match_object/2##
+### match_object/2 ###
 
 
-<pre>match_object(Tab::<a href="#type-lets_tab">lets_tab()</a>, Pattern::<a href="#type-match_pattern">match_pattern()</a>) -> [<a href="#type-match">match()</a>]</pre>
+<pre><code>
+match_object(Tab::<a href="#type-lets_tab">lets_tab()</a>, Pattern::<a href="#type-match_pattern">match_pattern()</a>) -&gt; [<a href="#type-match">match()</a>]
+</code></pre>
+
 <br></br>
 
 
@@ -769,12 +920,16 @@ __See also:__ [ets:match_object/1](ets.md#match_object-1).<a name="match_object-
 <code>Pattern</code>.</p>
 
 
-__See also:__ [ets:match_object/2](ets.md#match_object-2).<a name="match_object-3"></a>
+__See also:__ [ets:match_object/2](ets.md#match_object-2).
+<a name="match_object-3"></a>
 
-###match_object/3##
+### match_object/3 ###
 
 
-<pre>match_object(Tab::<a href="#type-lets_tab">lets_tab()</a>, Pattern::<a href="#type-match_pattern">match_pattern()</a>, Limit::<a href="#type-limit">limit()</a>) -> {[<a href="#type-match">match()</a>], <a href="#type-cont">cont()</a> | '$end_of_table'} | '$end_of_table'</pre>
+<pre><code>
+match_object(Tab::<a href="#type-lets_tab">lets_tab()</a>, Pattern::<a href="#type-match_pattern">match_pattern()</a>, Limit::<a href="#type-limit">limit()</a>) -&gt; {[<a href="#type-match">match()</a>], <a href="#type-cont">cont()</a> | '$end_of_table'} | '$end_of_table'
+</code></pre>
+
 <br></br>
 
 
@@ -783,12 +938,16 @@ __See also:__ [ets:match_object/2](ets.md#match_object-2).<a name="match_object-
 objects.</p>
 
 
-__See also:__ [ets:match_object/3](ets.md#match_object-3).<a name="member-2"></a>
+__See also:__ [ets:match_object/3](ets.md#match_object-3).
+<a name="member-2"></a>
 
-###member/2##
+### member/2 ###
 
 
-<pre>member(Tab::<a href="#type-lets_tab">lets_tab()</a>, Key::<a href="#type-key">key()</a>) -> true | false</pre>
+<pre><code>
+member(Tab::<a href="#type-lets_tab">lets_tab()</a>, Key::<a href="#type-key">key()</a>) -&gt; true | false
+</code></pre>
+
 <br></br>
 
 
@@ -796,12 +955,16 @@ __See also:__ [ets:match_object/3](ets.md#match_object-3).<a name="member-2"></a
 the key <code>Key</code>, <code>false</code> otherwise.</p>
 
 
-__See also:__ [ets:member/2](ets.md#member-2).<a name="new-2"></a>
+__See also:__ [ets:member/2](ets.md#member-2).
+<a name="new-2"></a>
 
-###new/2##
+### new/2 ###
 
 
-<pre>new(Name::<a href="#type-name">name()</a>, Opts::<a href="#type-opts">opts()</a>) -> <a href="#type-lets_tab">lets_tab()</a></pre>
+<pre><code>
+new(Name::<a href="#type-name">name()</a>, Opts::<a href="#type-opts">opts()</a>) -&gt; <a href="#type-lets_tab">lets_tab()</a>
+</code></pre>
+
 <br></br>
 
 
@@ -997,12 +1160,16 @@ considered complete. The default is <code>false</code>.
 </ul>
 
 
-__See also:__ [ets:new/2](ets.md#new-2).<a name="next-2"></a>
+__See also:__ [ets:new/2](ets.md#new-2).
+<a name="next-2"></a>
 
-###next/2##
+### next/2 ###
 
 
-<pre>next(Tab::<a href="#type-lets_tab">lets_tab()</a>, Key::<a href="#type-key">key()</a>) -> <a href="#type-key">key()</a> | '$end_of_table'</pre>
+<pre><code>
+next(Tab::<a href="#type-lets_tab">lets_tab()</a>, Key::<a href="#type-key">key()</a>) -&gt; <a href="#type-key">key()</a> | '$end_of_table'
+</code></pre>
+
 <br></br>
 
 
@@ -1011,12 +1178,16 @@ table <code>Tab</code>.  If there is no next key, <code><em>$end_of_table</em></
 returned.</p>
 
 
-__See also:__ [ets:next/2](ets.md#next-2).<a name="prev-2"></a>
+__See also:__ [ets:next/2](ets.md#next-2).
+<a name="prev-2"></a>
 
-###prev/2##
+### prev/2 ###
 
 
-<pre>prev(Tab::<a href="#type-lets_tab">lets_tab()</a>, Key::<a href="#type-key">key()</a>) -> <a href="#type-key">key()</a> | '$end_of_table'</pre>
+<pre><code>
+prev(Tab::<a href="#type-lets_tab">lets_tab()</a>, Key::<a href="#type-key">key()</a>) -&gt; <a href="#type-key">key()</a> | '$end_of_table'
+</code></pre>
+
 <br></br>
 
 
@@ -1025,12 +1196,16 @@ the table <code>Tab</code>.  If there is no previous key, <code><em>$end_of_tabl
 returned.</p>
 
 
-__See also:__ [ets:prev/2](ets.md#prev-2).<a name="repair-2"></a>
+__See also:__ [ets:prev/2](ets.md#prev-2).
+<a name="repair-2"></a>
 
-###repair/2##
+### repair/2 ###
 
 
-<pre>repair(Name::<a href="#type-name">name()</a>, Opts::<a href="#type-opts">opts()</a>) -> true</pre>
+<pre><code>
+repair(Name::<a href="#type-name">name()</a>, Opts::<a href="#type-opts">opts()</a>) -&gt; true
+</code></pre>
+
 <br></br>
 
 
@@ -1039,24 +1214,32 @@ method to resurrect as much of the contents of the table as
 possible.  Some data may be lost, so be careful when calling this
 function on a table that contains important information. This
 function only applies to <code>driver</code> and <code>nif</code> implementations.</p>
+
 <a name="select-1"></a>
 
-###select/1##
+### select/1 ###
 
 
-<pre>select(Cont::<a href="#type-cont">cont()</a> | '$end_of_table') -> {[<a href="#type-match">match()</a>], <a href="#type-cont">cont()</a> | '$end_of_table'} | '$end_of_table'</pre>
+<pre><code>
+select(Cont::<a href="#type-cont">cont()</a> | '$end_of_table') -&gt; {[<a href="#type-match">match()</a>], <a href="#type-cont">cont()</a> | '$end_of_table'} | '$end_of_table'
+</code></pre>
+
 <br></br>
 
 
 <p>Continues a select started with <code>select/3</code>.</p>
 
 
-__See also:__ [ets:select/1](ets.md#select-1).<a name="select-2"></a>
+__See also:__ [ets:select/1](ets.md#select-1).
+<a name="select-2"></a>
 
-###select/2##
+### select/2 ###
 
 
-<pre>select(Tab::<a href="#type-lets_tab">lets_tab()</a>, Spec::<a href="#type-match_spec">match_spec()</a>) -> [<a href="#type-match">match()</a>]</pre>
+<pre><code>
+select(Tab::<a href="#type-lets_tab">lets_tab()</a>, Spec::<a href="#type-match_spec">match_spec()</a>) -&gt; [<a href="#type-match">match()</a>]
+</code></pre>
+
 <br></br>
 
 
@@ -1064,12 +1247,16 @@ __See also:__ [ets:select/1](ets.md#select-1).<a name="select-2"></a>
 <code>Spec</code>.</p>
 
 
-__See also:__ [ets:select/2](ets.md#select-2).<a name="select-3"></a>
+__See also:__ [ets:select/2](ets.md#select-2).
+<a name="select-3"></a>
 
-###select/3##
+### select/3 ###
 
 
-<pre>select(Tab::<a href="#type-lets_tab">lets_tab()</a>, Spec::<a href="#type-match_spec">match_spec()</a>, Limit::<a href="#type-limit">limit()</a>) -> {[<a href="#type-match">match()</a>], <a href="#type-cont">cont()</a> | '$end_of_table'} | '$end_of_table'</pre>
+<pre><code>
+select(Tab::<a href="#type-lets_tab">lets_tab()</a>, Spec::<a href="#type-match_spec">match_spec()</a>, Limit::<a href="#type-limit">limit()</a>) -&gt; {[<a href="#type-match">match()</a>], <a href="#type-cont">cont()</a> | '$end_of_table'} | '$end_of_table'
+</code></pre>
+
 <br></br>
 
 
@@ -1077,12 +1264,16 @@ __See also:__ [ets:select/2](ets.md#select-2).<a name="select-3"></a>
 and returns a limited (<code>Limit</code>) number of matching objects.</p>
 
 
-__See also:__ [ets:select/3](ets.md#select-3).<a name="select_count-2"></a>
+__See also:__ [ets:select/3](ets.md#select-3).
+<a name="select_count-2"></a>
 
-###select_count/2##
+### select_count/2 ###
 
 
-<pre>select_count(Tab::<a href="#type-lets_tab">lets_tab()</a>, Spec::<a href="#type-match_spec">match_spec()</a>) -> pos_integer()</pre>
+<pre><code>
+select_count(Tab::<a href="#type-lets_tab">lets_tab()</a>, Spec::<a href="#type-match_spec">match_spec()</a>) -&gt; pos_integer()
+</code></pre>
+
 <br></br>
 
 
@@ -1090,12 +1281,16 @@ __See also:__ [ets:select/3](ets.md#select-3).<a name="select_count-2"></a>
 table <code>Tab</code> and returns the number matched.</p>
 
 
-__See also:__ [ets:select_count/2](ets.md#select_count-2).<a name="select_delete-2"></a>
+__See also:__ [ets:select_count/2](ets.md#select_count-2).
+<a name="select_delete-2"></a>
 
-###select_delete/2##
+### select_delete/2 ###
 
 
-<pre>select_delete(Tab::<a href="#type-lets_tab">lets_tab()</a>, Spec::<a href="#type-match_spec">match_spec()</a>) -> pos_integer()</pre>
+<pre><code>
+select_delete(Tab::<a href="#type-lets_tab">lets_tab()</a>, Spec::<a href="#type-match_spec">match_spec()</a>) -&gt; pos_integer()
+</code></pre>
+
 <br></br>
 
 
@@ -1103,24 +1298,32 @@ __See also:__ [ets:select_count/2](ets.md#select_count-2).<a name="select_delete
 table <code>Tab</code> and returns the number deleted.</p>
 
 
-__See also:__ [ets:select_delete/2](ets.md#select_delete-2).<a name="select_reverse-1"></a>
+__See also:__ [ets:select_delete/2](ets.md#select_delete-2).
+<a name="select_reverse-1"></a>
 
-###select_reverse/1##
+### select_reverse/1 ###
 
 
-<pre>select_reverse(Cont::<a href="#type-cont">cont()</a> | '$end_of_table') -> {[<a href="#type-match">match()</a>], <a href="#type-cont">cont()</a> | '$end_of_table'} | '$end_of_table'</pre>
+<pre><code>
+select_reverse(Cont::<a href="#type-cont">cont()</a> | '$end_of_table') -&gt; {[<a href="#type-match">match()</a>], <a href="#type-cont">cont()</a> | '$end_of_table'} | '$end_of_table'
+</code></pre>
+
 <br></br>
 
 
 <p>Continues a select reverse started with <code>select_reverse/3</code>.</p>
 
 
-__See also:__ [ets:select_reverse/1](ets.md#select_reverse-1).<a name="select_reverse-2"></a>
+__See also:__ [ets:select_reverse/1](ets.md#select_reverse-1).
+<a name="select_reverse-2"></a>
 
-###select_reverse/2##
+### select_reverse/2 ###
 
 
-<pre>select_reverse(Tab::<a href="#type-lets_tab">lets_tab()</a>, Spec::<a href="#type-match_spec">match_spec()</a>) -> [<a href="#type-match">match()</a>]</pre>
+<pre><code>
+select_reverse(Tab::<a href="#type-lets_tab">lets_tab()</a>, Spec::<a href="#type-match_spec">match_spec()</a>) -&gt; [<a href="#type-match">match()</a>]
+</code></pre>
+
 <br></br>
 
 
@@ -1128,12 +1331,16 @@ __See also:__ [ets:select_reverse/1](ets.md#select_reverse-1).<a name="select_re
 spec <code>Spec</code>.</p>
 
 
-__See also:__ [ets:select_reverse/2](ets.md#select_reverse-2).<a name="select_reverse-3"></a>
+__See also:__ [ets:select_reverse/2](ets.md#select_reverse-2).
+<a name="select_reverse-3"></a>
 
-###select_reverse/3##
+### select_reverse/3 ###
 
 
-<pre>select_reverse(Tab::<a href="#type-lets_tab">lets_tab()</a>, Spec::<a href="#type-match_spec">match_spec()</a>, Limit::<a href="#type-limit">limit()</a>) -> {[<a href="#type-match">match()</a>], <a href="#type-cont">cont()</a> | '$end_of_table'} | '$end_of_table'</pre>
+<pre><code>
+select_reverse(Tab::<a href="#type-lets_tab">lets_tab()</a>, Spec::<a href="#type-match_spec">match_spec()</a>, Limit::<a href="#type-limit">limit()</a>) -&gt; {[<a href="#type-match">match()</a>], <a href="#type-cont">cont()</a> | '$end_of_table'} | '$end_of_table'
+</code></pre>
+
 <br></br>
 
 
@@ -1142,12 +1349,16 @@ spec <code>Spec</code> and returns a limited (<code>Limit</code>) number of matc
 objects.</p>
 
 
-__See also:__ [ets:select_reverse/3](ets.md#select_reverse-3).<a name="tab2list-1"></a>
+__See also:__ [ets:select_reverse/3](ets.md#select_reverse-3).
+<a name="tab2list-1"></a>
 
-###tab2list/1##
+### tab2list/1 ###
 
 
-<pre>tab2list(Tab::<a href="#type-lets_tab">lets_tab()</a>) -> [<a href="#type-object">object()</a>]</pre>
+<pre><code>
+tab2list(Tab::<a href="#type-lets_tab">lets_tab()</a>) -&gt; [<a href="#type-object">object()</a>]
+</code></pre>
+
 <br></br>
 
 
@@ -1155,13 +1366,18 @@ __See also:__ [ets:select_reverse/3](ets.md#select_reverse-3).<a name="tab2list-
 operation is <strong>not</strong> guaranteed to be atomic and isolated.</p>
 
 
-__See also:__ [ets:tab2list/1](ets.md#tab2list-1).<a name="tid-1"></a>
+__See also:__ [ets:tab2list/1](ets.md#tab2list-1).
+<a name="tid-1"></a>
 
-###tid/1##
+### tid/1 ###
 
 
-<pre>tid(Tab::<a href="#type-lets_tab">lets_tab()</a>) -> <a href="#type-lets_tid">lets_tid()</a></pre>
+<pre><code>
+tid(Tab::<a href="#type-lets_tab">lets_tab()</a>) -&gt; <a href="#type-lets_tid">lets_tid()</a>
+</code></pre>
+
 <br></br>
 
 
 <p>Returns a table[8217,115,32,105,100,101,110,116,105,102,105,101,114,46]</p>
+

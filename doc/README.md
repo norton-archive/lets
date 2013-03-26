@@ -1,11 +1,11 @@
 
 
-#LETS - LevelDB-based Erlang Term Storage#
-
+# LETS - LevelDB-based Erlang Term Storage #
 
 Copyright (c) 2011-2013 by Joseph Wayne Norton
 
-__Authors:__ Joseph Wayne Norton ([`norton@alum.mit.edu`](mailto:norton@alum.mit.edu)).<p>LETS is an alternative Erlang Term Storage using LevelDB as the
+__Authors:__ Joseph Wayne Norton ([`norton@alum.mit.edu`](mailto:norton@alum.mit.edu)).
+<p>LETS is an alternative Erlang Term Storage using LevelDB as the
 storage implementation.  LETS tries to address some bad properties of
 ETS and DETS.  ETS is limited by physical memory.  DETS is limited by
 a 2 GB file size limitation and does not implement ordered sets.  LETS
@@ -887,7 +887,7 @@ consider adding explicit read_options and write_options for LET's
 
 
 
-##Modules##
+## Modules ##
 
 
 <table width="100%" border="0" summary="list of modules">
