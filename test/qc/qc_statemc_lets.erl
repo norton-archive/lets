@@ -236,7 +236,7 @@ teardown(_Ref, _State) ->
 -spec aggregate([{integer(), term(), term(), #state{}}])
                -> [{atom(), atom(), integer() | term()}].
 aggregate(L) ->
-    [ {Cmd,filter_reply(Reply)} || {_N,{set,_,{call,_,Cmd,_}},Reply,_State} <- L ].
+    [ {{Cmd,length(Args)},filter_reply(Reply)} || {_N,{set,_,{call,_,Cmd,Args}},Reply,_State} <- L ].
 
 filter_reply({'EXIT',{Err,_}}) ->
     {error,Err};
