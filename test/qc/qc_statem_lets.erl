@@ -47,6 +47,8 @@
 %% @NOTE For boilerplate exports, see "qc_statem.hrl"
 -include_lib("qc/include/qc_statem.hrl").
 
+%% TEMPORARY raw proper_statem
+-export([prop_statem/0, initial_state/0, command/1]).
 
 %%%----------------------------------------------------------------------
 %%% defines, types, records
@@ -109,6 +111,23 @@ qc_counterexample_read(Options, FileName) ->
 qc_counterexample_write(FileName, CounterExample) ->
     qc_statem:qc_counterexample_write(FileName, CounterExample).
 
+%%%----------------------------------------------------------------------
+%%% TEMPORARY raw proper statem
+%%%----------------------------------------------------------------------
+prop_statem() ->
+    ?FORALL(Cmds, more_commands(3, commands(?MODULE)),
+            begin
+                {ok, _TestRef} = setup(undefined),
+                {History, State, Result} = run_commands(?MODULE, Cmds),
+                ?WHENFAIL(io:format("~nResult:~n\t~p~n~nState:~n\t~p~n~nCommands:~n\t~p~nHistory:~n\t~p~n", [Result, State, Cmds, History]),
+                          Result =:= ok)
+            end).
+
+command(S) ->
+    command_gen(S).
+
+initial_state() ->
+    #state{}.
 
 %%%----------------------------------------------------------------------
 %%% qc_statem Callbacks
