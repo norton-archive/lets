@@ -227,7 +227,7 @@ $ make deps clean compile</code></pre>
 $ cd working-directory-name
 $ git clone https://github.com/norton/lets.git lets
 $ cd lets
-$ make deps clean eqc
+$ make deps clean compile-for-eqc
 $ (cd .qc; erl -smp +A 5 -pz ../deps/sext/ebin -pz ../deps/gen_ets/ebin -pz ../deps/qc/ebin)
 
 1> qc_statem_lets:qc_run(5000).
