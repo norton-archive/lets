@@ -283,7 +283,7 @@ impl_open(Type, Protection, Path, Options, ReadOptions, WriteOptions) ->
 
 impl_destroy(Type, Protection, Path, Options, ReadOptions, WriteOptions) ->
     Impl = init(),
-    true = call(Impl, {?LETS_OPEN6, Type, Protection, Path, Options, ReadOptions, WriteOptions}),
+    true = call(Impl, {?LETS_DESTROY6, Type, Protection, Path, Options, ReadOptions, WriteOptions}),
     _ = port_close(Impl),
     _ = erl_ddll:unload(lets_impl_drv),
     true.
