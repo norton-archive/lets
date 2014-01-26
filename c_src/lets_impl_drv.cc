@@ -861,7 +861,7 @@ lets_output_delete2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int item
     if (ng) GOTOBADARG;
 
     if (d->impl.async) {
-        drv_async = new DrvAsync(d, driver_caller(d->port), LETS_INSERT2);
+        drv_async = new DrvAsync(d, driver_caller(d->port), LETS_DELETE2);
         if (!drv_async) {
             GOTOBADARG;
         }
