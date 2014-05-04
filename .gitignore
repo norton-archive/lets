@@ -1,6 +1,7 @@
 .eqc-info
 .eunit/
 .qc/
+.rebar/
 c_src/*.o
 c_src/leveldb-*/
 c_src/leveldb/

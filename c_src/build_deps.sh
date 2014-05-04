@@ -38,18 +38,10 @@ case "$1" in
         rm -rf snappy snappy-$SNAPPY_VSN
         rm -rf leveldb leveldb-$LEVELDB_VSN
         ;;
-
     get_deps)
-        # snappy
-        if [ ! -d $REBAR_DEPS_DIR/snappy ]; then
-            git clone git://github.com/norton/snappy.git $REBAR_DEPS_DIR/snappy
-        fi
-        # leveldb
-        if [ ! -d $REBAR_DEPS_DIR/leveldb ]; then
-            git clone git://github.com/norton/leveldb.git $REBAR_DEPS_DIR/leveldb
-        fi
         ;;
-
+    update_deps)
+        ;;
     *)
         # snappy
         if [ ! -f $BASEDIR/snappy/lib/libsnappy.a ]; then
