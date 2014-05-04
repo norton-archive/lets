@@ -228,42 +228,56 @@ $ cd working-directory-name
 $ git clone https://github.com/norton/lets.git lets
 $ cd lets
 $ make deps clean compile-for-eqc
-$ (cd .qc; erl -smp +A 5 -pz ../deps/sext/ebin -pz ../deps/gen_ets/ebin -pz ../deps/qc/ebin)
+$ (cd .qc; erl -smp +A 5 -pz -pz ../deps/{sext,gen_ets,qc}/ebin)
 
-1> qc_statem_lets:qc_run(5000).
+1> qc_statem_lets:qc_run(500).
 ....
-OK, passed 5000 tests
+OK, passed 500 tests
 
-9.022% {delete,ok}
-7.800% {new,ok}
-4.535% {match_delete,ok}
-4.491% {lookup,ok}
-4.399% {select,ok}
-4.352% {select_delete,ok}
-4.348% {tab2list,ok}
-4.341% {member,ok}
-4.334% {last,ok}
-4.315% {foldl,ok}
-4.308% {select_reverse,ok}
-4.301% {select_count,ok}
-4.293% {select31,ok}
-4.264% {first,ok}
-4.216% {foldr,ok}
-4.202% {match_object,ok}
-4.184% {match,ok}
-4.056% {insert,ok}
-3.997% {prev,ok}
-3.774% {next,ok}
-3.416% {lookup_element,{error,badarg}}
-1.298% {insert_new,ok}
-0.757% {lookup_element,ok}
-0.516% {next,{error,badarg}}
-0.483% {prev,{error,badarg}}
+100.0% {1,attempts}
+
+3.82% {{all,1},ok}
+3.81% {{match,2},ok}
+3.78% {{lookup,2},ok}
+3.78% {{foldl,3},ok}
+3.77% {{delete,2},ok}
+3.76% {{first,1},ok}
+3.75% {{foldr,3},ok}
+3.71% {{last,1},ok}
+3.70% {{tab2list,1},ok}
+3.67% {{select,2},ok}
+3.67% {{member,2},ok}
+3.64% {{select_delete,2},ok}
+3.63% {{match_object31,3},ok}
+3.63% {{match_delete,2},ok}
+3.61% {{select31,3},ok}
+3.53% {{select_reverse,2},ok}
+3.51% {{select_count,2},ok}
+3.50% {{select_reverse31,3},ok}
+3.50% {{new,2},ok}
+3.48% {{delete,1},ok}
+3.44% {{match_object,2},ok}
+3.44% {{insert,2},ok}
+3.43% {{match31,3},ok}
+3.37% {{new,3},ok}
+3.34% {{prev,2},ok}
+3.23% {{next,2},ok}
+2.99% {{lookup_element,3},{error,badarg}}
+1.53% {{insert_new,2},ok}
+0.76% {{lookup_element,3},ok}
+0.62% {{next,2},{error,badarg}}
+0.60% {{prev,2},{error,badarg}}
 true
 .......</code></pre>
 
-<p>For an alternative recipe with other "features" albeit more complex,
-please read further.</p>
+
+<table><tr>
+<td class="icon">
+Tip
+</td>
+<td class="content">For testing LevelDB directly using the C bindings, try<code>qc_statemc_lets:qc_run(500)</code>.</td>
+</tr></table>
+
 
 
 
@@ -272,11 +286,10 @@ please read further.</p>
 
 <h3 id="_where_should_i_start">Where should I start?</h3>
 <p>This README is the only bit of documentation right now.</p>
-<p>The QC (a.k.a. QuickCheck, PropEr, etc.) tests underneath the
-"tests/qc" directory should be helpful for understanding the
-specification and behavior of ETS and LETS.  These QC tests also
-illustrate several strategies for testing Erlang Driver-based and
-NIF-based implementations.</p>
+<p>The QC (a.k.a. QuickCheck) tests underneath the "tests/qc" directory
+should be helpful for understanding the specification and behavior of
+ETS and LETS.  These QC tests also illustrate several strategies for
+testing Erlang Driver-based and NIF-based implementations.</p>
 
 
 <h3 id="_what_is_ets_and_dets">What is ETS and DETS?</h3>
@@ -300,74 +313,10 @@ provides an ordered mapping from string keys to string values.</p>
 
 
 
-<h2 id="_to_download">To download</h2>
+<h2 id="_tools">Tools</h2>
 
-<ol class="arabic">
-<li>
-<p>
-Configure your e-mail and name for Git
-</p>
-
-
-<pre><code>$ git config \--global user.email "you@example.com"
-$ git config \--global user.name "Your Name"</code></pre>
-
-</li>
-<li>
-<p>
-Install Repo
-</p>
-
-
-<pre><code>$ mkdir -p ~/bin
-$ wget -O - https://dl-ssl.google.com/dl/googlesource/git-repo/repo > ~/bin/repo
-$ chmod a+x ~/bin/repo</code></pre>
-
-</li>
-<li>
-<p>
-Create working directory
-</p>
-
-
-<pre><code>$ mkdir working-directory-name
-$ cd working-directory-name
-$ repo init -u https://github.com/norton/manifests.git -m lets-default.xml</code></pre>
-
-
-<table><tr>
-<td class="icon">
-Note
-</td>
-<td class="content">Your "Git" identity is needed during the init step.  Please
-enter the name and email of your GitHub account if you have one.  Team
-members having read-write access are recommended to use "repo init -u
-<a href="mailto:git@github.com">git@github.com</a>:norton/manifests.git -m lets-default-rw.xml".</td>
-</tr></table>
-
-
-<table><tr>
-<td class="icon">
-Tip
-</td>
-<td class="content">If you want to checkout the latest development version, please
-append " -b dev" to the repo init command.</td>
-</tr></table>
-
-</li>
-<li>
-<p>
-Download Git repositories
-</p>
-
-
-<pre><code>$ cd working-directory-name
-$ repo sync</code></pre>
-
-</li>
-</ol>
-<p>For further information and help for related tools, please refer to the
-following links:</p>
+<p>For further information and help for related tools, please refer to
+the following links:</p>
 <ul>
 <li>
 <p>
@@ -376,7 +325,7 @@ Erlang - <a href="http://www.erlang.org/">http://www.erlang.org/</a>
 <ul>
 <li>
 <p>
-<strong>R16B or newer, R16B has been tested most recently</strong>
+<strong>R16B or newer, 17.0 has been tested most recently</strong>
 </p>
 </li>
 </ul>
@@ -388,12 +337,7 @@ Git - <a href="http://git-scm.com/">http://git-scm.com/</a>
 <ul>
 <li>
 <p>
-<strong>Git 1.5.4 or newer, Git 1.8.2 has been tested most recently</strong>
-</p>
-</li>
-<li>
-<p>
-<em>required for Repo and GitHub</em>
+<strong>Git 1.5.4 or newer, Git 1.9.2 has been tested most recently</strong>
 </p>
 </li>
 </ul>
@@ -403,271 +347,7 @@ Git - <a href="http://git-scm.com/">http://git-scm.com/</a>
 GitHub - <a href="https://github.com">https://github.com</a>
 </p>
 </li>
-<li>
-<p>
-Python - <a href="http://www.python.org">http://www.python.org</a>
-</p>
-<ul>
-<li>
-<p>
-<strong>Python 2.4 or newer, Python 2.7.3 has been tested most recently
-    (CAUTION: Python 3.x might be too new)</strong>
-</p>
-</li>
-<li>
-<p>
-<em>required for Repo</em>
-</p>
-</li>
 </ul>
-</li>
-<li>
-<p>
-Rebar - <a href="https://github.com/rebar/rebar/wiki">https://github.com/rebar/rebar/wiki</a>
-</p>
-</li>
-<li>
-<p>
-Repo - <a href="http://source.android.com/source/git-repo.html">http://source.android.com/source/git-repo.html</a>
-</p>
-</li>
-</ul>
-
-
-
-<h2 id="_to_build_basic_recipe">To build - basic recipe</h2>
-
-<ol class="arabic">
-<li>
-<p>
-Get and install an erlang system <a href="http://www.erlang.org">http://www.erlang.org</a>
-</p>
-</li>
-<li>
-<p>
-Build
-</p>
-
-
-<pre><code>$ cd working-directory-name
-$ make compile</code></pre>
-
-</li>
-</ol>
-
-
-
-<h2 id="_to_build_optional_features">To build - optional features</h2>
-
-<ol class="upperalpha">
-<li>
-<p>
-Dialyzer Testing <em>basic recipe</em>
-</p>
-<ol class="arabic">
-<li>
-<p>
-Build Dialyzer's PLT <em>(required once)</em>
-</p>
-
-
-<pre><code>$ cd working-directory-name
-$ make build-plt</code></pre>
-
-
-<table><tr>
-<td class="icon">
-Tip
-</td>
-<td class="content">Check Makefile and dialyzer's documentation for further
-information.</td>
-</tr></table>
-
-</li>
-<li>
-<p>
-Dialyze with specs
-</p>
-
-
-<pre><code>$ cd working-directory-name
-$ make dialyze</code></pre>
-
-
-<table><tr>
-<td class="icon">
-Caution
-</td>
-<td class="content">If you manually run dialyzer with the "-r" option, execute
-"make clean compile" first to avoid finding duplicate beam files
-underneath rebar's .eunit directory.  Check Makefile for further
-information.</td>
-</tr></table>
-
-</li>
-<li>
-<p>
-Dialyze without specs
-</p>
-
-
-<pre><code>$ cd working-directory-name
-$ make dialyze-nospec</code></pre>
-
-</li>
-</ol>
-</li>
-</ol>
-
-
-
-<h2 id="_to_test_quickcheck">To test - QuickCheck</h2>
-
-<ol class="arabic">
-<li>
-<p>
-Make sure QuickCheck is in your Erlang code path.  One simple way
-   to accomplish this is by adding the code path to your <code>~/.erlang</code>
-   resource file.
-</p>
-
-
-<pre><code>true = code:add_pathz(os:getenv("HOME")++"/.erlang.d/deps/quviq/eqc-X.Y.Z/ebin").</code></pre>
-
-</li>
-<li>
-<p>
-Compile for QuickCheck
-</p>
-
-
-<pre><code>$ cd working-directory-name
-$ make clean
-$ make compile-for-eqc</code></pre>
-
-</li>
-<li>
-<p>
-Run 5,000 QuickCheck tests
-</p>
-
-
-<pre><code>$ cd working-directory-name/deps/lets/.qc
-$ erl -smp +A 5 -pz ../../sext/ebin -pz ../../gen_ets/ebin -pz ../../qc/ebin
-
-1> qc_statem_lets:qc_run(5000).
-....
-OK, passed 5000 tests
-
-9.022% {delete,ok}
-7.800% {new,ok}
-4.535% {match_delete,ok}
-4.491% {lookup,ok}
-4.399% {select,ok}
-4.352% {select_delete,ok}
-4.348% {tab2list,ok}
-4.341% {member,ok}
-4.334% {last,ok}
-4.315% {foldl,ok}
-4.308% {select_reverse,ok}
-4.301% {select_count,ok}
-4.293% {select31,ok}
-4.264% {first,ok}
-4.216% {foldr,ok}
-4.202% {match_object,ok}
-4.184% {match,ok}
-4.056% {insert,ok}
-3.997% {prev,ok}
-3.774% {next,ok}
-3.416% {lookup_element,{error,badarg}}
-1.298% {insert_new,ok}
-0.757% {lookup_element,ok}
-0.516% {next,{error,badarg}}
-0.483% {prev,{error,badarg}}
-true
-.......</code></pre>
-
-
-<table><tr>
-<td class="icon">
-Tip
-</td>
-<td class="content">For testing LevelDB directly using the C bindings, try<code>qc_statemc_lets:qc_run(5000)</code>.</td>
-</tr></table>
-
-</li>
-</ol>
-
-
-
-<h2 id="_to_test_proper">To test - PropEr</h2>
-
-<ol class="arabic">
-<li>
-<p>
-Make sure PropEr is in your Erlang code path.  One simple way to
-   accomplish this is by adding the code path to your <code>~/.erlang</code>
-   resource file.
-</p>
-
-
-<pre><code>true = code:add_pathz(os:getenv("HOME")++"/.erlang.d/deps/proper/ebin").</code></pre>
-
-</li>
-<li>
-<p>
-Compile for PropEr
-</p>
-
-
-<pre><code>$ cd working-directory-name
-$ make clean
-$ make compile-for-proper</code></pre>
-
-</li>
-<li>
-<p>
-Run 5,000 PropEr tests
-</p>
-
-
-<pre><code>$ cd working-directory-name/deps/lets/.qc
-$ erl -smp +A 5 -pz ../../sext/ebin -pz ../../gen_ets/ebin -pz ../../qc/ebin
-
-1> qc_statem_lets:qc_run(5000).
-....
-OK: Passed 5000 test(s).
-
-11% {new,ok}
-8% {delete,ok}
-4% {member,ok}
-4% {select,ok}
-4% {select_count,ok}
-4% {select_reverse,ok}
-4% {lookup,ok}
-4% {match_object,ok}
-4% {tab2list,ok}
-4% {last,ok}
-4% {match,ok}
-4% {foldl,ok}
-4% {match_delete,ok}
-3% {prev,ok}
-3% {select31,ok}
-3% {select_delete,ok}
-3% {foldr,ok}
-3% {insert,ok}
-3% {first,ok}
-3% {next,ok}
-3% {lookup_element,{error,badarg}}
-1% {insert_new,ok}
-0% {prev,{error,badarg}}
-0% {lookup_element,ok}
-0% {next,{error,badarg}}
-true
-.......</code></pre>
-
-</li>
-</ol>
 
 
 
@@ -681,8 +361,7 @@ Documentation
 <ul>
 <li>
 <p>
-Explain how to run QuickCheck/PropEr tests using a new rebar
-    plugin.
+Explain how to run QuickCheck tests using a new rebar plugin.
 </p>
 </li>
 <li>
