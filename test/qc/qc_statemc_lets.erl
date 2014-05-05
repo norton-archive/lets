@@ -23,7 +23,7 @@
 -module(qc_statemc_lets).
 
 -ifdef(QC).
--ifdef(EQC).
+-ifdef(QC_EQC).
 
 %% API
 -export([qc_run/1, qc_run/2]).
@@ -332,5 +332,5 @@ keymember(X, S) ->
 %%% Internal - Implementation
 %%%----------------------------------------------------------------------
 
--endif. %% -ifdef(EQC).
+-endif. %% -ifdef(QC_EQC).
 -endif. %% -ifdef(QC).
