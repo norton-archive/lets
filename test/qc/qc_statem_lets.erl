@@ -72,13 +72,14 @@
          }).
 
 -type obj() :: #obj{}.
--type ets_type() :: set | ordered_set.  %% default is set
--type ets_impl() :: drv | nif | ets.    %% default is drv
+-type ets_type() :: set | ordered_set.       % default is set
+-type ets_impl() :: drv | nif | hyper | ets. % default is drv
 
 -record(state, {
           parallel=false :: boolean(),
           type           :: ets_type(),
           impl           :: ets_impl(),
+          hyper=false    :: boolean(),
           exists=false   :: boolean(),
           options=[]     :: proplists:proplist(),
           tab            :: tuple() | pid(),
@@ -482,7 +483,7 @@ teardown(_Ref, _State) ->
 -spec aggregate([{integer(), term(), term(), #state{}}])
                -> [{atom(), atom(), integer() | term()}].
 aggregate(L) ->
-    [ {{Cmd,length(Args)},filter_reply(Reply)} || {_N,{set,_,{call,_,Cmd,Args}},Reply,_State} <- L ].
+    [ {{Impl,[ hyper || {hyper,true} <- Opts ]},{Cmd,length(Args)},filter_reply(Reply)} || {_N,{set,_,{call,_,Cmd,Args}},Reply,#state{impl=Impl, options=Opts}} <- L ].
 
 filter_reply({'EXIT',{Err,_}}) ->
     {error,Err};
@@ -495,15 +496,15 @@ filter_reply(_) ->
 %%%----------------------------------------------------------------------
 
 gen_options(Op,#state{type=undefined, impl=undefined, tab=undefined}=S) ->
-    ?LET({Type,Impl}, {lets_type(), lets_impl()},
-         gen_options(Op,S#state{type=Type, impl=Impl}));
-gen_options(Op,#state{type=Type, impl=drv=Impl}=S) ->
-    Defaults = [Type, Impl]
+    ?LET({Type,Impl,Hyper}, {lets_type(), lets_impl(), lets_hyper()},
+         gen_options(Op,S#state{type=Type, impl=Impl, hyper=if Impl==ets -> false; true -> Hyper end}));
+gen_options(Op,#state{type=Type, impl=drv=Impl, hyper=Hyper}=S) ->
+    Defaults = [Type, Impl, {hyper, Hyper}]
         ++ [public, {keypos,#obj.key}, {compressed, gen_boolean()}, {async, gen_boolean()}]
         ++ gen_leveldb_options(Op,S),
     oneof([Defaults, [named_table|Defaults]]);
-gen_options(Op,#state{type=Type, impl=nif=Impl}=S) ->
-    Defaults = [Type, Impl]
+gen_options(Op,#state{type=Type, impl=nif=Impl, hyper=Hyper}=S) ->
+    Defaults = [Type, Impl, {hyper, Hyper}]
         ++ [public, {keypos,#obj.key}, {compressed, gen_boolean()}]
         ++ gen_leveldb_options(Op,S),
     oneof([Defaults, [named_table|Defaults]]);
@@ -549,6 +550,9 @@ lets_impl() ->
     %% @NOTE Remove one or two of these to restrict to a particular
     %% implementation.
     noshrink(oneof([drv,nif,ets])).
+
+lets_hyper() ->
+    noshrink(gen_boolean()).
 
 gen_integer_key() ->
     oneof(?INT_KEYS).

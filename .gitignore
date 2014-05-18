@@ -3,6 +3,8 @@
 .qc/
 .rebar/
 c_src/*.o
+c_src/hyperleveldb-*/
+c_src/hyperleveldb/
 c_src/leveldb-*/
 c_src/leveldb/
 c_src/snappy-*/

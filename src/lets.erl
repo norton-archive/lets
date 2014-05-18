@@ -77,7 +77,7 @@
 
 -type opts()          :: [ets_opt() | impl_opt() | db_opts() | db_read_opts() | db_write_opts()].
 -type ets_opt()       :: set | ordered_set | named_table | {keypos,pos_integer()} | public | protected | private | compressed | async.
--type impl_opt()      :: drv | nif | ets.
+-type impl_opt()      :: drv | nif | hyper | ets.
 
 -type db_opts()       :: {db, [{path,file:filename()} | create_if_missing | {create_if_missing,boolean()} | error_if_exists | {error_if_exists,boolean()} | paranoid_checks | {paranoid_checks,boolean()} | {write_buffer_size,pos_integer()} | {max_open_files,pos_integer()} | {block_cache_size,pos_integer()} | {block_size,pos_integer()} | {block_restart_interval,pos_integer()} | {filter_policy,no | {bloom,pos_integer()}}]}.
 -type db_read_opts()  :: {db_read, [verify_checksums | {verify_checksums,boolean()} | fill_cache | {fill_cache,boolean()}]}.
@@ -145,22 +145,27 @@ tid(Tab) ->
 %%
 %% - +private+ Only the owner process can read or write to the table.
 %%
-%% - +compressed+ If this option is present, the table data will be
-%%   stored in a compressed format.
+%% - +compressed+ If this option is present, the table data is stored
+%%   in a compressed format.
 %%
 %% - +async+ If this option is present, the emulator\'s async thread
-%%   pool will be used when accessing the table data.  _only the drv
+%%   pool is used when accessing the table data.  _only the drv
 %%   implementation_
 %%
-%% - +drv+ If this option is present, the table data will be stored
-%%   with LevelDB backend via an Erlang Driver.  This is the default
+%% - +drv+ If this option is present, the table data is stored with
+%%   LevelDB backend via an Erlang Driver.  This is the default
 %%   setting for the table implementation.
 %%
-%% - +nif+ If this option is present, the table data will be stored
-%%   with LevelDB backend via an Erlang NIF.
+%% - +nif+ If this option is present, the table data is stored with
+%%   LevelDB backend via an Erlang NIF.
 %%
-%% - +ets+ If this option is present, the table data will be stored
-%%   with ETS as the backend.
+%% - +hyper+ If this option is present, the HyperLeveDB version of the
+%%   LevelDB implementation is used as the backend.  The original
+%%   LevelDB implementation is the default backend.  _not applicable
+%%   to the ets implementation_
+%%
+%% - +ets+ If this option is present, the table data is stored with
+%%   ETS as the backend.
 %%
 %% - +{db, [db_opts()]}+ LevelDB database options.
 %%
@@ -174,7 +179,7 @@ tid(Tab) ->
 %%   path.  The default is +Name+.
 %%
 %% - +create_if_missing | {create_if_missing, boolean()}+ If +true+,
-%%   the database will be created if it is missing.  The default is
+%%   the database is created if it is missing.  The default is
 %%   +false+.
 %%
 %% - +error_if_exists | {error_if_exists, boolean()}+ If +true+, an
@@ -182,9 +187,9 @@ tid(Tab) ->
 %%   +false+.
 %%
 %% - +paranoid_checks | {paranoid_checks, boolean()}+ If +true+, the
-%%   implementation will do aggressive checking of the data it is
-%%   processing and will stop early if it detects any errors. The
-%%   default is +false+.
+%%   implementation does aggressive checking of the data it is
+%%   processing and stops early if it detects any errors. The default
+%%   is +false+.
 %%
 %% - +{write_buffer_size, pos_integer()}+ The default is 4MB.
 %%
@@ -201,7 +206,7 @@ tid(Tab) ->
 %% Valid LevelDB read properties for +db_read_opts()+ are:
 %%
 %% - +verify_checksums | {verify_checksums, boolean()}+ If +true+, all
-%%   data read from underlying storage will be verified against
+%%   data read from underlying storage is verified against
 %%   corresponding checksums. The default is +false+.
 %%
 %% - +fill_cache | {fill_cache, boolean()}+ If +true+, the data read
@@ -209,9 +214,9 @@ tid(Tab) ->
 %%
 %% Valid LevelDB write properties for +db_write_opts()+ are:
 %%
-%% - +sync | {sync, boolean()}+ If +true+, the write will be flushed
-%%   from the operating system buffer cache before the write is
-%%   considered complete. The default is +false+.
+%% - +sync | {sync, boolean()}+ If +true+, the write is flushed from
+%%   the operating system buffer cache before the write is considered
+%%   complete. The default is +false+.
 %%
 %% @end
 %% @see ets:new/2
@@ -266,7 +271,7 @@ delete_all_objects(Tab) ->
     gen_ets_ns:delete_all_objects(?NS, Tab).
 
 %% @doc Returns the first key +Key+ in the table +Tab+.  If the table
-%% is empty, +'$end_of_table'+ will be returned.
+%% is empty, +'$end_of_table'+ is returned.
 %% @end
 %% @see ets:first/1
 
@@ -345,7 +350,7 @@ insert_new(Tab, ObjOrObjs) ->
     gen_ets_ns:insert_new(?NS, Tab, ObjOrObjs).
 
 %% @doc Returns the last key +Key+ in the table +Tab+.  If the table
-%% is empty, +'$end_of_table'+ will be returned.
+%% is empty, +'$end_of_table'+ is returned.
 %% @end
 %% @see ets:last/1
 
@@ -548,12 +553,12 @@ tab2list(Tab) ->
 %%%----------------------------------------------------------------------
 
 create(Op, Name, Opts) ->
-    case options(Opts) of
-        {POpts, []} ->
-            POpts;
-        {POpts, BadArgs} ->
-            erlang:error(badarg, [Name, BadArgs])
-    end,
+    POpts = case options(Opts) of
+                {POpts0, []} ->
+                    POpts0;
+                {_POpts0, BadArgs} ->
+                    erlang:error(badarg, [Name, BadArgs])
+            end,
 
     NamedTable = proplists:get_bool(named_table, POpts),
     Type =
@@ -586,6 +591,7 @@ create(Op, Name, Opts) ->
 
     Drv = proplists:get_bool(drv, POpts),
     Nif = proplists:get_bool(nif, POpts),
+    Hyper = proplists:get_bool(hyper, POpts),
     Ets = proplists:get_bool(ets, POpts),
 
     DBOptions = fix_db_options(Name, Compressed, Async, proplists:get_value(db, POpts, [])),
@@ -599,16 +605,20 @@ create(Op, Name, Opts) ->
     DBOpts = [{db, DBOptions}, {db_read, DBReadOptions}, {db_write, DBWriteOptions}],
 
     if Drv ->
-            DrvOpts = [{impl, {lets_impl_drv, DBOpts}} | GenOpts],
+            Impl = if Hyper -> hets_impl_drv; true -> lets_impl_drv end,
+            DrvOpts = [{impl, {Impl, DBOpts}} | GenOpts],
             gen_ets_ns:Op(?NS, Name, DrvOpts);
        Nif ->
-            NifOpts = [{impl, {lets_impl_nif, DBOpts}} | GenOpts],
+            Impl = if Hyper -> hets_impl_nif; true -> lets_impl_nif end,
+            NifOpts = [{impl, {Impl, DBOpts}} | GenOpts],
             gen_ets_ns:Op(?NS, Name, NifOpts);
        Ets ->
+            _ = if Hyper -> erlang:error(badarg, [Name, [proplists:get_value(hyper, POpts)]]); true -> true end,
             EtsOpts = [{impl, {gen_ets_impl_ets, []}} | GenOpts],
             gen_ets_ns:Op(?NS, Name, EtsOpts);
        true ->
-            DrvOpts = [{impl, {lets_impl_drv, DBOpts}} | GenOpts],
+            Impl = if Hyper -> hets_impl_drv; true -> lets_impl_drv end,
+            DrvOpts = [{impl, {Impl, DBOpts}} | GenOpts],
             gen_ets_ns:Op(?NS, Name, DrvOpts)
     end.
 
@@ -644,7 +654,7 @@ binify(X) when is_binary(X) ->
     X.
 
 options(Options) ->
-    Keys = [set, ordered_set, named_table, keypos, public, protected, private, compressed, async, drv, nif, ets, db, db_read, db_write],
+    Keys = [set, ordered_set, named_table, keypos, public, protected, private, compressed, async, drv, nif, hyper, ets, db, db_read, db_write],
     options(Options, Keys).
 
 options(Options, Keys) when is_list(Options) ->

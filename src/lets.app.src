@@ -28,6 +28,6 @@
   {vsn, git},
   {registered, []},
   {applications, [kernel, stdlib, sasl]},
-  {modules, [lets, lets_impl_drv, lets_impl_nif]}
+  {modules, [lets, lets_impl_drv, lets_impl_nif, hets_impl_drv, hets_impl_nif]}
  ]
 }.

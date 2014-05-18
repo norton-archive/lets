@@ -26,6 +26,7 @@ set -eo pipefail
 
 SNAPPY_VSN=HEAD
 LEVELDB_VSN=HEAD
+HYPERLEVELDB_VSN=HEAD
 
 if [ `basename $PWD` != "c_src" ]; then
     pushd c_src > /dev/null 2>&1
@@ -35,8 +36,10 @@ BASEDIR="$PWD"
 
 case "$1" in
     clean)
+        rm -f *.o ../priv/lib/*.so
         rm -rf snappy snappy-$SNAPPY_VSN
         rm -rf leveldb leveldb-$LEVELDB_VSN
+        rm -rf hyperleveldb hyperleveldb-$HYPERLEVELDB_VSN
         ;;
     get_deps)
         ;;
@@ -90,6 +93,23 @@ case "$1" in
                 install include/leveldb/*.h $BASEDIR/leveldb/include/leveldb && \
                 mkdir -p $BASEDIR/leveldb/lib && \
                 install libleveldb.a $BASEDIR/leveldb/lib)
+        fi
+        # hyperleveldb
+        if [ ! -f $BASEDIR/hyperleveldb/lib/libhyperleveldb.a ]; then
+            (cd $REBAR_DEPS_DIR/hyperleveldb && git archive --format=tar --prefix=hyperleveldb-$HYPERLEVELDB_VSN/ $HYPERLEVELDB_VSN) \
+                | tar xf -
+            (cd hyperleveldb-$HYPERLEVELDB_VSN && \
+                autoreconf -i && \
+                env CPPFLAGS="-fPIC -I$BASEDIR/snappy/include $CPPFLAGS" \
+                    CFLAGS="-fPIC -I$BASEDIR/snappy/include $CFLAGS" \
+                    CXXFLAGS="-fPIC -I$BASEDIR/snappy/include $CXXFLAGS" \
+                    LDFLAGS="-L$BASEDIR/snappy/lib -lsnappy $LDFLAGS" \
+                    ./configure --enable-static --enable-snappy && \
+                make && \
+                mkdir -p $BASEDIR/hyperleveldb/include/hyperleveldb && \
+                install hyperleveldb/*.h $BASEDIR/hyperleveldb/include/hyperleveldb && \
+                mkdir -p $BASEDIR/hyperleveldb/lib && \
+                install .libs/libhyperleveldb.a $BASEDIR/hyperleveldb/lib)
         fi
         ;;
 esac

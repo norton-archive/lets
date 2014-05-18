@@ -48,6 +48,7 @@
 %%%===================================================================
 
 setup() ->
+    %% @TODO add option to enable hyperleveldb
     Options = [{c_src,"../c_src/leveldb/include/leveldb/c.h"},
                {additional_files, ["../c_src/leveldb/lib/libleveldb.a", "../c_src/snappy/lib/libsnappy.a"]},
                {cflags, "-lstdc++ -lpthread"}],
