@@ -186,7 +186,7 @@ supported ETS APIs are:</p>
 </p>
 </li>
 </ul>
-<p>For testing and comparison purposes, LETS supports three backend
+<p>For testing and comparison purposes, LETS supports five backend
 implementations:</p>
 <ul>
 <li>
@@ -197,6 +197,16 @@ implementations:</p>
 <li>
 <p>
 <code>nif</code> C++ NIF with LevelDB backend
+</p>
+</li>
+<li>
+<p>
+<code>hyper drv</code> C++ Driver with HyperLevelDB backend
+</p>
+</li>
+<li>
+<p>
+<code>hyper nif</code> C++ NIF with HyperLevelDB backend
 </p>
 </li>
 <li>
@@ -231,42 +241,150 @@ $ make deps clean compile-for-eqc
 $ (cd .qc; erl -smp +A 5 -pz -pz ../deps/{sext,gen_ets,qc}/ebin)
 
 1> qc_statem_lets:qc_run(500).
-....
+.......
 OK, passed 500 tests
 
 100.0% {1,attempts}
 
-3.82% {{all,1},ok}
-3.81% {{match,2},ok}
-3.78% {{lookup,2},ok}
-3.78% {{foldl,3},ok}
-3.77% {{delete,2},ok}
-3.76% {{first,1},ok}
-3.75% {{foldr,3},ok}
-3.71% {{last,1},ok}
-3.70% {{tab2list,1},ok}
-3.67% {{select,2},ok}
-3.67% {{member,2},ok}
-3.64% {{select_delete,2},ok}
-3.63% {{match_object31,3},ok}
-3.63% {{match_delete,2},ok}
-3.61% {{select31,3},ok}
-3.53% {{select_reverse,2},ok}
-3.51% {{select_count,2},ok}
-3.50% {{select_reverse31,3},ok}
-3.50% {{new,2},ok}
-3.48% {{delete,1},ok}
-3.44% {{match_object,2},ok}
-3.44% {{insert,2},ok}
-3.43% {{match31,3},ok}
-3.37% {{new,3},ok}
-3.34% {{prev,2},ok}
-3.23% {{next,2},ok}
-2.99% {{lookup_element,3},{error,badarg}}
-1.53% {{insert_new,2},ok}
-0.76% {{lookup_element,3},ok}
-0.62% {{next,2},{error,badarg}}
-0.60% {{prev,2},{error,badarg}}
+3.79% {{undefined,[]},{new,2},ok}
+1.29% {{drv,[]},{match_delete,2},ok}
+1.25% {{ets,[]},{select_delete,2},ok}
+1.23% {{drv,[]},{select_count,2},ok}
+1.22% {{drv,[]},{match,2},ok}
+1.22% {{drv,[]},{match_object,2},ok}
+1.22% {{drv,[]},{lookup,2},ok}
+1.21% {{drv,[]},{select_delete,2},ok}
+1.21% {{drv,[]},{delete,1},ok}
+1.19% {{drv,[]},{last,1},ok}
+1.18% {{drv,[]},{insert,2},ok}
+1.18% {{drv,[]},{delete,2},ok}
+1.18% {{ets,[]},{select,2},ok}
+1.18% {{drv,[]},{foldr,3},ok}
+1.17% {{ets,[]},{tab2list,1},ok}
+1.17% {{drv,[]},{new,3},ok}
+1.17% {{drv,[]},{foldl,3},ok}
+1.16% {{ets,[]},{select_reverse31,3},ok}
+1.14% {{drv,[]},{match31,3},ok}
+1.13% {{ets,[]},{insert,2},ok}
+1.13% {{drv,[]},{all,1},ok}
+1.12% {{ets,[]},{select_count,2},ok}
+1.12% {{ets,[]},{match_object,2},ok}
+1.12% {{ets,[]},{match_delete,2},ok}
+1.11% {{drv,[]},{tab2list,1},ok}
+1.11% {{drv,[]},{select,2},ok}
+1.11% {{drv,[]},{member,2},ok}
+1.10% {{ets,[]},{match31,3},ok}
+1.10% {{ets,[]},{first,1},ok}
+1.10% {{drv,[]},{select_reverse31,3},ok}
+1.10% {{drv,[]},{next,2},ok}
+1.10% {{drv,[]},{match_object31,3},ok}
+1.09% {{nif,[]},{match_object,2},ok}
+1.09% {{drv,[]},{select31,3},ok}
+1.09% {{ets,[]},{match_object31,3},ok}
+1.09% {{ets,[]},{lookup,2},ok}
+1.08% {{ets,[]},{select31,3},ok}
+1.08% {{drv,[]},{select_reverse,2},ok}
+1.07% {{ets,[]},{delete,2},ok}
+1.05% {{ets,[]},{select_reverse,2},ok}
+1.05% {{ets,[]},{foldr,3},ok}
+1.05% {{ets,[]},{foldl,3},ok}
+1.03% {{nif,[]},{match,2},ok}
+1.03% {{ets,[]},{all,1},ok}
+1.03% {{drv,[]},{prev,2},ok}
+1.01% {{ets,[]},{member,2},ok}
+1.01% {{ets,[]},{last,1},ok}
+1.01% {{ets,[]},{insert_new,2},ok}
+1.01% {{drv,[]},{first,1},ok}
+0.96% {{nif,[]},{prev,2},ok}
+0.96% {{nif,[]},{match31,3},ok}
+0.96% {{nif,[]},{all,1},ok}
+0.95% {{nif,[]},{tab2list,1},ok}
+0.94% {{drv,[]},{lookup_element,3},{error,badarg}}
+0.93% {{nif,[]},{first,1},ok}
+0.93% {{ets,[]},{delete,1},ok}
+0.92% {{nif,[]},{select31,3},ok}
+0.92% {{nif,[]},{lookup_element,3},{error,badarg}}
+0.92% {{ets,[]},{match,2},ok}
+0.91% {{nif,[]},{select,2},ok}
+0.90% {{nif,[]},{lookup,2},ok}
+0.89% {{nif,[]},{insert,2},ok}
+0.89% {{nif,[]},{foldl,3},ok}
+0.88% {{nif,[]},{match_object31,3},ok}
+0.88% {{ets,[]},{new,3},ok}
+0.88% {{ets,[]},{lookup_element,3},{error,badarg}}
+0.86% {{nif,[]},{delete,2},ok}
+0.84% {{nif,[]},{select_reverse31,3},ok}
+0.84% {{nif,[]},{last,1},ok}
+0.84% {{nif,[]},{select_delete,2},ok}
+0.82% {{nif,[]},{select_reverse,2},ok}
+0.82% {{nif,[]},{foldr,3},ok}
+0.81% {{nif,[]},{next,2},ok}
+0.80% {{nif,[]},{match_delete,2},ok}
+0.77% {{nif,[]},{select_count,2},ok}
+0.77% {{nif,[]},{delete,1},ok}
+0.76% {{nif,[]},{member,2},ok}
+0.73% {{nif,[]},{new,3},ok}
+0.67% {{ets,[]},{next,2},ok}
+0.55% {{ets,[]},{prev,2},{error,badarg}}
+0.52% {{ets,[]},{next,2},{error,badarg}}
+0.50% {{ets,[]},{prev,2},ok}
+0.39% {{drv,[hyper]},{tab2list,1},ok}
+0.38% {{drv,[hyper]},{select_reverse31,3},ok}
+0.38% {{drv,[hyper]},{select_reverse,2},ok}
+0.36% {{drv,[hyper]},{match_object,2},ok}
+0.35% {{drv,[hyper]},{insert,2},ok}
+0.35% {{drv,[hyper]},{foldr,3},ok}
+0.35% {{drv,[hyper]},{delete,1},ok}
+0.34% {{drv,[hyper]},{new,3},ok}
+0.34% {{drv,[hyper]},{lookup,2},ok}
+0.34% {{drv,[hyper]},{delete,2},ok}
+0.33% {{drv,[hyper]},{next,2},ok}
+0.33% {{drv,[hyper]},{match_object31,3},ok}
+0.33% {{drv,[hyper]},{all,1},ok}
+0.31% {{drv,[hyper]},{prev,2},ok}
+0.31% {{drv,[hyper]},{last,1},ok}
+0.31% {{drv,[hyper]},{first,1},ok}
+0.30% {{nif,[hyper]},{insert,2},ok}
+0.30% {{drv,[hyper]},{select_count,2},ok}
+0.30% {{drv,[hyper]},{select,2},ok}
+0.29% {{nif,[hyper]},{select,2},ok}
+0.29% {{nif,[hyper]},{delete,1},ok}
+0.29% {{drv,[hyper]},{foldl,3},ok}
+0.28% {{drv,[hyper]},{match31,3},ok}
+0.27% {{nif,[hyper]},{select_reverse31,3},ok}
+0.27% {{nif,[hyper]},{select31,3},ok}
+0.27% {{nif,[hyper]},{select_reverse,2},ok}
+0.27% {{drv,[hyper]},{select31,3},ok}
+0.26% {{nif,[hyper]},{tab2list,1},ok}
+0.26% {{nif,[hyper]},{select_count,2},ok}
+0.26% {{nif,[hyper]},{lookup,2},ok}
+0.26% {{nif,[hyper]},{all,1},ok}
+0.26% {{drv,[hyper]},{member,2},ok}
+0.25% {{nif,[hyper]},{new,3},ok}
+0.25% {{nif,[hyper]},{match_object31,3},ok}
+0.24% {{nif,[hyper]},{select_delete,2},ok}
+0.24% {{drv,[hyper]},{select_delete,2},ok}
+0.24% {{drv,[hyper]},{match_delete,2},ok}
+0.24% {{drv,[hyper]},{match,2},ok}
+0.24% {{drv,[hyper]},{lookup_element,3},{error,badarg}}
+0.23% {{nif,[hyper]},{foldr,3},ok}
+0.23% {{nif,[hyper]},{prev,2},ok}
+0.23% {{nif,[hyper]},{member,2},ok}
+0.23% {{nif,[hyper]},{match,2},ok}
+0.22% {{nif,[hyper]},{first,1},ok}
+0.21% {{nif,[hyper]},{match_object,2},ok}
+0.21% {{nif,[hyper]},{last,1},ok}
+0.21% {{nif,[hyper]},{delete,2},ok}
+0.19% {{drv,[]},{lookup_element,3},ok}
+0.18% {{nif,[hyper]},{match31,3},ok}
+0.18% {{nif,[hyper]},{lookup_element,3},{error,badarg}}
+0.18% {{nif,[]},{lookup_element,3},ok}
+0.18% {{ets,[]},{lookup_element,3},ok}
+0.18% {{nif,[hyper]},{next,2},ok}
+0.18% {{nif,[hyper]},{match_delete,2},ok}
+0.17% {{nif,[hyper]},{foldl,3},ok}
+0.03% {{nif,[hyper]},{lookup_element,3},ok}
+0.02% {{drv,[hyper]},{lookup_element,3},ok}
 true
 .......</code></pre>
 
@@ -285,7 +403,7 @@ Tip
 
 
 <h3 id="_where_should_i_start">Where should I start?</h3>
-<p>This README is the only bit of documentation right now.</p>
+<p>This README is the only bit of documentation.</p>
 <p>The QC (a.k.a. QuickCheck) tests underneath the "tests/qc" directory
 should be helpful for understanding the specification and behavior of
 ETS and LETS.  These QC tests also illustrate several strategies for
@@ -304,6 +422,13 @@ disk-based implementation.</p>
 <p>LevelDB is a fast key-value storage library written at Google that
 provides an ordered mapping from string keys to string values.</p>
 <p>See <a href="http://code.google.com/p/leveldb/">http://code.google.com/p/leveldb/</a> for further details.</p>
+
+
+<h3 id="_what_is_hyperleveldb">What is HyperLevelDB?</h3>
+<p>HyperLevelDB is the data storage engine that powers HyperDex.
+HyperLevelDB was forked from Google's LevelDB and adapted to more
+closely meet the needs of HyperDex.</p>
+<p>See <a href="https://github.com/rescrv/HyperLevelDB">https://github.com/rescrv/HyperLevelDB</a> for further details.</p>
 
 
 <h3 id="_what_is_snappy">What is Snappy?</h3>
@@ -337,7 +462,7 @@ Git - <a href="http://git-scm.com/">http://git-scm.com/</a>
 <ul>
 <li>
 <p>
-<strong>Git 1.5.4 or newer, Git 1.9.2 has been tested most recently</strong>
+<strong>Git 1.5.4 or newer, Git 1.9.3 has been tested most recently</strong>
 </p>
 </li>
 </ul>
@@ -570,6 +695,8 @@ consider adding explicit read_options and write_options for LET's
 
 
 <table width="100%" border="0" summary="list of modules">
+<tr><td><a href="hets_impl_drv.md" class="module">hets_impl_drv</a></td></tr>
+<tr><td><a href="hets_impl_nif.md" class="module">hets_impl_nif</a></td></tr>
 <tr><td><a href="lets.md" class="module">lets</a></td></tr>
 <tr><td><a href="lets_impl_drv.md" class="module">lets_impl_drv</a></td></tr>
 <tr><td><a href="lets_impl_nif.md" class="module">lets_impl_nif</a></td></tr></table>

@@ -75,7 +75,7 @@ ets_opt() = set | ordered_set | named_table | {keypos, pos_integer()} | public |
 
 
 <pre><code>
-impl_opt() = drv | nif | ets
+impl_opt() = drv | nif | hyper | ets
 </code></pre>
 
 
@@ -232,7 +232,7 @@ pos() = pos_integer()
 guaranteed to be atomic and isolated.  This function only applies
 to the <code>ets</code> implementation.</p>.</td></tr><tr><td valign="top"><a href="#destroy-2">destroy/2</a></td><td><p>Destroy the contents of the specified table.  This function
 only applies to <code>driver</code> and <code>nif</code> implementations.</p>.</td></tr><tr><td valign="top"><a href="#first-1">first/1</a></td><td><p>Returns the first key <code>Key</code> in the table <code>Tab</code>.  If the table
-is empty, <code><em>$end_of_table</em></code> will be returned.</p>.</td></tr><tr><td valign="top"><a href="#foldl-3">foldl/3</a></td><td><p>Fold from left to right over the elements of the table.</p>.</td></tr><tr><td valign="top"><a href="#foldr-3">foldr/3</a></td><td><p>Fold from right to left over the elements of the table.</p>.</td></tr><tr><td valign="top"><a href="#info-1">info/1</a></td><td><p>Returns information about the table <code>Tab</code> as a list of <code>{Item,
+is empty, <code><em>$end_of_table</em></code> is returned.</p>.</td></tr><tr><td valign="top"><a href="#foldl-3">foldl/3</a></td><td><p>Fold from left to right over the elements of the table.</p>.</td></tr><tr><td valign="top"><a href="#foldr-3">foldr/3</a></td><td><p>Fold from right to left over the elements of the table.</p>.</td></tr><tr><td valign="top"><a href="#info-1">info/1</a></td><td><p>Returns information about the table <code>Tab</code> as a list of <code>{Item,
 Value}</code> tuples.</p>.</td></tr><tr><td valign="top"><a href="#info-2">info/2</a></td><td><p>Returns the information associated with <code>Item</code> for the table <code>Tab</code>.</p>
 
 
@@ -294,7 +294,7 @@ Value}</code> tuples.</p>.</td></tr><tr><td valign="top"><a href="#info-2">info/
 exception that instead of overwriting objects with the same key, it
 simply returns false.  This function only applies to the <code>ets</code>
 implementation.</p>.</td></tr><tr><td valign="top"><a href="#last-1">last/1</a></td><td><p>Returns the last key <code>Key</code> in the table <code>Tab</code>.  If the table
-is empty, <code><em>$end_of_table</em></code> will be returned.</p>.</td></tr><tr><td valign="top"><a href="#lookup-2">lookup/2</a></td><td><p>Returns a list of all objects with the key <code>Key</code> in the table
+is empty, <code><em>$end_of_table</em></code> is returned.</p>.</td></tr><tr><td valign="top"><a href="#lookup-2">lookup/2</a></td><td><p>Returns a list of all objects with the key <code>Key</code> in the table
 <code>Tab</code>.</p>.</td></tr><tr><td valign="top"><a href="#lookup_element-3">lookup_element/3</a></td><td><p>Returns the <code>Pos</code>:th element of the object with the key <code>Key</code>
 in the table <code>Tab</code>.</p>.</td></tr><tr><td valign="top"><a href="#match-1">match/1</a></td><td><p>Continues a match started with <code>match/3</code>.</p>.</td></tr><tr><td valign="top"><a href="#match-2">match/2</a></td><td><p>Matches the objects in the table <code>Tab</code> against the pattern
 <code>Pattern</code>.</p>.</td></tr><tr><td valign="top"><a href="#match-3">match/3</a></td><td><p>Matches the objects in the table <code>Tab</code> against the pattern
@@ -358,34 +358,42 @@ setting for the access rights.
 </li>
 <li>
 <p>
-<code>compressed</code> If this option is present, the table data will be
-stored in a compressed format.
+<code>compressed</code> If this option is present, the table data is stored
+in a compressed format.
 </p>
 </li>
 <li>
 <p>
 <code>async</code> If this option is present, the emulator's async thread
-pool will be used when accessing the table data.<em>only the drv
+pool is used when accessing the table data.<em>only the drv
 implementation</em>
 </p>
 </li>
 <li>
 <p>
-<code>drv</code> If this option is present, the table data will be stored
-with LevelDB backend via an Erlang Driver.  This is the default
+<code>drv</code> If this option is present, the table data is stored with
+LevelDB backend via an Erlang Driver.  This is the default
 setting for the table implementation.
 </p>
 </li>
 <li>
 <p>
-<code>nif</code> If this option is present, the table data will be stored
-with LevelDB backend via an Erlang NIF.
+<code>nif</code> If this option is present, the table data is stored with
+LevelDB backend via an Erlang NIF.
 </p>
 </li>
 <li>
 <p>
-<code>ets</code> If this option is present, the table data will be stored
-with ETS as the backend.
+<code>hyper</code> If this option is present, the HyperLeveDB version of the
+LevelDB implementation is used as the backend.  The original
+LevelDB implementation is the default backend.<em>not applicable
+to the ets implementation</em>
+</p>
+</li>
+<li>
+<p>
+<code>ets</code> If this option is present, the table data is stored with
+ETS as the backend.
 </p>
 </li>
 <li>
@@ -416,7 +424,7 @@ path.  The default is <code>Name</code>.
 <li>
 <p>
 <code>create_if_missing | {create_if_missing, boolean()}</code> If <code>true</code>,
-the database will be created if it is missing.  The default is
+the database is created if it is missing.  The default is
 <code>false</code>.
 </p>
 </li>
@@ -430,9 +438,9 @@ error is raised if the database already exists. The default is
 <li>
 <p>
 <code>paranoid_checks | {paranoid_checks, boolean()}</code> If <code>true</code>, the
-implementation will do aggressive checking of the data it is
-processing and will stop early if it detects any errors. The
-default is <code>false</code>.
+implementation does aggressive checking of the data it is
+processing and stops early if it detects any errors. The default
+is <code>false</code>.
 </p>
 </li>
 <li>
@@ -472,7 +480,7 @@ default is <code>false</code>.
 <li>
 <p>
 <code>verify_checksums | {verify_checksums, boolean()}</code> If <code>true</code>, all
-data read from underlying storage will be verified against
+data read from underlying storage is verified against
 corresponding checksums. The default is <code>false</code>.
 </p>
 </li>
@@ -488,9 +496,9 @@ should be cached in memory. The default is <code>true</code>.
 </li>
 <li>
 <p>
-<code>sync | {sync, boolean()}</code> If <code>true</code>, the write will be flushed
-from the operating system buffer cache before the write is
-considered complete. The default is <code>false</code>.
+<code>sync | {sync, boolean()}</code> If <code>true</code>, the write is flushed from
+the operating system buffer cache before the write is considered
+complete. The default is <code>false</code>.
 </p>
 </li>
 </ul>.</td></tr><tr><td valign="top"><a href="#next-2">next/2</a></td><td><p>Returns the next key <code>Key2</code>, following the key <code>Key1</code> in the
@@ -610,7 +618,7 @@ first(Tab::<a href="#type-lets_tab">lets_tab()</a>) -&gt; <a href="#type-key">ke
 
 
 <p>Returns the first key <code>Key</code> in the table <code>Tab</code>.  If the table
-is empty, <code><em>$end_of_table</em></code> will be returned.</p>
+is empty, <code><em>$end_of_table</em></code> is returned.</p>
 
 
 __See also:__ [ets:first/1](ets.md#first-1).
@@ -782,7 +790,7 @@ last(Tab::<a href="#type-lets_tab">lets_tab()</a>) -&gt; <a href="#type-key">key
 
 
 <p>Returns the last key <code>Key</code> in the table <code>Tab</code>.  If the table
-is empty, <code><em>$end_of_table</em></code> will be returned.</p>
+is empty, <code><em>$end_of_table</em></code> is returned.</p>
 
 
 __See also:__ [ets:last/1](ets.md#last-1).
@@ -1022,34 +1030,42 @@ setting for the access rights.
 </li>
 <li>
 <p>
-<code>compressed</code> If this option is present, the table data will be
-stored in a compressed format.
+<code>compressed</code> If this option is present, the table data is stored
+in a compressed format.
 </p>
 </li>
 <li>
 <p>
 <code>async</code> If this option is present, the emulator's async thread
-pool will be used when accessing the table data.<em>only the drv
+pool is used when accessing the table data.<em>only the drv
 implementation</em>
 </p>
 </li>
 <li>
 <p>
-<code>drv</code> If this option is present, the table data will be stored
-with LevelDB backend via an Erlang Driver.  This is the default
+<code>drv</code> If this option is present, the table data is stored with
+LevelDB backend via an Erlang Driver.  This is the default
 setting for the table implementation.
 </p>
 </li>
 <li>
 <p>
-<code>nif</code> If this option is present, the table data will be stored
-with LevelDB backend via an Erlang NIF.
+<code>nif</code> If this option is present, the table data is stored with
+LevelDB backend via an Erlang NIF.
 </p>
 </li>
 <li>
 <p>
-<code>ets</code> If this option is present, the table data will be stored
-with ETS as the backend.
+<code>hyper</code> If this option is present, the HyperLeveDB version of the
+LevelDB implementation is used as the backend.  The original
+LevelDB implementation is the default backend.<em>not applicable
+to the ets implementation</em>
+</p>
+</li>
+<li>
+<p>
+<code>ets</code> If this option is present, the table data is stored with
+ETS as the backend.
 </p>
 </li>
 <li>
@@ -1080,7 +1096,7 @@ path.  The default is <code>Name</code>.
 <li>
 <p>
 <code>create_if_missing | {create_if_missing, boolean()}</code> If <code>true</code>,
-the database will be created if it is missing.  The default is
+the database is created if it is missing.  The default is
 <code>false</code>.
 </p>
 </li>
@@ -1094,9 +1110,9 @@ error is raised if the database already exists. The default is
 <li>
 <p>
 <code>paranoid_checks | {paranoid_checks, boolean()}</code> If <code>true</code>, the
-implementation will do aggressive checking of the data it is
-processing and will stop early if it detects any errors. The
-default is <code>false</code>.
+implementation does aggressive checking of the data it is
+processing and stops early if it detects any errors. The default
+is <code>false</code>.
 </p>
 </li>
 <li>
@@ -1136,7 +1152,7 @@ default is <code>false</code>.
 <li>
 <p>
 <code>verify_checksums | {verify_checksums, boolean()}</code> If <code>true</code>, all
-data read from underlying storage will be verified against
+data read from underlying storage is verified against
 corresponding checksums. The default is <code>false</code>.
 </p>
 </li>
@@ -1152,9 +1168,9 @@ should be cached in memory. The default is <code>true</code>.
 </li>
 <li>
 <p>
-<code>sync | {sync, boolean()}</code> If <code>true</code>, the write will be flushed
-from the operating system buffer cache before the write is
-considered complete. The default is <code>false</code>.
+<code>sync | {sync, boolean()}</code> If <code>true</code>, the write is flushed from
+the operating system buffer cache before the write is considered
+complete. The default is <code>false</code>.
 </p>
 </li>
 </ul>
