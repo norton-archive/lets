@@ -75,13 +75,13 @@
 -type lets_tid()      :: gen_ets_ns:gen_tid().
 -type lets_tab()      :: gen_ets_ns:gen_tab().
 
--type opts()          :: [ets_opt() | impl_opt() | db_opts() | db_read_opts() | db_write_opts()].
+-type opts()          :: [ets_opt() | impl_opt() | {db, db_opts()} | {db_read, db_read_opts()} | {db_write, db_write_opts()}].
 -type ets_opt()       :: set | ordered_set | named_table | {keypos,pos_integer()} | public | protected | private | compressed | async.
 -type impl_opt()      :: drv | nif | hyper | ets.
 
--type db_opts()       :: {db, [{path,file:filename()} | create_if_missing | {create_if_missing,boolean()} | error_if_exists | {error_if_exists,boolean()} | paranoid_checks | {paranoid_checks,boolean()} | {write_buffer_size,pos_integer()} | {max_open_files,pos_integer()} | {block_cache_size,pos_integer()} | {block_size,pos_integer()} | {block_restart_interval,pos_integer()} | {filter_policy,no | {bloom,pos_integer()}}]}.
--type db_read_opts()  :: {db_read, [verify_checksums | {verify_checksums,boolean()} | fill_cache | {fill_cache,boolean()}]}.
--type db_write_opts() :: {db_write, [sync | {sync,boolean()}]}.
+-type db_opts()       :: [{path,file:filename()} | create_if_missing | {create_if_missing,boolean()} | error_if_exists | {error_if_exists,boolean()} | paranoid_checks | {paranoid_checks,boolean()} | {write_buffer_size,pos_integer()} | {max_open_files,pos_integer()} | {block_cache_size,pos_integer()} | {block_size,pos_integer()} | {block_restart_interval,pos_integer()} | {filter_policy,no | {bloom,pos_integer()}}].
+-type db_read_opts()  :: [verify_checksums | {verify_checksums,boolean()} | fill_cache | {fill_cache,boolean()}].
+-type db_write_opts() :: [sync | {sync,boolean()}].
 
 -type key()           :: gen_ets_ns:key().
 -type object()        :: gen_ets_ns:object().
@@ -167,11 +167,11 @@ tid(Tab) ->
 %% - +ets+ If this option is present, the table data is stored with
 %%   ETS as the backend.
 %%
-%% - +{db, [db_opts()]}+ LevelDB database options.
+%% - +{db, db_opts()}+ LevelDB database options.
 %%
-%% - +{db_read, [db_read_opts()]}+ LevelDB read options.
+%% - +{db_read, db_read_opts()}+ LevelDB read options.
 %%
-%% - +{db_write, [db_write_opts()]}+ LevelDB write options.
+%% - +{db_write, db_write_opts()}+ LevelDB write options.
 %%
 %% Valid LevelDB database properties for +db_opts()+ are:
 %%
