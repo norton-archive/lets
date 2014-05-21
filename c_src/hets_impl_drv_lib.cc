@@ -264,7 +264,7 @@ lets_parse_options(lets_impl& impl,
 }
 
 bool
-lets_parse_read_options(lets_impl& impl,
+lets_parse_read_options(leveldb::ReadOptions& opts,
                         const char* buf, ErlDrvSizeT len)
 {
     (void) len;
@@ -289,9 +289,9 @@ lets_parse_read_options(lets_impl& impl,
             ng = ei_decode_atom(buf, &index, atom);
             if (ng) return FALSE;
             if (strcmp(atom, "verify_checksums") == 0) {
-                impl.db_read_options.verify_checksums = true;
+                opts.verify_checksums = true;
             } else if (strcmp(atom, "fill_cache") == 0) {
-                impl.db_read_options.fill_cache = true;
+                opts.fill_cache = true;
             } else {
                 return FALSE;
             }
@@ -307,9 +307,9 @@ lets_parse_read_options(lets_impl& impl,
                 ng = ei_decode_atom(buf, &index, atom);
                 if (ng) return FALSE;
                 if (strcmp(atom, "true") == 0) {
-                    impl.db_read_options.verify_checksums = true;
+                    opts.verify_checksums = true;
                 } else if (strcmp(atom, "false") == 0) {
-                    impl.db_read_options.verify_checksums = false;
+                    opts.verify_checksums = false;
                 } else {
                     return FALSE;
                 }
@@ -317,9 +317,9 @@ lets_parse_read_options(lets_impl& impl,
                 ng = ei_decode_atom(buf, &index, atom);
                 if (ng) return FALSE;
                 if (strcmp(atom, "true") == 0) {
-                    impl.db_read_options.fill_cache = true;
+                    opts.fill_cache = true;
                 } else if (strcmp(atom, "false") == 0) {
-                    impl.db_read_options.fill_cache = false;
+                    opts.fill_cache = false;
                 } else {
                     return FALSE;
                 }
@@ -342,7 +342,7 @@ lets_parse_read_options(lets_impl& impl,
 }
 
 bool
-lets_parse_write_options(lets_impl& impl,
+lets_parse_write_options(leveldb::WriteOptions& opts,
                          const char* buf, ErlDrvSizeT len)
 {
     (void) len;
@@ -367,7 +367,7 @@ lets_parse_write_options(lets_impl& impl,
             ng = ei_decode_atom(buf, &index, atom);
             if (ng) return FALSE;
             if (strcmp(atom, "sync") == 0) {
-                impl.db_write_options.sync = true;
+                opts.sync = true;
             } else {
                 return FALSE;
             }
@@ -383,9 +383,9 @@ lets_parse_write_options(lets_impl& impl,
                 ng = ei_decode_atom(buf, &index, atom);
                 if (ng) return FALSE;
                 if (strcmp(atom, "true") == 0) {
-                    impl.db_write_options.sync = true;
+                    opts.sync = true;
                 } else if (strcmp(atom, "false") == 0) {
-                    impl.db_write_options.sync = false;
+                    opts.sync = false;
                 } else {
                     return FALSE;
                 }

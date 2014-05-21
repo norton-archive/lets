@@ -352,8 +352,4 @@ the following links:
 
   * +info/2+ - investigate if LevelDB\'s implementation can (easily)
     support size and memory info items
-
-  * consider adding explicit read_options and write_options for LET\'s
-    operations (rather than just +new/2+, +destroy/2+, and +repair/2+
-    operations).
 @end

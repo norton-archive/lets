@@ -27,6 +27,7 @@
 %% External exports
 -export([all/0
          , tid/1
+         , tid/2
          , new/2
          , destroy/2
          , repair/2
@@ -115,6 +116,25 @@ all() ->
 -spec tid(lets_tab()) -> lets_tid().
 tid(Tab) ->
     gen_ets_ns:tid(?NS, Tab).
+
+%% @doc Returns a copy of a table\'s identifier with given LevelDB
+%% read and write options.  If Opts is not undefined, the given read
+%% and write options are used when the returned copy is passed as the
+%% first argument to table operations.  Otherwise, the original read
+%% and write options given at the time of calling new/2 are used.
+%% @end
+
+-spec tid(lets_tab(), Opts :: undefined | [{db_read, db_read_opts()} | {db_write, db_write_opts()}]) -> lets_tid().
+tid(Tab, undefined) ->
+    gen_ets_ns:tid(?NS, Tab, undefined);
+tid(Tab, Opts) ->
+    POpts = case options(Opts, [db_read, db_write]) of
+                {POpts0, []} ->
+                    POpts0;
+                {_POpts0, BadArgs} ->
+                    erlang:error(badarg, [Tab, BadArgs])
+            end,
+    gen_ets_ns:tid(?NS, Tab, POpts).
 
 %% @doc Creates a new table and returns a table identifier which can
 %% be used in subsequent operations.  The table identifier can be sent

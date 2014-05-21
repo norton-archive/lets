@@ -27,26 +27,26 @@
 
 %% External exports
 -export([open/2
-         , destroy/2
-         , repair/2
-         , delete/1
-         , delete/2
-         , delete_all_objects/1
-         , first/1
-         , first_iter/1
-         , info_memory/1
-         , info_size/1
-         , insert/2
-         , insert_new/2
-         , last/1
-         , last_iter/1
-         , lookup/2
-         , lookup_element/3
-         , member/2
-         , next/2
-         , next_iter/2
-         , prev/2
-         , prev_iter/2
+        , destroy/2
+        , repair/2
+        , delete/1
+        , delete/2
+        , delete_all_objects/1
+        , first/1
+        , first_iter/1
+        , info_memory/1
+        , info_size/1
+        , insert/2
+        , insert_new/2
+        , last/1
+        , last_iter/1
+        , lookup/2
+        , lookup_element/3
+        , member/2
+        , next/2
+        , next_iter/2
+        , prev/2
+        , prev_iter/2
         ]).
 
 -on_load(init/0).
@@ -69,52 +69,52 @@ init() ->
             Dir ->
                 filename:join([Dir, "lib"])
         end,
-    erlang:load_nif(filename:join(Path, "hets_impl_nif"), 0).
+    erlang:load_nif(filename:join(Path, ?MODULE_STRING), 0).
 
-open(Tid, Options) ->
-    create(fun impl_open/6, Tid, Options).
+open(Tid, Opts) ->
+    create(fun impl_open/6, Tid, Opts).
 
-destroy(Tid, Options) ->
-    create(fun impl_destroy/6, Tid, Options).
+destroy(Tid, Opts) ->
+    create(fun impl_destroy/6, Tid, Opts).
 
-repair(Tid, Options) ->
-    create(fun impl_repair/6, Tid, Options).
+repair(Tid, Opts) ->
+    create(fun impl_repair/6, Tid, Opts).
 
-delete(#gen_tid{impl=Impl}) ->
-    impl_delete(Impl).
+delete(#gen_tid{impl=Impl, impl_opts=Opts}) ->
+    impl_delete(Impl, opts(db_write, Opts)).
 
-delete(#gen_tid{type=Type, impl=Impl}, Key) ->
-    impl_delete(Impl, encode(Type, Key)).
+delete(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key) ->
+    impl_delete(Impl, opts(db_write, Opts), encode(Type, Key)).
 
-delete_all_objects(#gen_tid{impl=Impl}) ->
-    impl_delete_all_objects(Impl).
+delete_all_objects(#gen_tid{impl=Impl, impl_opts=Opts}) ->
+    impl_delete_all_objects(Impl, opts(db_write, Opts)).
 
-first(#gen_tid{type=Type, impl=Impl}) ->
-    case impl_first(Impl) of
+first(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}) ->
+    case impl_first(Impl, opts(db_read, Opts)) of
         '$end_of_table' ->
             '$end_of_table';
         Key ->
             decode(Type, Key)
     end.
 
-first_iter(#gen_tid{type=Type, impl=Impl}) ->
-    case impl_first_iter(Impl) of
+first_iter(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}) ->
+    case impl_first_iter(Impl, opts(db_read, Opts)) of
         '$end_of_table' ->
             '$end_of_table';
         Key ->
             decode(Type, Key)
     end.
 
-last(#gen_tid{type=Type, impl=Impl}) ->
-    case impl_last(Impl) of
+last(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}) ->
+    case impl_last(Impl, opts(db_read, Opts)) of
         '$end_of_table' ->
             '$end_of_table';
         Key ->
             decode(Type, Key)
     end.
 
-last_iter(#gen_tid{type=Type, impl=Impl}) ->
-    case impl_last_iter(Impl) of
+last_iter(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}) ->
+    case impl_last_iter(Impl, opts(db_read, Opts)) of
         '$end_of_table' ->
             '$end_of_table';
         Key ->
@@ -132,33 +132,33 @@ info_memory(#gen_tid{impl=Impl}) ->
 info_size(#gen_tid{impl=Impl}) ->
     impl_info_size(Impl).
 
-insert(#gen_tid{keypos=KeyPos, type=Type, impl=Impl}, Object) when is_tuple(Object) ->
+insert(#gen_tid{keypos=KeyPos, type=Type, impl=Impl, impl_opts=Opts}, Object) when is_tuple(Object) ->
     Key = element(KeyPos, Object),
     Val = Object,
-    impl_insert(Impl, encode(Type, Key), encode(Type, Val));
-insert(#gen_tid{keypos=KeyPos, type=Type, impl=Impl}, Objects) when is_list(Objects) ->
+    impl_insert(Impl, opts(db_write, Opts), encode(Type, Key), encode(Type, Val));
+insert(#gen_tid{keypos=KeyPos, type=Type, impl=Impl, impl_opts=Opts}, Objects) when is_list(Objects) ->
     List = [{encode(Type, element(KeyPos, Object)), encode(Type, Object)} || Object <- Objects ],
-    impl_insert(Impl, List).
+    impl_insert(Impl, opts(db_write, Opts), List).
 
-insert_new(#gen_tid{keypos=KeyPos, type=Type, impl=Impl}, Object) when is_tuple(Object) ->
+insert_new(#gen_tid{keypos=KeyPos, type=Type, impl=Impl, impl_opts=Opts}, Object) when is_tuple(Object) ->
     Key = element(KeyPos, Object),
     Val = Object,
-    impl_insert_new(Impl, encode(Type, Key), encode(Type, Val));
-insert_new(#gen_tid{keypos=KeyPos, type=Type, impl=Impl}, Objects) when is_list(Objects) ->
+    impl_insert_new(Impl, opts(db_write, Opts), encode(Type, Key), encode(Type, Val));
+insert_new(#gen_tid{keypos=KeyPos, type=Type, impl=Impl, impl_opts=Opts}, Objects) when is_list(Objects) ->
     List = [{encode(Type, element(KeyPos, Object)), encode(Type, Object)} || Object <- Objects ],
-    impl_insert_new(Impl, List).
+    impl_insert_new(Impl, opts(db_write, Opts), List).
 
-lookup(#gen_tid{type=Type, impl=Impl}, Key) ->
-    case impl_lookup(Impl, encode(Type, Key)) of
+lookup(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key) ->
+    case impl_lookup(Impl, opts(db_read, Opts), encode(Type, Key)) of
         '$end_of_table' ->
             [];
         Object when is_binary(Object) ->
             [decode(Type, Object)]
     end.
 
-lookup_element(#gen_tid{type=Type, impl=Impl}, Key, Pos) ->
+lookup_element(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key, Pos) ->
     Element =
-        case impl_lookup(Impl, encode(Type, Key)) of
+        case impl_lookup(Impl, opts(db_read, Opts), encode(Type, Key)) of
             '$end_of_table' ->
                 '$end_of_table';
             Object when is_binary(Object) ->
@@ -166,35 +166,35 @@ lookup_element(#gen_tid{type=Type, impl=Impl}, Key, Pos) ->
         end,
     element(Pos, Element).
 
-member(#gen_tid{type=Type, impl=Impl}, Key) ->
-    impl_member(Impl, encode(Type, Key)).
+member(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key) ->
+    impl_member(Impl, opts(db_read, Opts), encode(Type, Key)).
 
-next(#gen_tid{type=Type, impl=Impl}, Key) ->
-    case impl_next(Impl, encode(Type, Key)) of
+next(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key) ->
+    case impl_next(Impl, opts(db_read, Opts), encode(Type, Key)) of
         '$end_of_table' ->
             '$end_of_table';
         Next ->
             decode(Type, Next)
     end.
 
-next_iter(#gen_tid{type=Type, impl=Impl}, Key) ->
-    case impl_next_iter(Impl, encode(Type, Key)) of
+next_iter(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key) ->
+    case impl_next_iter(Impl, opts(db_read, Opts), encode(Type, Key)) of
         '$end_of_table' ->
             '$end_of_table';
         Next ->
             decode(Type, Next)
     end.
 
-prev(#gen_tid{type=Type, impl=Impl}, Key) ->
-    case impl_prev(Impl, encode(Type, Key)) of
+prev(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key) ->
+    case impl_prev(Impl, opts(db_read, Opts), encode(Type, Key)) of
         '$end_of_table' ->
             '$end_of_table';
         Prev ->
             decode(Type, Prev)
     end.
 
-prev_iter(#gen_tid{type=Type, impl=Impl}, Key) ->
-    case impl_prev_iter(Impl, encode(Type, Key)) of
+prev_iter(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key) ->
+    case impl_prev_iter(Impl, opts(db_read, Opts), encode(Type, Key)) of
         '$end_of_table' ->
             '$end_of_table';
         Prev ->
@@ -205,12 +205,17 @@ prev_iter(#gen_tid{type=Type, impl=Impl}, Key) ->
 %%% Internal functions
 %%%----------------------------------------------------------------------
 
-create(Fun, #gen_tid{type=Type, protection=Protection}, Options) ->
-    DbOptions = proplists:get_value(db, Options, []),
-    ReadOptions = proplists:get_value(db_read, Options, []),
-    WriteOptions = proplists:get_value(db_write, Options, []),
-    {value, {path,Path}, NewDbOptions} = lists:keytake(path, 1, DbOptions),
-    Fun(Type, Protection, Path, NewDbOptions, ReadOptions, WriteOptions).
+create(Fun, #gen_tid{type=Type, protection=Protection}, Opts) ->
+    DbOpts = opts(db, Opts),
+    ReadOpts = opts(db_read, Opts),
+    WriteOpts = opts(db_write, Opts),
+    {value, {path,Path}, NewDbOpts} = lists:keytake(path, 1, DbOpts),
+    Fun(Type, Protection, Path, NewDbOpts, ReadOpts, WriteOpts).
+
+opts(_Opt, undefined) ->
+    undefined;
+opts(Key, Opts) ->
+    proplists:get_value(Key, Opts, []).
 
 encode(set, Term) ->
     term_to_binary(Term);
@@ -225,34 +230,34 @@ decode(ordered_set, Term) ->
 nif_stub_error(Line) ->
     erlang:nif_error({nif_not_loaded,module,?MODULE,line,Line}).
 
-impl_open(_Type, _Protection, _Path, _Options, _ReadOptions, _WriteOptions) ->
+impl_open(_Type, _Protection, _Path, _Opts, _ReadOpts, _WriteOpts) ->
     ?NIF_STUB.
 
-impl_destroy(_Type, _Protection, _Path, _Options, _ReadOptions, _WriteOptions) ->
+impl_destroy(_Type, _Protection, _Path, _Opts, _ReadOpts, _WriteOpts) ->
     ?NIF_STUB.
 
-impl_repair(_Type, _Protection, _Path, _Options, _ReadOptions, _WriteOptions) ->
+impl_repair(_Type, _Protection, _Path, _Opts, _ReadOpts, _WriteOpts) ->
     ?NIF_STUB.
 
-impl_delete(_Impl) ->
+impl_delete(_Impl, _Opts) ->
     ?NIF_STUB.
 
-impl_delete(_Impl, _Key) ->
+impl_delete(_Impl, _Opts, _Key) ->
     ?NIF_STUB.
 
-impl_delete_all_objects(_Impl) ->
+impl_delete_all_objects(_Impl, _Opts) ->
     ?NIF_STUB.
 
-impl_first(_Impl) ->
+impl_first(_Impl, _Opts) ->
     ?NIF_STUB.
 
-impl_first_iter(_Impl) ->
+impl_first_iter(_Impl, _Opts) ->
     ?NIF_STUB.
 
-impl_last(_Impl) ->
+impl_last(_Impl, _Opts) ->
     ?NIF_STUB.
 
-impl_last_iter(_Impl) ->
+impl_last_iter(_Impl, _Opts) ->
     ?NIF_STUB.
 
 impl_info_memory(_Impl) ->
@@ -261,32 +266,32 @@ impl_info_memory(_Impl) ->
 impl_info_size(_Impl) ->
     ?NIF_STUB.
 
-impl_insert(_Impl, _Key, _Object) ->
+impl_insert(_Impl, _Opts, _Key, _Object) ->
     ?NIF_STUB.
 
-impl_insert(_Impl, _List) ->
+impl_insert(_Impl, _Opts, _List) ->
     ?NIF_STUB.
 
-impl_insert_new(_Impl, _Key, _Object) ->
+impl_insert_new(_Impl, _Opts, _Key, _Object) ->
     ?NIF_STUB.
 
-impl_insert_new(_Impl, _List) ->
+impl_insert_new(_Impl, _Opts, _List) ->
     ?NIF_STUB.
 
-impl_lookup(_Impl, _Key) ->
+impl_lookup(_Impl, _Opts, _Key) ->
     ?NIF_STUB.
 
-impl_member(_Impl, _Key) ->
+impl_member(_Impl, _Opts, _Key) ->
     ?NIF_STUB.
 
-impl_next(_Impl, _Key) ->
+impl_next(_Impl, _Opts, _Key) ->
     ?NIF_STUB.
 
-impl_next_iter(_Impl, _Key) ->
+impl_next_iter(_Impl, _Opts, _Key) ->
     ?NIF_STUB.
 
-impl_prev(_Impl, _Key) ->
+impl_prev(_Impl, _Opts, _Key) ->
     ?NIF_STUB.
 
-impl_prev_iter(_Impl, _Key) ->
+impl_prev_iter(_Impl, _Opts, _Key) ->
     ?NIF_STUB.

@@ -28,6 +28,8 @@
          , is_table/1
          %% lets
          , all/1
+         , tid/1
+         , tid/2
          , new/2
          , new/3
          , destroy/3
@@ -80,6 +82,12 @@ is_table(Tab) ->
 
 all(Tab) ->
     qc_lets_proxy:all(Tab).
+
+tid(Tab) ->
+    qc_lets_proxy:tid(Tab).
+
+tid(Tab, Options) ->
+    qc_lets_proxy:tid(Tab, Options).
 
 new(Name, Options) ->
     call_slave(new, [Name, Options]).

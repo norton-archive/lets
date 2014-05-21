@@ -37,39 +37,39 @@ extern "C" {
     ERL_NIF_TERM
     lets_impl_nif_repair6(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
     ERL_NIF_TERM
-    lets_impl_nif_insert2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
-    ERL_NIF_TERM
     lets_impl_nif_insert3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
     ERL_NIF_TERM
-    lets_impl_nif_insert_new2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+    lets_impl_nif_insert4(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
     ERL_NIF_TERM
     lets_impl_nif_insert_new3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
     ERL_NIF_TERM
-    lets_impl_nif_delete1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+    lets_impl_nif_insert_new4(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
     ERL_NIF_TERM
     lets_impl_nif_delete2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
     ERL_NIF_TERM
-    lets_impl_nif_delete_all_objects1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+    lets_impl_nif_delete3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
     ERL_NIF_TERM
-    lets_impl_nif_lookup2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+    lets_impl_nif_delete_all_objects2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
     ERL_NIF_TERM
-    lets_impl_nif_member2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+    lets_impl_nif_lookup3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
     ERL_NIF_TERM
-    lets_impl_nif_first1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+    lets_impl_nif_member3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
     ERL_NIF_TERM
-    lets_impl_nif_first_iter1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+    lets_impl_nif_first2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
     ERL_NIF_TERM
-    lets_impl_nif_last1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+    lets_impl_nif_first_iter2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
     ERL_NIF_TERM
-    lets_impl_nif_last_iter1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+    lets_impl_nif_last2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
     ERL_NIF_TERM
-    lets_impl_nif_next2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+    lets_impl_nif_last_iter2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
     ERL_NIF_TERM
-    lets_impl_nif_next_iter2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+    lets_impl_nif_next3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
     ERL_NIF_TERM
-    lets_impl_nif_prev2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+    lets_impl_nif_next_iter3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
     ERL_NIF_TERM
-    lets_impl_nif_prev_iter2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+    lets_impl_nif_prev3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+    ERL_NIF_TERM
+    lets_impl_nif_prev_iter3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
     ERL_NIF_TERM
     lets_impl_nif_info_memory1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
     ERL_NIF_TERM

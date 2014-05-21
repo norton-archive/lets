@@ -78,6 +78,7 @@ extern "C" {
         ErlNifUInt64 db_size;
     } lets_impl;
 
+    extern ERL_NIF_TERM lets_atom_undefined;
     extern ERL_NIF_TERM lets_atom_true;
     extern ERL_NIF_TERM lets_atom_false;
     extern ERL_NIF_TERM lets_atom_set;
@@ -114,9 +115,9 @@ extern "C" {
 
     extern bool lets_parse_options(ErlNifEnv* env, lets_impl& impl,
                                    ERL_NIF_TERM& options, const ERL_NIF_TERM& options_len);
-    extern bool lets_parse_read_options(ErlNifEnv* env, lets_impl& impl,
+    extern bool lets_parse_read_options(ErlNifEnv* env, leveldb::ReadOptions& opts,
                                         ERL_NIF_TERM& options, const ERL_NIF_TERM& options_len);
-    extern bool lets_parse_write_options(ErlNifEnv* env, lets_impl& impl,
+    extern bool lets_parse_write_options(ErlNifEnv* env, leveldb::WriteOptions& opts,
                                          ERL_NIF_TERM& options, const ERL_NIF_TERM& options_len);
 
 #ifdef __cplusplus

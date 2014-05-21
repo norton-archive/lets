@@ -30,6 +30,8 @@
          , is_table/1
          %% lets
          , all/1
+         , tid/1
+         , tid/2
          , new/2
          , new/3
          , destroy/3
@@ -85,6 +87,12 @@ is_table(Res) ->
 
 all(_Tab) ->
     catch lets:all().
+
+tid(Tab) ->
+    catch lets:tid(Tab).
+
+tid(Tab, Options) ->
+    catch lets:tid(Tab, Options).
 
 new(Name, Options) ->
     ok = filelib:ensure_dir(?MODULE_STRING),

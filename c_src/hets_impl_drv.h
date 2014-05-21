@@ -20,8 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef LETS_DRV_H
-#define LETS_DRV_H
+#ifndef HETS_DRV_H
+#define HETS_DRV_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -50,4 +50,4 @@ extern "C" {
 }
 #endif
 
-#endif /* LETS_DRV_H */
+#endif /* HETS_DRV_H */

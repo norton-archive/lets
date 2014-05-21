@@ -148,11 +148,13 @@ serial_command_gen(#state{tab=undefined}=S) ->
           %% @TODO ++ [{call,?IMPL,destroy,[undefined,?TAB,gen_options(destroy,S)]}]
           %% @TODO ++ [{call,?IMPL,repair,[undefined,?TAB,gen_options(repair,S)]}]
          );
-serial_command_gen(#state{tab=Tab, type=Type, impl=Impl}=S) ->
+serial_command_gen(#state{tab=Tab, type=Type, impl=Impl, options=Options}=S) ->
     %% @TODO gen_db_write_options/2
     %% @TODO gen_db_read_options/2
     %% @TODO info/1, info/2
     oneof([{call,?IMPL,all,[Tab]}]
+          ++ [{call,?IMPL,tid,[Tab]}]
+          ++ [{call,?IMPL,tid,[Tab, oneof([undefined, [ Opts || {RW, _}=Opts <- Options, RW==db_read orelse RW==db_write ]])]}]
           ++ [{call,?IMPL,insert,[Tab,oneof([gen_obj(S),gen_objs(S)])]}]
           ++ [{call,?IMPL,insert_new,[Tab,oneof([gen_obj(S),gen_objs(S)])]} || Impl =:= ets]
           ++ [{call,?IMPL,delete,[Tab]}]
@@ -213,6 +215,10 @@ state_is_sane(_S) ->
     true.
 
 -spec next_state(#state{}, term(), tuple()) -> #state{}.
+next_state(S, V, {call,_,tid,[_Tab]}) ->
+    S#state{tab=V};
+next_state(S, V, {call,_,tid,[_Tab,_Options]}) ->
+    S#state{tab=V};
 next_state(#state{tab=undefined, type=undefined, impl=undefined}=S, V, {call,_,new,[?TAB,Options]}) ->
     case [proplists:get_bool(X, Options) || X <- [set, ordered_set]] of
         [_, false] ->
@@ -309,6 +315,10 @@ postcondition(#state{tab=Tab}, {call,_,all,[_Tab]}, Res) ->
        true ->
             Res =:= [Tab]
     end;
+postcondition(_S, {call,_,tid,[_Tab]}, Res) ->
+    ?IMPL:is_table(Res);
+postcondition(_S, {call,_,tid,[_Tab,_Options]}, Res) ->
+    ?IMPL:is_table(Res);
 postcondition(#state{tab=undefined}, {call,_,new,[?TAB,Options]}, Res) ->
     if is_pid(Res) ->
             true;
@@ -605,6 +615,12 @@ gen_spec_true(S) ->
 %%% Internal - Model
 %%%----------------------------------------------------------------------
 
+tid(Tab) ->
+    ?IMPL:tid(Tab).
+
+tid(Tab, Options) ->
+    ?IMPL:tid(Tab, Options).
+
 insert_objs(S, []) ->
     S;
 insert_objs(S, [#obj{key=K}=Obj|T]) ->
@@ -877,6 +893,5 @@ select_reverse31('$end_of_table', _Spec, _Limit, Acc) ->
     Acc;
 select_reverse31({Match, Cont}, Spec, Limit, Acc) when length(Match) =< Limit ->
     select_reverse31(?IMPL:select_reverse(Cont), Spec, Limit, Acc ++ Match).
-
 
 -endif. %% -ifdef(QC).

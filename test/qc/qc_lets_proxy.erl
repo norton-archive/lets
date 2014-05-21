@@ -30,6 +30,8 @@
          , is_table/1
          %% lets
          , all/1
+         , tid/1
+         , tid/2
          , new/2
          , new/3
          , destroy/3
@@ -87,6 +89,12 @@ is_table(Tab) ->
 
 all(Tab) ->
     gen_server:call(Tab, all).
+
+tid(Tab) ->
+    gen_server:call(Tab, tid).
+
+tid(Tab, Options) ->
+    gen_server:call(Tab, {tid, Options}).
 
 new(Name, Options) ->
     %% @NOTE needed for foldr's and foldl's anonymous funs
@@ -233,6 +241,12 @@ init([Name, Options]) ->
 handle_call(all, _From, State) ->
     Reply = qc_lets_raw:all(unused),
     {reply, Reply, State};
+handle_call(tid, _From, #state{tab=Tab}=State) ->
+    Reply = qc_lets_raw:tid(Tab),
+    {reply, self(), State#state{tab=Reply}};
+handle_call({tid, Options}, _From, #state{tab=Tab}=State) ->
+    Reply = qc_lets_raw:tid(Tab, Options),
+    {reply, self(), State#state{tab=Reply}};
 handle_call(delete, _From, #state{tab=Tab}=State) ->
     Reply = qc_lets_raw:delete(Tab),
     {stop, normal, Reply, State#state{tab=undefined}};

@@ -20,8 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef LETS_DRV_LIB_H
-#define LETS_DRV_LIB_H
+#ifndef HETS_DRV_LIB_H
+#define HETS_DRV_LIB_H
 
 #include <string>
 
@@ -88,9 +88,9 @@ extern "C" {
 
     extern bool lets_parse_options(lets_impl& impl,
                                    const char* buf, ErlDrvSizeT len);
-    extern bool lets_parse_read_options(lets_impl& impl,
+    extern bool lets_parse_read_options(leveldb::ReadOptions& opts,
                                         const char* buf, ErlDrvSizeT len);
-    extern bool lets_parse_write_options(lets_impl& impl,
+    extern bool lets_parse_write_options(leveldb::WriteOptions& opts,
                                          const char* buf, ErlDrvSizeT len);
 
     // helpers
@@ -101,4 +101,4 @@ extern "C" {
 }
 #endif
 
-#endif /* LETS_DRV_LIB_H */
+#endif /* HETS_DRV_LIB_H */

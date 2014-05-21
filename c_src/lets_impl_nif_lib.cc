@@ -34,7 +34,7 @@ return_false(unsigned line) {
 #define FALSE false
 #endif
 
-
+ERL_NIF_TERM lets_atom_undefined = 0;
 ERL_NIF_TERM lets_atom_true = 0;
 ERL_NIF_TERM lets_atom_false = 0;
 ERL_NIF_TERM lets_atom_set = 0;
@@ -64,6 +64,7 @@ ERL_NIF_TERM lets_atom_end_of_table = 0;
 bool
 lets_impl_nif_lib_init(ErlNifEnv* env)
 {
+    lets_atom_undefined = enif_make_atom(env, "undefined");
     lets_atom_true = enif_make_atom(env, "true");
     lets_atom_false = enif_make_atom(env, "false");
     lets_atom_set = enif_make_atom(env, "set");
@@ -260,7 +261,7 @@ lets_parse_options(ErlNifEnv* env, lets_impl& impl,
 }
 
 bool
-lets_parse_read_options(ErlNifEnv* env, lets_impl& impl,
+lets_parse_read_options(ErlNifEnv* env, leveldb::ReadOptions& opts,
                         ERL_NIF_TERM& options, const ERL_NIF_TERM& options_len)
 {
     (void) options_len;
@@ -272,23 +273,23 @@ lets_parse_read_options(ErlNifEnv* env, lets_impl& impl,
     // TODO: snapshot
     while (enif_get_list_cell(env, options, &head, &tail)) {
         if (enif_is_identical(head, lets_atom_verify_checksums)) {
-            impl.db_read_options.verify_checksums = true;
+            opts.verify_checksums = true;
         } else if (enif_is_identical(head, lets_atom_fill_cache)) {
-            impl.db_read_options.fill_cache = true;
+            opts.fill_cache = true;
         } else if (enif_get_tuple(env, head, &arity, &tuple) && arity == 2) {
             if (enif_is_identical(tuple[0], lets_atom_verify_checksums)) {
                 if (enif_is_identical(tuple[1], lets_atom_true)) {
-                    impl.db_read_options.verify_checksums = true;
+                    opts.verify_checksums = true;
                 } else if (enif_is_identical(tuple[1], lets_atom_false)) {
-                    impl.db_read_options.verify_checksums = false;
+                    opts.verify_checksums = false;
                 } else {
                     return FALSE;
                 }
             } else if (enif_is_identical(tuple[0], lets_atom_fill_cache)) {
                 if (enif_is_identical(tuple[1], lets_atom_true)) {
-                    impl.db_read_options.fill_cache = true;
+                    opts.fill_cache = true;
                 } else if (enif_is_identical(tuple[1], lets_atom_false)) {
-                    impl.db_read_options.fill_cache = false;
+                    opts.fill_cache = false;
                 } else {
                     return FALSE;
                 }
@@ -305,7 +306,7 @@ lets_parse_read_options(ErlNifEnv* env, lets_impl& impl,
 }
 
 bool
-lets_parse_write_options(ErlNifEnv* env, lets_impl& impl,
+lets_parse_write_options(ErlNifEnv* env, leveldb::WriteOptions& opts,
                          ERL_NIF_TERM& options, const ERL_NIF_TERM& options_len)
 {
     (void) options_len;
@@ -317,13 +318,13 @@ lets_parse_write_options(ErlNifEnv* env, lets_impl& impl,
     // TODO: snapshot
     while (enif_get_list_cell(env, options, &head, &tail)) {
         if (enif_is_identical(head, lets_atom_sync)) {
-            impl.db_write_options.sync = true;
+            opts.sync = true;
         } else if (enif_get_tuple(env, head, &arity, &tuple) && arity == 2) {
             if (enif_is_identical(tuple[0], lets_atom_sync)) {
                 if (enif_is_identical(tuple[1], lets_atom_true)) {
-                    impl.db_write_options.sync = true;
+                    opts.sync = true;
                 } else if (enif_is_identical(tuple[1], lets_atom_false)) {
-                    impl.db_write_options.sync = false;
+                    opts.sync = false;
                 } else {
                     return FALSE;
                 }

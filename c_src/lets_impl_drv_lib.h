@@ -88,9 +88,9 @@ extern "C" {
 
     extern bool lets_parse_options(lets_impl& impl,
                                    const char* buf, ErlDrvSizeT len);
-    extern bool lets_parse_read_options(lets_impl& impl,
+    extern bool lets_parse_read_options(leveldb::ReadOptions& opts,
                                         const char* buf, ErlDrvSizeT len);
-    extern bool lets_parse_write_options(lets_impl& impl,
+    extern bool lets_parse_write_options(leveldb::WriteOptions& opts,
                                          const char* buf, ErlDrvSizeT len);
 
     // helpers
