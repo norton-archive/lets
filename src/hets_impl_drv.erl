@@ -49,9 +49,17 @@
         , prev_iter/2
         ]).
 
+-export_type([tid/0, opts/0, key/0, pos/0, object/0]).
+
 %%%----------------------------------------------------------------------
 %%% Types/Specs/Records
 %%%----------------------------------------------------------------------
+
+-type tid() :: lets:lets_tid().
+-type opts() :: lets:opts().
+-type key() :: lets:key().
+-type pos() :: lets:pos().
+-type object() :: lets:object().
 
 -define(LETS_BADARG,              16#00).
 -define(LETS_TRUE,                16#01).
@@ -86,6 +94,182 @@
 %%% API
 %%%----------------------------------------------------------------------
 
+%% @see lets:new/2
+-spec open(tid(), opts()) -> tid().
+open(Tid, Opts) ->
+    Tid#gen_tid{impl=create(fun impl_open/6, Tid, Opts)}.
+
+%% @see lets:destroy/2
+-spec destroy(tid(), opts()) -> true.
+destroy(Tid, Opts) ->
+    create(fun impl_destroy/6, Tid, Opts).
+
+%% @see lets:repair/2
+-spec repair(tid(), opts()) -> true.
+repair(Tid, Opts) ->
+    create(fun impl_repair/6, Tid, Opts).
+
+%% @see lets:delete/1
+-spec delete(tid()) -> true.
+delete(#gen_tid{impl=Impl, impl_opts=Opts}) ->
+    impl_delete(Impl, opts(db_write, Opts)).
+
+%% @see lets:delete/2
+-spec delete(tid(), key()) -> true.
+delete(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key) ->
+    impl_delete(Impl, opts(db_write, Opts), encode(Type, Key)).
+
+%% @see lets:delete_all_objects/1
+-spec delete_all_objects(tid()) -> true.
+delete_all_objects(#gen_tid{impl=Impl, impl_opts=Opts}) ->
+    impl_delete_all_objects(Impl, opts(db_write, Opts)).
+
+%% @see lets:first/1
+-spec first(tid()) -> key() | '$end_of_table'.
+first(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}) ->
+    case impl_first(Impl, opts(db_read, Opts)) of
+        '$end_of_table' ->
+            '$end_of_table';
+        Key ->
+            decode(Type, Key)
+    end.
+
+%% @see lets:first/1
+-spec first_iter(tid()) -> object() | '$end_of_table'.
+first_iter(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}) ->
+    case impl_first_iter(Impl, opts(db_read, Opts)) of
+        '$end_of_table' ->
+            '$end_of_table';
+        Key ->
+            decode(Type, Key)
+    end.
+
+%% @see lets:last/1
+-spec last(tid()) -> key() | '$end_of_table'.
+last(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}) ->
+    case impl_last(Impl, opts(db_read, Opts)) of
+        '$end_of_table' ->
+            '$end_of_table';
+        Key ->
+            decode(Type, Key)
+    end.
+
+%% @see lets:last/1
+-spec last_iter(tid()) -> object() | '$end_of_table'.
+last_iter(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}) ->
+    case impl_last_iter(Impl, opts(db_read, Opts)) of
+        '$end_of_table' ->
+            '$end_of_table';
+        Key ->
+            decode(Type, Key)
+    end.
+
+%% @see lets:info/1
+-spec info_memory(tid()) -> non_neg_integer().
+info_memory(#gen_tid{impl=Impl}) ->
+    case impl_info_memory(Impl) of
+        Memory when is_integer(Memory) ->
+            erlang:round(Memory / erlang:system_info(wordsize));
+        Else ->
+            Else
+    end.
+
+%% @see lets:info/1
+-spec info_size(tid()) -> non_neg_integer().
+info_size(#gen_tid{impl=Impl}) ->
+    impl_info_size(Impl).
+
+%% @see lets:insert/2
+-spec insert(tid(), object() | [object()]) -> true.
+insert(#gen_tid{keypos=KeyPos, type=Type, impl=Impl, impl_opts=Opts}, Object) when is_tuple(Object) ->
+    Key = element(KeyPos, Object),
+    Val = Object,
+    impl_insert(Impl, opts(db_write, Opts), encode(Type, Key), encode(Type, Val));
+insert(#gen_tid{keypos=KeyPos, type=Type, impl=Impl, impl_opts=Opts}, Objects) when is_list(Objects) ->
+    List = [{encode(Type, element(KeyPos, Object)), encode(Type, Object)} || Object <- Objects ],
+    impl_insert(Impl, opts(db_write, Opts), List).
+
+%% @see lets:insert_new/2
+-spec insert_new(tid(), object() | [object()]) -> true.
+insert_new(#gen_tid{keypos=KeyPos, type=Type, impl=Impl, impl_opts=Opts}, Object) when is_tuple(Object) ->
+    Key = element(KeyPos, Object),
+    Val = Object,
+    impl_insert_new(Impl, opts(db_write, Opts), encode(Type, Key), encode(Type, Val));
+insert_new(#gen_tid{keypos=KeyPos, type=Type, impl=Impl, impl_opts=Opts}, Objects) when is_list(Objects) ->
+    List = [{encode(Type, element(KeyPos, Object)), encode(Type, Object)} || Object <- Objects ],
+    impl_insert_new(Impl, opts(db_write, Opts), List).
+
+%% @see lets:lookup/2
+-spec lookup(tid(), key()) -> [object()].
+lookup(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key) ->
+    case impl_lookup(Impl, opts(db_read, Opts), encode(Type, Key)) of
+        '$end_of_table' ->
+            [];
+        Object when is_binary(Object) ->
+            [decode(Type, Object)]
+    end.
+
+%% @see lets:lookup_element/3
+-spec lookup_element(tid(), key(), pos()) -> term().
+lookup_element(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key, Pos) ->
+    Element =
+        case impl_lookup(Impl, opts(db_read, Opts), encode(Type, Key)) of
+            '$end_of_table' ->
+                '$end_of_table';
+            Object when is_binary(Object) ->
+                decode(Type, Object)
+        end,
+    element(Pos, Element).
+
+%% @see lets:member/2
+-spec member(tid(), key()) -> true | false.
+member(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key) ->
+    impl_member(Impl, opts(db_read, Opts), encode(Type, Key)).
+
+%% @see lets:next/2
+-spec next(#gen_tid{}, key()) -> key() | '$end_of_table'.
+next(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key) ->
+    case impl_next(Impl, opts(db_read, Opts), encode(Type, Key)) of
+        '$end_of_table' ->
+            '$end_of_table';
+        Next ->
+            decode(Type, Next)
+    end.
+
+%% @see lets:next/2
+-spec next_iter(tid(), key()) -> object() | '$end_of_table'.
+next_iter(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key) ->
+    case impl_next_iter(Impl, opts(db_read, Opts), encode(Type, Key)) of
+        '$end_of_table' ->
+            '$end_of_table';
+        Next ->
+            decode(Type, Next)
+    end.
+
+%% @see lets:prev/2
+-spec prev(#gen_tid{}, key()) -> key() | '$end_of_table'.
+prev(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key) ->
+    case impl_prev(Impl, opts(db_read, Opts), encode(Type, Key)) of
+        '$end_of_table' ->
+            '$end_of_table';
+        Prev ->
+            decode(Type, Prev)
+    end.
+
+%% @see lets:prev/2
+-spec prev_iter(tid(), key()) -> object() | '$end_of_table'.
+prev_iter(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key) ->
+    case impl_prev_iter(Impl, opts(db_read, Opts), encode(Type, Key)) of
+        '$end_of_table' ->
+            '$end_of_table';
+        Prev ->
+            decode(Type, Prev)
+    end.
+
+%%%----------------------------------------------------------------------
+%%% Internal functions
+%%%----------------------------------------------------------------------
+
 init() ->
     Path =
         case code:priv_dir(lets) of
@@ -108,140 +292,6 @@ init() ->
             erlang:exit({Err, FormattedErr})
     end,
     open_port({spawn, ?MODULE_STRING}, [binary]).
-
-open(Tid, Opts) ->
-    create(fun impl_open/6, Tid, Opts).
-
-destroy(Tid, Opts) ->
-    create(fun impl_destroy/6, Tid, Opts).
-
-repair(Tid, Opts) ->
-    create(fun impl_repair/6, Tid, Opts).
-
-delete(#gen_tid{impl=Impl, impl_opts=Opts}) ->
-    impl_delete(Impl, opts(db_write, Opts)).
-
-delete(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key) ->
-    impl_delete(Impl, opts(db_write, Opts), encode(Type, Key)).
-
-delete_all_objects(#gen_tid{impl=Impl, impl_opts=Opts}) ->
-    impl_delete_all_objects(Impl, opts(db_write, Opts)).
-
-first(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}) ->
-    case impl_first(Impl, opts(db_read, Opts)) of
-        '$end_of_table' ->
-            '$end_of_table';
-        Key ->
-            decode(Type, Key)
-    end.
-
-first_iter(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}) ->
-    case impl_first_iter(Impl, opts(db_read, Opts)) of
-        '$end_of_table' ->
-            '$end_of_table';
-        Key ->
-            decode(Type, Key)
-    end.
-
-last(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}) ->
-    case impl_last(Impl, opts(db_read, Opts)) of
-        '$end_of_table' ->
-            '$end_of_table';
-        Key ->
-            decode(Type, Key)
-    end.
-
-last_iter(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}) ->
-    case impl_last_iter(Impl, opts(db_read, Opts)) of
-        '$end_of_table' ->
-            '$end_of_table';
-        Key ->
-            decode(Type, Key)
-    end.
-
-info_memory(#gen_tid{impl=Impl}) ->
-    case impl_info_memory(Impl) of
-        Memory when is_integer(Memory) ->
-            erlang:round(Memory / erlang:system_info(wordsize));
-        Else ->
-            Else
-    end.
-
-info_size(#gen_tid{impl=Impl}) ->
-    impl_info_size(Impl).
-
-insert(#gen_tid{keypos=KeyPos, type=Type, impl=Impl, impl_opts=Opts}, Object) when is_tuple(Object) ->
-    Key = element(KeyPos, Object),
-    Val = Object,
-    impl_insert(Impl, opts(db_write, Opts), encode(Type, Key), encode(Type, Val));
-insert(#gen_tid{keypos=KeyPos, type=Type, impl=Impl, impl_opts=Opts}, Objects) when is_list(Objects) ->
-    List = [{encode(Type, element(KeyPos, Object)), encode(Type, Object)} || Object <- Objects ],
-    impl_insert(Impl, opts(db_write, Opts), List).
-
-insert_new(#gen_tid{keypos=KeyPos, type=Type, impl=Impl, impl_opts=Opts}, Object) when is_tuple(Object) ->
-    Key = element(KeyPos, Object),
-    Val = Object,
-    impl_insert_new(Impl, opts(db_write, Opts), encode(Type, Key), encode(Type, Val));
-insert_new(#gen_tid{keypos=KeyPos, type=Type, impl=Impl, impl_opts=Opts}, Objects) when is_list(Objects) ->
-    List = [{encode(Type, element(KeyPos, Object)), encode(Type, Object)} || Object <- Objects ],
-    impl_insert_new(Impl, opts(db_write, Opts), List).
-
-lookup(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key) ->
-    case impl_lookup(Impl, opts(db_read, Opts), encode(Type, Key)) of
-        '$end_of_table' ->
-            [];
-        Object when is_binary(Object) ->
-            [decode(Type, Object)]
-    end.
-
-lookup_element(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key, Pos) ->
-    Element =
-        case impl_lookup(Impl, opts(db_read, Opts), encode(Type, Key)) of
-            '$end_of_table' ->
-                '$end_of_table';
-            Object when is_binary(Object) ->
-                decode(Type, Object)
-        end,
-    element(Pos, Element).
-
-member(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key) ->
-    impl_member(Impl, opts(db_read, Opts), encode(Type, Key)).
-
-next(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key) ->
-    case impl_next(Impl, opts(db_read, Opts), encode(Type, Key)) of
-        '$end_of_table' ->
-            '$end_of_table';
-        Next ->
-            decode(Type, Next)
-    end.
-
-next_iter(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key) ->
-    case impl_next_iter(Impl, opts(db_read, Opts), encode(Type, Key)) of
-        '$end_of_table' ->
-            '$end_of_table';
-        Next ->
-            decode(Type, Next)
-    end.
-
-prev(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key) ->
-    case impl_prev(Impl, opts(db_read, Opts), encode(Type, Key)) of
-        '$end_of_table' ->
-            '$end_of_table';
-        Prev ->
-            decode(Type, Prev)
-    end.
-
-prev_iter(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key) ->
-    case impl_prev_iter(Impl, opts(db_read, Opts), encode(Type, Key)) of
-        '$end_of_table' ->
-            '$end_of_table';
-        Prev ->
-            decode(Type, Prev)
-    end.
-
-%%%----------------------------------------------------------------------
-%%% Internal functions
-%%%----------------------------------------------------------------------
 
 create(Fun, #gen_tid{type=Type, protection=Protection}, Opts) ->
     DbOpts = opts(db, Opts),

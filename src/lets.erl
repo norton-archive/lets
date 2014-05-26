@@ -67,7 +67,7 @@
 
 %% DEBUG -compile(export_all).
 
--export_type([lets_tab/0, lets_tid/0, name/0, key/0, object/0, match_pattern/0, match_spec/0, cont/0]).
+-export_type([lets_tab/0, lets_tid/0, name/0, opts/0, key/0, object/0, match_pattern/0, match_spec/0, cont/0]).
 
 %%%----------------------------------------------------------------------
 %%% Types/Specs/Records
