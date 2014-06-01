@@ -99,6 +99,10 @@ case "$1" in
             (cd $REBAR_DEPS_DIR/hyperleveldb && git archive --format=tar --prefix=hyperleveldb-$HYPERLEVELDB_VSN/ $HYPERLEVELDB_VSN) \
                 | tar xf -
             (cd hyperleveldb-$HYPERLEVELDB_VSN && \
+             perl -ibak1 -pe 's/leveldb\.la/leveldb.a/g;' Makefile.am && \
+             perl -ibak2 -pe 's/leveldb_la/leveldb_a/g;' Makefile.am && \
+             perl -ibak3 -pe 's/lib_LTLIBARIES/lib_LIBRARIES/g;' Makefile.am)
+            (cd hyperleveldb-$HYPERLEVELDB_VSN && \
                 autoreconf -i && \
                 env CPPFLAGS="-fPIC -I$BASEDIR/snappy/include $CPPFLAGS" \
                     CFLAGS="-fPIC -I$BASEDIR/snappy/include $CFLAGS" \
@@ -109,7 +113,7 @@ case "$1" in
                 mkdir -p $BASEDIR/hyperleveldb/include/hyperleveldb && \
                 install hyperleveldb/*.h $BASEDIR/hyperleveldb/include/hyperleveldb && \
                 mkdir -p $BASEDIR/hyperleveldb/lib && \
-                install .libs/libhyperleveldb.a $BASEDIR/hyperleveldb/lib)
+                install libhyperleveldb.a $BASEDIR/hyperleveldb/lib)
         fi
         ;;
 esac
