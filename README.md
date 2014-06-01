@@ -677,13 +677,6 @@ Existing APIs (TBD)
     support size and memory info items
 </p>
 </li>
-<li>
-<p>
-consider adding explicit read_options and write_options for LET's
-    operations (rather than just <code>new/2</code>, <code>destroy/2</code>, and <code>repair/2</code>
-    operations).
-</p>
-</li>
 </ul>
 </li>
 </ul>

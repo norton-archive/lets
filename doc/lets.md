@@ -27,7 +27,7 @@ __abstract datatype__: `cont()`
 
 
 <pre><code>
-db_opts() = {db, [{path, <a href="file.md#type-filename">file:filename()</a>} | create_if_missing | {create_if_missing, boolean()} | error_if_exists | {error_if_exists, boolean()} | paranoid_checks | {paranoid_checks, boolean()} | {write_buffer_size, pos_integer()} | {max_open_files, pos_integer()} | {block_cache_size, pos_integer()} | {block_size, pos_integer()} | {block_restart_interval, pos_integer()} | {filter_policy, no | {bloom, pos_integer()}}]}
+db_opts() = [{path, <a href="file.md#type-filename">file:filename()</a>} | create_if_missing | {create_if_missing, boolean()} | error_if_exists | {error_if_exists, boolean()} | paranoid_checks | {paranoid_checks, boolean()} | {write_buffer_size, pos_integer()} | {max_open_files, pos_integer()} | {block_cache_size, pos_integer()} | {block_size, pos_integer()} | {block_restart_interval, pos_integer()} | {filter_policy, no | {bloom, pos_integer()}}]
 </code></pre>
 
 
@@ -39,7 +39,7 @@ db_opts() = {db, [{path, <a href="file.md#type-filename">file:filename()</a>} | 
 
 
 <pre><code>
-db_read_opts() = {db_read, [verify_checksums | {verify_checksums, boolean()} | fill_cache | {fill_cache, boolean()}]}
+db_read_opts() = [verify_checksums | {verify_checksums, boolean()} | fill_cache | {fill_cache, boolean()}]
 </code></pre>
 
 
@@ -51,7 +51,7 @@ db_read_opts() = {db_read, [verify_checksums | {verify_checksums, boolean()} | f
 
 
 <pre><code>
-db_write_opts() = {db_write, [sync | {sync, boolean()}]}
+db_write_opts() = [sync | {sync, boolean()}]
 </code></pre>
 
 
@@ -207,7 +207,7 @@ object() = <a href="gen_ets_ns.md#type-object">gen_ets_ns:object()</a>
 
 
 <pre><code>
-opts() = [<a href="#type-ets_opt">ets_opt()</a> | <a href="#type-impl_opt">impl_opt()</a> | <a href="#type-db_opts">db_opts()</a> | <a href="#type-db_read_opts">db_read_opts()</a> | <a href="#type-db_write_opts">db_write_opts()</a>]
+opts() = [<a href="#type-ets_opt">ets_opt()</a> | <a href="#type-impl_opt">impl_opt()</a> | {db, <a href="#type-db_opts">db_opts()</a>} | {db_read, <a href="#type-db_read_opts">db_read_opts()</a>} | {db_write, <a href="#type-db_write_opts">db_write_opts()</a>}]
 </code></pre>
 
 
@@ -398,17 +398,17 @@ ETS as the backend.
 </li>
 <li>
 <p>
-<code>{db, [db_opts()]}</code> LevelDB database options.
+<code>{db, db_opts()}</code> LevelDB database options.
 </p>
 </li>
 <li>
 <p>
-<code>{db_read, [db_read_opts()]}</code> LevelDB read options.
+<code>{db_read, db_read_opts()}</code> LevelDB read options.
 </p>
 </li>
 <li>
 <p>
-<code>{db_write, [db_write_opts()]}</code> LevelDB write options.
+<code>{db_write, db_write_opts()}</code> LevelDB write options.
 </p>
 
 
@@ -517,7 +517,11 @@ table <code>Tab</code> and returns the number deleted.</p>.</td></tr><tr><td val
 spec <code>Spec</code>.</p>.</td></tr><tr><td valign="top"><a href="#select_reverse-3">select_reverse/3</a></td><td><p>Matches in reverse the objects in the table <code>Tab</code> against the
 spec <code>Spec</code> and returns a limited (<code>Limit</code>) number of matching
 objects.</p>.</td></tr><tr><td valign="top"><a href="#tab2list-1">tab2list/1</a></td><td><p>Returns a list of all objects in the table <code>Tab</code>. The
-operation is <strong>not</strong> guaranteed to be atomic and isolated.</p>.</td></tr><tr><td valign="top"><a href="#tid-1">tid/1</a></td><td><p>Returns a table's identifier.</p>.</td></tr></table>
+operation is <strong>not</strong> guaranteed to be atomic and isolated.</p>.</td></tr><tr><td valign="top"><a href="#tid-1">tid/1</a></td><td><p>Returns a table's identifier.</p>.</td></tr><tr><td valign="top"><a href="#tid-2">tid/2</a></td><td><p>Returns a copy of a table's identifier with given LevelDB
+read and write options.  If Opts is not undefined, the given read
+and write options are used when the returned copy is passed as the
+first argument to table operations.  Otherwise, the original read
+and write options given at the time of calling new/2 are used.</p>.</td></tr></table>
 
 
 <a name="functions"></a>
@@ -1070,17 +1074,17 @@ ETS as the backend.
 </li>
 <li>
 <p>
-<code>{db, [db_opts()]}</code> LevelDB database options.
+<code>{db, db_opts()}</code> LevelDB database options.
 </p>
 </li>
 <li>
 <p>
-<code>{db_read, [db_read_opts()]}</code> LevelDB read options.
+<code>{db_read, db_read_opts()}</code> LevelDB read options.
 </p>
 </li>
 <li>
 <p>
-<code>{db_write, [db_write_opts()]}</code> LevelDB write options.
+<code>{db_write, db_write_opts()}</code> LevelDB write options.
 </p>
 
 
@@ -1396,4 +1400,22 @@ tid(Tab::<a href="#type-lets_tab">lets_tab()</a>) -&gt; <a href="#type-lets_tid"
 
 
 <p>Returns a table's identifier.</p>
+
+<a name="tid-2"></a>
+
+### tid/2 ###
+
+
+<pre><code>
+tid(Tab::<a href="#type-lets_tab">lets_tab()</a>, Opts::undefined | [{db_read, <a href="#type-db_read_opts">db_read_opts()</a>} | {db_write, <a href="#type-db_write_opts">db_write_opts()</a>}]) -&gt; <a href="#type-lets_tid">lets_tid()</a>
+</code></pre>
+
+<br></br>
+
+
+<p>Returns a copy of a table's identifier with given LevelDB
+read and write options.  If Opts is not undefined, the given read
+and write options are used when the returned copy is passed as the
+first argument to table operations.  Otherwise, the original read
+and write options given at the time of calling new/2 are used.</p>
 
