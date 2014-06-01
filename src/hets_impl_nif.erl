@@ -47,6 +47,7 @@
         , next_iter/2
         , prev/2
         , prev_iter/2
+        , notify/4
         ]).
 
 -export_type([tid/0, opts/0, key/0, pos/0, object/0]).
@@ -241,6 +242,13 @@ prev_iter(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key) ->
             decode(Type, Prev)
     end.
 
+%% @doc Register the specified process to be sent the specified
+%% message when the table is destroyed and return true.  Otherwise,
+%% return false.
+-spec notify(tid(), Event::when_destroyed, Pid::pid(), Msg::term()) -> true | false.
+notify(#gen_tid{impl=Impl}, Event, Pid, Msg) ->
+    impl_notify(Impl, Event, Pid, Msg).
+
 %%%----------------------------------------------------------------------
 %%% Internal functions
 %%%----------------------------------------------------------------------
@@ -344,4 +352,7 @@ impl_prev(_Impl, _Opts, _Key) ->
     ?NIF_STUB.
 
 impl_prev_iter(_Impl, _Opts, _Key) ->
+    ?NIF_STUB.
+
+impl_notify(_Impl, _Event, _Pid, _Msg) ->
     ?NIF_STUB.

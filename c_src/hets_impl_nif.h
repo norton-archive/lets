@@ -74,6 +74,8 @@ extern "C" {
     lets_impl_nif_info_memory1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
     ERL_NIF_TERM
     lets_impl_nif_info_size1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+    ERL_NIF_TERM
+    lets_impl_nif_notify4(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
 
 #ifdef __cplusplus
 }

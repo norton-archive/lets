@@ -47,6 +47,8 @@
 %% @NOTE For boilerplate exports, see "qc_statem.hrl"
 -include_lib("qc/include/qc_statem.hrl").
 
+-include_lib("gen_ets/include/gen_ets.hrl").
+
 %% TEMPORARY raw proper_statem
 -export([prop_statem/0, initial_state/0, command/1]).
 
@@ -82,7 +84,8 @@
           hyper=false    :: boolean(),
           exists=false   :: boolean(),
           options=[]     :: proplists:proplist(),
-          tab            :: tuple() | pid(),
+          tab            :: atom() | tuple() | pid(),
+          tab_orig       :: atom() | tuple() | pid(),
           objs=[]        :: [obj()]
          }).
 
@@ -234,7 +237,7 @@ next_state(#state{tab=undefined, type=undefined, impl=undefined}=S, V, {call,_,n
         [false, false, true] ->
             Impl = ets
     end,
-    S#state{type=Type, impl=Impl, exists=true, options=Options, tab=V};
+    S#state{type=Type, impl=Impl, exists=true, options=Options, tab=V, tab_orig=V};
 next_state(#state{type=Type, impl=Impl, tab=undefined}=S, V, {call,_,new,[_Tab,?TAB,Options]}) ->
     case [proplists:get_bool(X, Options) || X <- [set, ordered_set]] of
         [_, false] ->
@@ -250,10 +253,10 @@ next_state(#state{type=Type, impl=Impl, tab=undefined}=S, V, {call,_,new,[_Tab,?
         [false, false, true] ->
             Impl = ets
     end,
-    S#state{type=Type, impl=Impl, exists=true, options=Options, tab=V};
+    S#state{type=Type, impl=Impl, exists=true, options=Options, tab=V, tab_orig=V};
 next_state(#state{impl=Impl}=S, _V, {call,_,destroy,[_Tab,?TAB,_Options]})
   when Impl =/= ets ->
-    S#state{tab=undefined, exists=false, objs=[]};
+    S#state{tab=undefined, tab_orig=undefined, exists=false, objs=[]};
 next_state(S, _V, {call,_,insert,[_Tab,Objs]}) when is_list(Objs) ->
     insert_objs(S, Objs);
 next_state(S, _V, {call,_,insert,[_Tab,Obj]}) ->
@@ -265,9 +268,9 @@ next_state(#state{impl=ets}=S, _V, {call,_,insert_new,[_Tab,Obj]}) ->
 next_state(S, _V, {call,_,insert_new,[_Tab,_ObjOrObjs]}) ->
     S;
 next_state(#state{impl=ets}=S, _V, {call,_,delete,[_Tab]}) ->
-    S#state{tab=undefined, exists=false, objs=[]};
+    S#state{tab=undefined, tab_orig=undefined, exists=false, objs=[]};
 next_state(#state{exists=Exists}=S, _V, {call,_,delete,[_Tab]}) ->
-    S#state{tab=undefined, exists=Exists};
+    S#state{tab=undefined, tab_orig=undefined, exists=Exists};
 next_state(S, _V, {call,_,delete,[_Tab,Key]}) ->
     S#state{objs=keydelete(Key, S)};
 next_state(#state{impl=ets}=S, _V, {call,_,delete_all_objects,[_Tab]}) ->
@@ -309,10 +312,11 @@ precondition(_S, {call,_,_,_}) ->
     true.
 
 -spec postcondition(#state{}, tuple(), term()) -> boolean().
-postcondition(#state{tab=Tab}, {call,_,all,[_Tab]}, Res) ->
-    if is_pid(Tab) ->
+postcondition(#state{tab_orig=Tab}, {call,_,all,[_Tab]}, Res) ->
+    case is_pid(Tab) of
+        true ->
             true;
-       true ->
+        false ->
             Res =:= [Tab]
     end;
 postcondition(_S, {call,_,tid,[_Tab]}, Res) ->

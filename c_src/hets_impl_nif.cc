@@ -71,6 +71,7 @@ static ErlNifFunc nif_funcs[] =
         {"impl_prev_iter", 3, lets_impl_nif_prev_iter3},
         {"impl_info_memory", 1, lets_impl_nif_info_memory1},
         {"impl_info_size", 1, lets_impl_nif_info_size1},
+        {"impl_notify", 4, lets_impl_nif_notify4},
     };
 
 static void
@@ -93,6 +94,20 @@ lets_impl_nif_resource_dtor(ErlNifEnv* env, void* arg)
 
     // name
     delete h->impl.name;
+
+    // notify_when_destroyed
+    while (h->impl.notify_when_destroyed.size()) {
+        ErlNifPid pid = h->impl.notify_when_destroyed.back().first;
+        ErlNifEnv* msgenv = h->impl.notify_when_destroyed.back().second.first;
+        ERL_NIF_TERM msg = h->impl.notify_when_destroyed.back().second.second;
+
+        if (!enif_send(NULL, &pid, msgenv, msg)) {
+            // TODO halt?
+        }
+        enif_free_env(msgenv);
+
+        h->impl.notify_when_destroyed.pop_back();
+    }
 }
 
 static int
@@ -1036,4 +1051,42 @@ lets_impl_nif_info_size1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
     // return info;
     return MAKEBADARG(env, status);
+}
+
+ERL_NIF_TERM
+lets_impl_nif_notify4(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+    (void) argc;
+
+    lets_impl_nif_handle* h;
+    ErlNifPid pid;
+    ErlNifEnv* msgenv;
+    ERL_NIF_TERM msg;
+    leveldb::Status status;
+
+    if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
+        return MAKEBADARG(env, status);
+    }
+    if (!enif_is_identical(argv[1], lets_atom_when_destroyed)) {
+        return MAKEBADARG(env, status);
+    }
+    if (!enif_get_local_pid(env, argv[2], &pid)) {
+        return MAKEBADARG(env, status);
+    }
+    if (!(msgenv = enif_alloc_env())) {
+        return MAKEBADARG(env, status);
+    }
+    if (!(msg = enif_make_copy(env, argv[3]))) {
+        enif_free_env(msgenv);
+        return MAKEBADARG(env, status);
+    }
+
+    if (!h->impl.alive) {
+        enif_free_env(msgenv);
+        return MAKEBADARG(env, status);
+    }
+
+    h->impl.notify_when_destroyed.push_back(std::make_pair(pid, std::make_pair(msgenv, msg)));
+
+    return lets_atom_true;
 }

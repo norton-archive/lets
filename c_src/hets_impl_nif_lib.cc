@@ -60,6 +60,7 @@ ERL_NIF_TERM lets_atom_verify_checksums = 0;
 ERL_NIF_TERM lets_atom_fill_cache = 0;
 ERL_NIF_TERM lets_atom_sync = 0;
 ERL_NIF_TERM lets_atom_end_of_table = 0;
+ERL_NIF_TERM lets_atom_when_destroyed = 0;
 
 bool
 lets_impl_nif_lib_init(ErlNifEnv* env)
@@ -90,6 +91,7 @@ lets_impl_nif_lib_init(ErlNifEnv* env)
     lets_atom_fill_cache = enif_make_atom(env, "fill_cache");
     lets_atom_sync = enif_make_atom(env, "sync");
     lets_atom_end_of_table = enif_make_atom(env, "$end_of_table");
+    lets_atom_when_destroyed = enif_make_atom(env, "when_destroyed");
 
     return true;
 }

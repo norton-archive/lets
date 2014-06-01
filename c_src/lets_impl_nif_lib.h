@@ -24,6 +24,7 @@
 #define LETS_NIF_LIB_H
 
 #include <string>
+#include <vector>
 
 #include "leveldb/db.h"
 #include "leveldb/cache.h"
@@ -76,6 +77,7 @@ extern "C" {
         leveldb::DB* db;
         ErlNifUInt64 db_memory;
         ErlNifUInt64 db_size;
+        std::vector<std::pair<ErlNifPid,std::pair<ErlNifEnv*,ERL_NIF_TERM> > > notify_when_destroyed;
     } lets_impl;
 
     extern ERL_NIF_TERM lets_atom_undefined;
@@ -104,6 +106,7 @@ extern "C" {
     extern ERL_NIF_TERM lets_atom_fill_cache;
     extern ERL_NIF_TERM lets_atom_sync;
     extern ERL_NIF_TERM lets_atom_end_of_table;
+    extern ERL_NIF_TERM lets_atom_when_destroyed;
 
     // prototypes
     extern bool lets_impl_nif_lib_init(ErlNifEnv* env);

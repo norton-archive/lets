@@ -24,6 +24,7 @@
 #define HETS_DRV_LIB_H
 
 #include <string>
+#include <vector>
 
 #include "hyperleveldb/db.h"
 #include "hyperleveldb/cache.h"
@@ -76,6 +77,7 @@ extern "C" {
         leveldb::DB* db;
         ErlDrvUInt64 db_memory;
         ErlDrvUInt64 db_size;
+        std::vector<std::pair<ErlDrvTermData,ErlDrvBinary*> > notify_when_destroyed;
     } lets_impl;
 
     // prototypes

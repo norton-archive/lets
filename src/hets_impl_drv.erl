@@ -47,6 +47,7 @@
         , next_iter/2
         , prev/2
         , prev_iter/2
+        , notify/4
         ]).
 
 -export_type([tid/0, opts/0, key/0, pos/0, object/0]).
@@ -89,6 +90,7 @@
 -define(LETS_NEXT_ITER3,          16#13).
 -define(LETS_PREV3,               16#14).
 -define(LETS_PREV_ITER3,          16#15).
+-define(LETS_NOTIFY4,             16#16).
 
 %%%----------------------------------------------------------------------
 %%% API
@@ -266,6 +268,16 @@ prev_iter(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key) ->
             decode(Type, Prev)
     end.
 
+%% @doc Register the specified process to be sent the specified
+%% message when the table is destroyed and return true.  Otherwise,
+%% return false.  Currently, the specified process must be same as
+%% calling process.  If not, a badarg error is raised.
+-spec notify(tid(), Event::when_destroyed, Pid::pid(), Msg::term()) -> true | false.
+notify(#gen_tid{impl=Impl}, Event, Pid, Msg) when Pid==self() ->
+    impl_notify(Impl, Event, Pid, term_to_binary(Msg));
+notify(Tid, Event, Pid, Msg) ->
+    erlang:error(badarg, [Tid, Event, Pid, Msg]).
+
 %%%----------------------------------------------------------------------
 %%% Internal functions
 %%%----------------------------------------------------------------------
@@ -338,21 +350,30 @@ impl_open(Type, Protection, Path, Opts, ReadOpts, WriteOpts) ->
 
 impl_destroy(Type, Protection, Path, Opts, ReadOpts, WriteOpts) ->
     Impl = init(),
+    Ref = make_ref(),
+    IsReg = impl_notify(Impl, when_destroyed, self(), term_to_binary(Ref)),
     true = call(Impl, {?LETS_DESTROY6, Type, Protection, Path, Opts, ReadOpts, WriteOpts}),
     _ = port_close(Impl),
+    _ = if IsReg -> receive Ref -> ok end; true -> ok end,
     _ = erl_ddll:unload(?MODULE),
     true.
 
 impl_repair(Type, Protection, Path, Opts, ReadOpts, WriteOpts) ->
     Impl = init(),
+    Ref = make_ref(),
+    IsReg = impl_notify(Impl, when_destroyed, self(), term_to_binary(Ref)),
     true = call(Impl, {?LETS_REPAIR6, Type, Protection, Path, Opts, ReadOpts, WriteOpts}),
     _ = port_close(Impl),
+    _ = if IsReg -> receive Ref -> ok end; true -> ok end,
     _ = erl_ddll:unload(?MODULE),
     true.
 
 impl_delete(Impl, Opts) ->
+    Ref = make_ref(),
+    IsReg = impl_notify(Impl, when_destroyed, self(), term_to_binary(Ref)),
     Res = call(Impl, {?LETS_DELETE2, Opts}),
     _ = port_close(Impl),
+    _ = if IsReg -> receive Ref -> ok end; true -> ok end,
     _ = erl_ddll:unload(?MODULE),
     Res.
 
@@ -409,3 +430,6 @@ impl_prev(Impl, Opts, Key) ->
 
 impl_prev_iter(Impl, Opts, Key) ->
     call(Impl, {?LETS_PREV_ITER3, Opts, Key}).
+
+impl_notify(Impl, Event, Pid, Msg) ->
+    call(Impl, {?LETS_NOTIFY4, Event, Pid, Msg}).

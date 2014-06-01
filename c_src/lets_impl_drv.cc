@@ -60,6 +60,7 @@
 #define LETS_NEXT_ITER3          0x13
 #define LETS_PREV3               0x14
 #define LETS_PREV_ITER3          0x15
+#define LETS_NOTIFY4             0x16
 
 // DrvData
 typedef struct {
@@ -164,6 +165,7 @@ static void lets_async_prev_iter3(void* async_data);
 // static void lets_async_info_memory1(void* async_data);
 // static void lets_output_info_size1(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 // static void lets_async_info_size1(void* async_data);
+static void lets_output_notify4(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 
 static void
 driver_send_int(DrvData* d, const int i, ErlDrvTermData caller=0)
@@ -300,6 +302,20 @@ drv_stop(ErlDrvData handle)
 
     // name
     delete d->impl.name;
+
+    // notify_when_destroyed
+    while (d->impl.notify_when_destroyed.size()) {
+        ErlDrvTermData port = driver_mk_port(d->port);
+        ErlDrvTermData receiver = d->impl.notify_when_destroyed.back().first;
+        ErlDrvBinary* msg = d->impl.notify_when_destroyed.back().second;
+        ErlDrvTermData spec[] = {ERL_DRV_EXT2TERM, (ErlDrvTermData) msg->orig_bytes, msg->orig_size};
+        if (erl_drv_send_term(port, receiver, spec, sizeof(spec) / sizeof(spec[0]))) {
+            // TODO? driver_failure_atom(d->port, (char*) "notify_when_destroyed");
+        }
+
+        driver_free_binary(msg);
+        d->impl.notify_when_destroyed.pop_back();
+    }
 
     driver_free(handle);
 }
@@ -455,6 +471,11 @@ drv_output(ErlDrvData handle, char* buf, ErlDrvSizeT len)
         ng = (items != 0 || !d->impl.alive);
         if (ng) GOTOBADARG;
         GOTOBADARG;
+        break;
+    case LETS_NOTIFY4:
+        ng = (items != 3 || !d->impl.alive);
+        if (ng) GOTOBADARG;
+        lets_output_notify4(d, buf, len, &index, items);
         break;
     default:
         GOTOBADARG;
@@ -1814,4 +1835,40 @@ lets_async_prev_iter3(void* async_data)
     }
 
     delete it;
+}
+
+static void
+lets_output_notify4(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
+{
+    (void) len;
+    (void) items;
+
+    int ng;
+    char atom[MAXATOMLEN];
+    erlang_pid pid;
+    char *binary;
+    long binarylen;
+    ErlDrvBinary* msg;
+
+    ng = ei_decode_atom(buf, index, atom);
+    if (ng) GOTOBADARG;
+    if (strcmp(atom, "when_destroyed") != 0) GOTOBADARG;
+
+    ng = ei_decode_pid(buf, index, &pid);
+    if (ng) GOTOBADARG;
+
+    ng = ei_inspect_binary(buf, index, (void**) &binary, &binarylen);
+    if (ng) GOTOBADARG;
+
+    msg = driver_alloc_binary(binarylen);
+    if (!msg) GOTOBADARG;
+
+    memcpy(msg->orig_bytes, binary, msg->orig_size);
+    d->impl.notify_when_destroyed.push_back(std::make_pair(driver_caller(d->port), msg));
+
+    driver_send_int(d, LETS_TRUE);
+    return;
+
+ badarg:
+    driver_send_int(d, LETS_BADARG);
 }
