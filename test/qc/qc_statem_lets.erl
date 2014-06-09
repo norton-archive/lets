@@ -24,33 +24,32 @@
 
 -ifdef(QC).
 
+-include_lib("qc/include/qc_statem.hrl").
+
+-ifdef(QC_STATEM).
+
 %% API
--export([qc_run/1, qc_run/2]).
--export([qc_sample/1]).
+-export([qc_run/0, qc_run/1, qc_run/2]).
+-export([qc_sample/0, qc_sample/1]).
 -export([qc_prop/1]).
--export([qc_counterexample/2]).
--export([qc_counterexample_read/2]).
--export([qc_counterexample_write/2]).
+-export([qc_check/0, qc_check/1, qc_check/2]).
+-export([qc_check_file/2]).
 
 %% qc_statem Callbacks
 -behaviour(qc_statem).
--export([scenario_gen/0, command_gen/1]).
--export([initial_state/1, state_is_sane/1, next_state/3, precondition/2, postcondition/3]).
--export([setup/0, setup/1, teardown/2, aggregate/1]).
+-export([command/1]).
+-export([initial_state/0, initial_state/1, next_state/3, invariant/1, precondition/2, postcondition/3]).
+-export([init/0, init/1, stop/2, aggregate/1]).
 
-%% DEBUG
--compile(export_all).
+%% DEBUG -compile(export_all).
 
 %% Implementation
 -export([fold_helper/2, match31/3, match_object31/3, select31/3, select_reverse31/3]).
-
-%% @NOTE For boilerplate exports, see "qc_statem.hrl"
--include_lib("qc/include/qc_statem.hrl").
+-export([match/3, match_cont/4]).
+-export([match_object_cont/4, match_object_reverse/2, match_object_reverse/3, match_object_reverse_cont/4]).
+-export([select_cont/4, select_reverse_cont/4]).
 
 -include_lib("gen_ets/include/gen_ets.hrl").
-
-%% TEMPORARY raw proper_statem
--export([prop_statem/0, initial_state/0, command/1]).
 
 %%%----------------------------------------------------------------------
 %%% defines, types, records
@@ -76,6 +75,7 @@
 -type obj() :: #obj{}.
 -type ets_type() :: set | ordered_set.       % default is set
 -type ets_impl() :: drv | nif | hyper | ets. % default is drv
+-type proplist() :: proplists:proplist().
 
 -record(state, {
           parallel=false :: boolean(),
@@ -94,11 +94,17 @@
 %%% API
 %%%----------------------------------------------------------------------
 
+qc_run() ->
+    qc_run(100).
+
 qc_run(NumTests) ->
     qc_run(NumTests, []).
 
 qc_run(NumTests, Options) ->
     qc_statem:qc_run(?MODULE, NumTests, Options).
+
+qc_sample() ->
+    qc_sample([]).
 
 qc_sample(Options) ->
     qc_statem:qc_sample(?MODULE, Options).
@@ -106,42 +112,25 @@ qc_sample(Options) ->
 qc_prop(Options) ->
     qc_statem:qc_prop(?MODULE, Options).
 
-qc_counterexample(Options, CounterExample) ->
-    qc_statem:qc_counterexample(?MODULE, Options, CounterExample).
+qc_check() ->
+    qc_check([]).
 
-qc_counterexample_read(Options, FileName) ->
-    qc_statem:qc_counterexample_read(?MODULE, Options, FileName).
+qc_check(Options) ->
+    qc_check(Options, ?QC:counterexample()).
 
-qc_counterexample_write(FileName, CounterExample) ->
-    qc_statem:qc_counterexample_write(FileName, CounterExample).
+qc_check(Options, CounterExample) ->
+    qc_statem:qc_check(?MODULE, Options, CounterExample).
 
-%%%----------------------------------------------------------------------
-%%% TEMPORARY raw proper statem
-%%%----------------------------------------------------------------------
-prop_statem() ->
-    ?FORALL(Cmds, more_commands(3, commands(?MODULE)),
-            begin
-                {ok, _TestRef} = setup(undefined),
-                {History, State, Result} = run_commands(?MODULE, Cmds),
-                ?WHENFAIL(io:format("~nResult:~n\t~p~n~nState:~n\t~p~n~nCommands:~n\t~p~nHistory:~n\t~p~n", [Result, State, Cmds, History]),
-                          Result =:= ok)
-            end).
+qc_check_file(Options, FileName) ->
+    qc_statem:qc_check_file(?MODULE, Options, FileName).
 
-command(S) ->
-    command_gen(S).
-
-initial_state() ->
-    #state{}.
 
 %%%----------------------------------------------------------------------
 %%% qc_statem Callbacks
 %%%----------------------------------------------------------------------
-scenario_gen() ->
-    undefined.
-
-command_gen(#state{parallel=false}=S) ->
+command(#state{parallel=false}=S) ->
     serial_command_gen(S);
-command_gen(#state{parallel=true}=S) ->
+command(#state{parallel=true}=S) ->
     parallel_command_gen(S).
 
 serial_command_gen(#state{tab=undefined, type=undefined, impl=undefined}=S) ->
@@ -159,10 +148,10 @@ serial_command_gen(#state{tab=Tab, type=Type, impl=Impl, options=Options}=S) ->
           ++ [{call,?IMPL,tid,[Tab]}]
           ++ [{call,?IMPL,tid,[Tab, oneof([undefined, [ Opts || {RW, _}=Opts <- Options, RW==db_read orelse RW==db_write ]])]}]
           ++ [{call,?IMPL,insert,[Tab,oneof([gen_obj(S),gen_objs(S)])]}]
-          ++ [{call,?IMPL,insert_new,[Tab,oneof([gen_obj(S),gen_objs(S)])]} || Impl =:= ets]
+          ++ [{call,?IMPL,insert_new,[Tab,oneof([gen_obj(S),gen_objs(S)])]} || Impl==ets]
           ++ [{call,?IMPL,delete,[Tab]}]
           ++ [{call,?IMPL,delete,[Tab,gen_key(S)]}]
-          ++ [{call,?IMPL,delete_all_objects,[Tab]} || Type =:= ets]
+          ++ [{call,?IMPL,delete_all_objects,[Tab]} || Impl==ets]
           ++ [{call,?IMPL,member,[Tab,gen_key(S)]}]
           ++ [{call,?IMPL,lookup,[Tab,gen_key(S)]}]
           ++ [{call,?IMPL,lookup_element,[Tab,gen_key(S),choose(1,record_info(size,obj))]}]
@@ -207,15 +196,13 @@ parallel_command_gen(#state{tab=Tab, impl=Impl}=S) ->
 fold_helper(X, Acc) ->
     [X|Acc].
 
--spec initial_state(term()) -> #state{}.
-initial_state(_Scenario) ->
-    ?LET(Parallel,parameter(parallel,false),
-         #state{parallel=Parallel}).
+-spec initial_state() -> #state{}.
+initial_state() ->
+    #state{}.
 
--spec state_is_sane(#state{}) -> boolean().
-state_is_sane(_S) ->
-    %% @TODO
-    true.
+-spec initial_state(proplist()) -> #state{}.
+initial_state(Opts) ->
+    #state{parallel=proplists:get_value(parallel, Opts, false)}.
 
 -spec next_state(#state{}, term(), tuple()) -> #state{}.
 next_state(S, V, {call,_,tid,[_Tab]}) ->
@@ -284,6 +271,10 @@ next_state(S, _V, {call,_,select_delete,[_Tab,Spec]}) ->
 next_state(S, _V, {call,_,_,_}) ->
     S.
 
+-spec invariant(#state{}) -> boolean().
+invariant(_S) ->
+    true.
+
 -spec precondition(#state{}, tuple()) -> boolean().
 precondition(#state{tab=undefined, type=undefined, impl=undefined}, {call,_,new,[?TAB,Options]}) ->
     Drv = proplists:get_bool(drv, Options),
@@ -313,10 +304,9 @@ precondition(_S, {call,_,_,_}) ->
 
 -spec postcondition(#state{}, tuple(), term()) -> boolean().
 postcondition(#state{tab_orig=Tab}, {call,_,all,[_Tab]}, Res) ->
-    case is_pid(Tab) of
-        true ->
+    if is_pid(Tab) ->
             true;
-        false ->
+       true ->
             Res =:= [Tab]
     end;
 postcondition(_S, {call,_,tid,[_Tab]}, Res) ->
@@ -369,7 +359,7 @@ postcondition(_S, {call,_,delete,[_Tab]}, Res) ->
 postcondition(_S, {call,_,delete,[_Tab,_Key]}, Res) ->
     Res =:= true;
 postcondition(#state{impl=ets}=_S, {call,_,delete_all_objects,[_Tab]}, Res) ->
-    Res =:= true;
+     Res =:= true;
 postcondition(_S, {call,_,delete_all_objects,[_Tab]}, {'EXIT',{badarg,_}}) ->
     true;
 postcondition(S, {call,_,member,[_Tab,Key]}, Res) ->
@@ -481,21 +471,21 @@ postcondition(#state{type=ordered_set}=S, {call,_,select_reverse31,[_Tab,Spec,_L
 postcondition(_S, {call,_,_,_}, _Res) ->
     false.
 
--spec setup() -> ok.
-setup() ->
+-spec init() -> ok.
+init() ->
     ok.
 
--spec setup(term()) -> {ok, term()}.
-setup(_Scenario) ->
+-spec init(#state{}) -> ok.
+init(_State) ->
     _ = ?IMPL:teardown(?TAB),
-    {ok, undefined}.
+    ok.
 
--spec teardown(term(), #state{}) -> ok.
-teardown(_Ref, _State) ->
+-spec stop(#state{}, #state{}) -> ok.
+stop(_State0, _State) ->
     ok.
 
 -spec aggregate([{integer(), term(), term(), #state{}}])
-               -> [{atom(), atom(), integer() | term()}].
+               -> [{{atom(), atom()}, {atom(), integer()}, term()}].
 aggregate(L) ->
     [ {{Impl,[ hyper || {hyper,true} <- Opts ]},{Cmd,length(Args)},filter_reply(Reply)} || {_N,{set,_,{call,_,Cmd,Args}},Reply,#state{impl=Impl, options=Opts}} <- L ].
 
@@ -618,12 +608,6 @@ gen_spec_true(S) ->
 %%%----------------------------------------------------------------------
 %%% Internal - Model
 %%%----------------------------------------------------------------------
-
-tid(Tab) ->
-    ?IMPL:tid(Tab).
-
-tid(Tab, Options) ->
-    ?IMPL:tid(Tab, Options).
 
 insert_objs(S, []) ->
     S;
@@ -897,5 +881,7 @@ select_reverse31('$end_of_table', _Spec, _Limit, Acc) ->
     Acc;
 select_reverse31({Match, Cont}, Spec, Limit, Acc) when length(Match) =< Limit ->
     select_reverse31(?IMPL:select_reverse(Cont), Spec, Limit, Acc ++ Match).
+
+-endif. %% -ifdef(QC_STATEM).
 
 -endif. %% -ifdef(QC).

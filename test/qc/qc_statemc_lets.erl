@@ -25,26 +25,25 @@
 -ifdef(QC).
 -ifdef(QC_EQC).
 
+-include_lib("eqc/include/eqc_c.hrl").
+-include_lib("qc/include/qc_statem.hrl").
+
+-ifdef(QC_STATEM).
+
 %% API
--export([qc_run/1, qc_run/2]).
--export([qc_sample/1]).
+-export([qc_run/0, qc_run/1, qc_run/2]).
+-export([qc_sample/0, qc_sample/1]).
 -export([qc_prop/1]).
--export([qc_counterexample/2]).
--export([qc_counterexample_read/2]).
--export([qc_counterexample_write/2]).
+-export([qc_check/0, qc_check/1, qc_check/2]).
+-export([qc_check_file/2]).
 
 %% qc_statem Callbacks
 -behaviour(qc_statem).
--export([scenario_gen/0, command_gen/1]).
--export([initial_state/1, state_is_sane/1, next_state/3, precondition/2, postcondition/3]).
--export([setup/0, setup/1, teardown/2, aggregate/1]).
+-export([command/1]).
+-export([initial_state/0, initial_state/1, next_state/3, invariant/1, precondition/2, postcondition/3]).
+-export([init/0, init/1, stop/2, aggregate/1]).
 
-%% DEBUG
--compile(export_all).
-
-%% @NOTE For boilerplate exports, see "qc_statem.hrl"
--include_lib("eqc/include/eqc_c.hrl").
--include_lib("qc/include/qc_statem.hrl").
+%% DEBUG -compile(export_all).
 
 
 %%%----------------------------------------------------------------------
@@ -56,6 +55,7 @@
 -record(obj, {key :: binary(), val :: binary()}).
 
 -type obj() :: #obj{}.
+-type proplist() :: proplists:proplist().
 
 -record(state, {
           parallel=false :: boolean(),
@@ -70,11 +70,17 @@
 %%% API
 %%%----------------------------------------------------------------------
 
+qc_run() ->
+    qc_run(100).
+
 qc_run(NumTests) ->
     qc_run(NumTests, []).
 
 qc_run(NumTests, Options) ->
     qc_statem:qc_run(?MODULE, NumTests, Options).
+
+qc_sample() ->
+    qc_sample([]).
 
 qc_sample(Options) ->
     qc_statem:qc_sample(?MODULE, Options).
@@ -82,25 +88,25 @@ qc_sample(Options) ->
 qc_prop(Options) ->
     qc_statem:qc_prop(?MODULE, Options).
 
-qc_counterexample(Options, CounterExample) ->
-    qc_statem:qc_counterexample(?MODULE, Options, CounterExample).
+qc_check() ->
+    qc_check([]).
 
-qc_counterexample_read(Options, FileName) ->
-    qc_statem:qc_counterexample_read(?MODULE, Options, FileName).
+qc_check(Options) ->
+    qc_check(Options, ?QC:counterexample()).
 
-qc_counterexample_write(FileName, CounterExample) ->
-    qc_statem:qc_counterexample_write(FileName, CounterExample).
+qc_check(Options, CounterExample) ->
+    qc_statem:qc_check(?MODULE, Options, CounterExample).
+
+qc_check_file(Options, FileName) ->
+    qc_statem:qc_check_file(?MODULE, Options, FileName).
 
 
 %%%----------------------------------------------------------------------
 %%% qc_statem Callbacks
 %%%----------------------------------------------------------------------
-scenario_gen() ->
-    undefined.
-
-command_gen(#state{parallel=false}=S) ->
+command(#state{parallel=false}=S) ->
     serial_command_gen(S);
-command_gen(#state{parallel=true}=S) ->
+command(#state{parallel=true}=S) ->
     parallel_command_gen(S).
 
 serial_command_gen(#state{db=undefined, exists=false}) ->
@@ -129,15 +135,13 @@ parallel_command_gen(#state{db=Db}=S) ->
            {call,?IMPL,get,[Db,gen_key(S),ulist(gen_db_read_options())]}
           ]).
 
--spec initial_state(term()) -> #state{}.
-initial_state(_Scenario) ->
-    ?LET(Parallel,parameter(parallel,false),
-         #state{parallel=Parallel}).
+-spec initial_state() -> #state{}.
+initial_state() ->
+    #state{}.
 
--spec state_is_sane(#state{}) -> boolean().
-state_is_sane(_S) ->
-    %% @TODO
-    true.
+-spec initial_state(proplist()) -> #state{}.
+initial_state(Opts) ->
+    #state{parallel=proplists:get_value(parallel, Opts, false)}.
 
 -spec next_state(#state{}, term(), tuple()) -> #state{}.
 next_state(#state{db=undefined, exists=false}=S, V, {call,_,open,[Opts]}) ->
@@ -154,6 +158,10 @@ next_state(S, _V, {call,_,delete,[_Db,Key,_Opts]}) ->
     delete_obj(S, Key);
 next_state(S, _V, {call,_,_,_}) ->
     S.
+
+-spec invariant(#state{}) -> boolean().
+invariant(_S) ->
+    true.
 
 -spec precondition(#state{}, tuple()) -> boolean().
 precondition(#state{exists=true}, {call,_,open,[__Opts]}) ->
@@ -219,22 +227,20 @@ postcondition(S, {call,_,prev,[_Db,Key,_Opts]}, Res) ->
 postcondition(_S, {call,_,_,_}, _Res) ->
     false.
 
--spec setup() -> ok.
-setup() ->
+-spec init() -> ok.
+init() ->
     ok.
 
--spec setup(term()) -> {ok, term()}.
-setup(_Scenario) ->
-    _ = ?IMPL:teardown(),
-    ?IMPL:setup(),
-    {ok, undefined}.
+-spec init(#state{}) -> ok.
+init(_State) ->
+    ok.
 
--spec teardown(term(), #state{}) -> ok.
-teardown(_Ref, _State) ->
+-spec stop(#state{}, #state{}) -> ok.
+stop(_State0, _State) ->
     ok.
 
 -spec aggregate([{integer(), term(), term(), #state{}}])
-               -> [{atom(), atom(), integer() | term()}].
+               -> [{{atom(), integer()}, term()}].
 aggregate(L) ->
     [ {{Cmd,length(Args)},filter_reply(Reply)} || {_N,{set,_,{call,_,Cmd,Args}},Reply,_State} <- L ].
 
@@ -331,6 +337,8 @@ keymember(X, S) ->
 %%%----------------------------------------------------------------------
 %%% Internal - Implementation
 %%%----------------------------------------------------------------------
+
+-endif. %% -ifdef(QC_STATEM).
 
 -endif. %% -ifdef(QC_EQC).
 -endif. %% -ifdef(QC).
