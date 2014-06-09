@@ -111,7 +111,7 @@ case "$1" in
                     ./configure --enable-static --enable-snappy && \
                 make && \
                 mkdir -p $BASEDIR/hyperleveldb/include/hyperleveldb && \
-                install hyperleveldb/*.h $BASEDIR/hyperleveldb/include/hyperleveldb && \
+                install include/hyperleveldb/*.h $BASEDIR/hyperleveldb/include/hyperleveldb && \
                 mkdir -p $BASEDIR/hyperleveldb/lib && \
                 install libhyperleveldb.a $BASEDIR/hyperleveldb/lib)
         fi
