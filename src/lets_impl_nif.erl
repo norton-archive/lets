@@ -48,6 +48,14 @@
         , prev/2
         , prev_iter/2
         , notify/4
+        , first/2
+        , first_iter/2
+        , last/2
+        , last_iter/2
+        , next/3
+        , next_iter/3
+        , prev/3
+        , prev_iter/3
         ]).
 
 -export_type([tid/0, opts/0, key/0, pos/0, object/0]).
@@ -248,6 +256,146 @@ prev_iter(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key) ->
 -spec notify(tid(), Event::when_destroyed, Pid::pid(), Msg::term()) -> true | false.
 notify(#gen_tid{impl=Impl}, Event, Pid, Msg) ->
     impl_notify(Impl, Event, Pid, Msg).
+
+first(Tid, N) when N > 0 ->
+    case first(Tid) of
+        '$end_of_table' ->
+            '$end_of_table';
+        Key when N==1 ->
+            [Key];
+        Key ->
+            case next(Tid, Key, N-1) of
+                '$end_of_table' ->
+                    [Key];
+                Keys ->
+                    [Key|Keys]
+            end
+    end;
+first(Tid, N) ->
+    erlang:error(badarg, [Tid, N]).
+
+first_iter(Tid, N) when N > 0 ->
+    case first(Tid) of
+        '$end_of_table' ->
+            '$end_of_table';
+        Key when N==1 ->
+            lookup(Tid, Key);
+        Key ->
+            case next_iter(Tid, Key, N-1) of
+                '$end_of_table' ->
+                    lookup(Tid, Key);
+                Objects ->
+                    lookup(Tid, Key)++Objects
+            end
+
+    end;
+first_iter(Tid, N) ->
+    erlang:error(badarg, [Tid, N]).
+
+last(Tid, N) when N > 0 ->
+    case last(Tid) of
+        '$end_of_table' ->
+            '$end_of_table';
+        Key when N==1 ->
+            [Key];
+        Key ->
+            case prev(Tid, Key, N-1) of
+                '$end_of_table' ->
+                    [Key];
+                Keys ->
+                    Keys++[Key]
+            end
+    end;
+
+last(Tid, N) ->
+    erlang:error(badarg, [Tid, N]).
+
+last_iter(Tid, N) when N > 0 ->
+    case last(Tid) of
+        '$end_of_table' ->
+            '$end_of_table';
+        Key when N==1 ->
+            lookup(Tid, Key);
+        Key ->
+            case prev_iter(Tid, Key, N-1) of
+                '$end_of_table' ->
+                    lookup(Tid, Key);
+                Objects ->
+                    Objects++lookup(Tid, Key)
+            end
+
+    end;
+last_iter(Tid, N) ->
+    erlang:error(badarg, [Tid, N]).
+
+next(Tid, Key, N) when N > 0 ->
+    case next(Tid, Key) of
+        '$end_of_table' ->
+            '$end_of_table';
+        NextKey when N==1 ->
+            [NextKey];
+        NextKey ->
+            case next(Tid, NextKey, N-1) of
+                '$end_of_table' ->
+                    [NextKey];
+                Keys ->
+                    [NextKey|Keys]
+            end
+    end;
+next(Tid, Key, N) ->
+    erlang:error(badarg, [Tid, Key, N]).
+
+next_iter(Tid, Key, N) when N > 0 ->
+    case next(Tid, Key) of
+        '$end_of_table' ->
+            '$end_of_table';
+        NextKey when N==1 ->
+            lookup(Tid, NextKey);
+        NextKey ->
+            case next_iter(Tid, NextKey, N-1) of
+                '$end_of_table' ->
+                    lookup(Tid, NextKey);
+                Objects ->
+                    lookup(Tid, NextKey)++Objects
+            end
+    end;
+next_iter(Tid, Key, N) ->
+    erlang:error(badarg, [Tid, Key, N]).
+
+prev(Tid, Key, N) when N > 0 ->
+    case prev(Tid, Key) of
+        '$end_of_table' ->
+            '$end_of_table';
+        PrevKey when N==1 ->
+            [PrevKey];
+        PrevKey ->
+            case prev(Tid, PrevKey, N-1) of
+                '$end_of_table' ->
+                    [PrevKey];
+                Keys ->
+                    Keys++[PrevKey]
+            end
+    end;
+prev(Tid, Key, N) ->
+    erlang:error(badarg, [Tid, Key, N]).
+
+prev_iter(Tid, Key, N) when N > 0 ->
+    case prev(Tid, Key) of
+        '$end_of_table' ->
+            '$end_of_table';
+        PrevKey when N==1 ->
+            lookup(Tid, PrevKey);
+        PrevKey ->
+            case prev_iter(Tid, PrevKey, N-1) of
+                '$end_of_table' ->
+                    lookup(Tid, PrevKey);
+                Objects ->
+                    Objects++lookup(Tid, PrevKey)
+            end
+    end;
+prev_iter(Tid, Key, N) ->
+    erlang:error(badarg, [Tid, Key, N]).
+
 
 %%%----------------------------------------------------------------------
 %%% Internal functions
