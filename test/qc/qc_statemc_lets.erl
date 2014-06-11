@@ -137,7 +137,7 @@ parallel_command_gen(#state{db=Db}=S) ->
 
 -spec initial_state() -> #state{}.
 initial_state() ->
-    #state{}.
+    initial_state([]).
 
 -spec initial_state(proplist()) -> #state{}.
 initial_state(Opts) ->
