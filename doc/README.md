@@ -191,22 +191,22 @@ implementations:</p>
 <ul>
 <li>
 <p>
-<code>drv</code> C++ Driver with LevelDB backend <em>(default)</em>
+<code>drv</code> CPP Driver with LevelDB backend <em>(default)</em>
 </p>
 </li>
 <li>
 <p>
-<code>nif</code> C++ NIF with LevelDB backend
+<code>nif</code> CPP NIF with LevelDB backend
 </p>
 </li>
 <li>
 <p>
-<code>hyper drv</code> C++ Driver with HyperLevelDB backend
+<code>hyper drv</code> CPP Driver with HyperLevelDB backend
 </p>
 </li>
 <li>
 <p>
-<code>hyper nif</code> C++ NIF with HyperLevelDB backend
+<code>hyper nif</code> CPP NIF with HyperLevelDB backend
 </p>
 </li>
 <li>
@@ -225,27 +225,27 @@ corresponding backend:</p>
 <ul>
 <li>
 <p>
-<code>drv</code> - <code>src/lets_impl_drv.erl</code>
+<code>drv</code> - src/lets_impl_drv.erl
 </p>
 </li>
 <li>
 <p>
-<code>nif</code> - <code>src/lets_impl_nif.erl</code>
+<code>nif</code> - src/lets_impl_nif.erl
 </p>
 </li>
 <li>
 <p>
-<code>hyper drv</code> - <code>src/hets_impl_drv.erl</code>
+<code>hyper drv</code> - src/hets_impl_drv.erl
 </p>
 </li>
 <li>
 <p>
-<code>hyper nif</code> - <code>src/hets_impl_nif.erl</code>
+<code>hyper nif</code> - src/hets_impl_nif.erl
 </p>
 </li>
 <li>
 <p>
-<code>ets</code> - <code>deps/gen_ets/src/gen_ets_impl_ets.erl</code>
+<code>ets</code> - deps/gen_ets/src/gen_ets_impl_ets.erl
 </p>
 </li>
 </ul>
@@ -255,9 +255,9 @@ reasons:</p>
 <li>
 <p>
 The NIF backends when deleting the table rely on garbage collection
-  of the NIF resource to delete the corresponding C<code> database object.
+  of the NIF resource to delete the corresponding CPP database object.
   The calling application must manage this carefully to ensure that a
-  call to re-open an existing database is not performed until the C</code>
+  call to re-open an existing database is not performed until the CPP
   database object is deleted.  The Driver backends do not have this
   limitation.
 </p>
