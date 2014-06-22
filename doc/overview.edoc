@@ -53,10 +53,10 @@ supported ETS APIs are:
 For testing and comparison purposes, LETS supports five backend
 implementations:
 
-- +drv+ C++ Driver with LevelDB backend _(default)_
-- +nif+ C++ NIF with LevelDB backend
-- +hyper drv+ C++ Driver with HyperLevelDB backend
-- +hyper nif+ C++ NIF with HyperLevelDB backend
+- +drv+ CPP Driver with LevelDB backend _(default)_
+- +nif+ CPP NIF with LevelDB backend
+- +hyper drv+ CPP Driver with HyperLevelDB backend
+- +hyper nif+ CPP NIF with HyperLevelDB backend
 - +ets+ Erlang ETS backend
 
 If desired, all of the five backends can be called directly using the
@@ -67,19 +67,19 @@ insertion, batch iteration by key, batch iteration by object, and
 other basic table operations.  See the following modules for the
 corresponding backend:
 
-- +drv+ - +src/lets_impl_drv.erl+
-- +nif+ - +src/lets_impl_nif.erl+
-- +hyper drv+ - +src/hets_impl_drv.erl+
-- +hyper nif+ - +src/hets_impl_nif.erl+
-- +ets+ - +deps/gen_ets/src/gen_ets_impl_ets.erl+
+- +drv+ - src/lets_impl_drv.erl
+- +nif+ - src/lets_impl_nif.erl
+- +hyper drv+ - src/hets_impl_drv.erl
+- +hyper nif+ - src/hets_impl_nif.erl
+- +ets+ - deps/gen_ets/src/gen_ets_impl_ets.erl
 
 The Driver backends are recommended over the NIF backends for two
 reasons:
 
 - The NIF backends when deleting the table rely on garbage collection
-  of the NIF resource to delete the corresponding C++ database object.
+  of the NIF resource to delete the corresponding CPP database object.
   The calling application must manage this carefully to ensure that a
-  call to re-open an existing database is not performed until the C++
+  call to re-open an existing database is not performed until the CPP
   database object is deleted.  The Driver backends do not have this
   limitation.
 
