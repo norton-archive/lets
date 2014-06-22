@@ -536,9 +536,7 @@ and write options given at the time of calling new/2 are used.</p>.</td></tr></t
 <pre><code>
 all() -&gt; [<a href="#type-lets_tab">lets_tab()</a>]
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Returns a list of all tables at the node.</p>
 
@@ -552,9 +550,7 @@ __See also:__ [ets:all/0](ets.md#all-0).
 <pre><code>
 delete(Tab::<a href="#type-lets_tab">lets_tab()</a>) -&gt; true
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Deletes the entire table <code>Tab</code>.</p>
 
@@ -568,9 +564,7 @@ __See also:__ [ets:delete/1](ets.md#delete-1).
 <pre><code>
 delete(Tab::<a href="#type-lets_tab">lets_tab()</a>, Key::<a href="#type-key">key()</a>) -&gt; true
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Deletes all objects with the key <code>Key</code> from the table <code>Tab</code>.</p>
 
@@ -584,9 +578,7 @@ __See also:__ [ets:delete/2](ets.md#delete-2).
 <pre><code>
 delete_all_objects(Tab::<a href="#type-lets_tab">lets_tab()</a>) -&gt; true
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Delete all objects in the table <code>Tab</code>. The operation is
 guaranteed to be atomic and isolated.  This function only applies
@@ -602,9 +594,7 @@ __See also:__ [ets:delete_all_objects/1](ets.md#delete_all_objects-1).
 <pre><code>
 destroy(Name::<a href="#type-name">name()</a>, Opts::<a href="#type-opts">opts()</a>) -&gt; true
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Destroy the contents of the specified table.  This function
 only applies to <code>driver</code> and <code>nif</code> implementations.</p>
@@ -617,9 +607,7 @@ only applies to <code>driver</code> and <code>nif</code> implementations.</p>
 <pre><code>
 first(Tab::<a href="#type-lets_tab">lets_tab()</a>) -&gt; <a href="#type-key">key()</a> | '$end_of_table'
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Returns the first key <code>Key</code> in the table <code>Tab</code>.  If the table
 is empty, <code><em>$end_of_table</em></code> is returned.</p>
@@ -664,9 +652,7 @@ __See also:__ [ets:foldr/3](ets.md#foldr-3).
 <pre><code>
 info(Tab::<a href="#type-lets_tab">lets_tab()</a>) -&gt; [{<a href="#type-item">item()</a>, term()}]
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Returns information about the table <code>Tab</code> as a list of <code>{Item,
 Value}</code> tuples.</p>
@@ -681,9 +667,7 @@ __See also:__ [info/2](#info-2).
 <pre><code>
 info(Tab::<a href="#type-lets_tab">lets_tab()</a>, Item::<a href="#type-item">item()</a>) -&gt; term()
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Returns the information associated with <code>Item</code> for the table <code>Tab</code>.</p>
 
@@ -753,9 +737,7 @@ __See also:__ [ets:info/2](ets.md#info-2).
 <pre><code>
 insert(Tab::<a href="#type-lets_tab">lets_tab()</a>, ObjOrObjs::<a href="#type-object">object()</a> | [<a href="#type-object">object()</a>]) -&gt; true
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Inserts the object or all of the objects in the list
 <code>ObjOrObjs</code> into the table <code>Tab</code>.</p>
@@ -770,9 +752,7 @@ __See also:__ [ets:insert/2](ets.md#insert-2).
 <pre><code>
 insert_new(Tab::<a href="#type-lets_tab">lets_tab()</a>, ObjOrObjs::<a href="#type-object">object()</a> | [<a href="#type-object">object()</a>]) -&gt; true
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>This function works exactly like <code>insert/2</code>, with the
 exception that instead of overwriting objects with the same key, it
@@ -789,9 +769,7 @@ __See also:__ [ets:insert_new/2](ets.md#insert_new-2).
 <pre><code>
 last(Tab::<a href="#type-lets_tab">lets_tab()</a>) -&gt; <a href="#type-key">key()</a> | '$end_of_table'
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Returns the last key <code>Key</code> in the table <code>Tab</code>.  If the table
 is empty, <code><em>$end_of_table</em></code> is returned.</p>
@@ -806,9 +784,7 @@ __See also:__ [ets:last/1](ets.md#last-1).
 <pre><code>
 lookup(Tab::<a href="#type-lets_tab">lets_tab()</a>, Key::<a href="#type-key">key()</a>) -&gt; [<a href="#type-object">object()</a>]
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Returns a list of all objects with the key <code>Key</code> in the table
 <code>Tab</code>.</p>
@@ -823,9 +799,7 @@ __See also:__ [ets:lookup/2](ets.md#lookup-2).
 <pre><code>
 lookup_element(Tab::<a href="#type-lets_tab">lets_tab()</a>, Key::<a href="#type-key">key()</a>, Pos::<a href="#type-pos">pos()</a>) -&gt; term()
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Returns the <code>Pos</code>:th element of the object with the key <code>Key</code>
 in the table <code>Tab</code>.</p>
@@ -840,9 +814,7 @@ __See also:__ [ets:lookup_element/3](ets.md#lookup_element-3).
 <pre><code>
 match(Cont::<a href="#type-cont">cont()</a> | '$end_of_table') -&gt; {[<a href="#type-match">match()</a>], <a href="#type-cont">cont()</a> | '$end_of_table'} | '$end_of_table'
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Continues a match started with <code>match/3</code>.</p>
 
@@ -856,9 +828,7 @@ __See also:__ [ets:match/1](ets.md#match-1).
 <pre><code>
 match(Tab::<a href="#type-lets_tab">lets_tab()</a>, Pattern::<a href="#type-match_pattern">match_pattern()</a>) -&gt; [<a href="#type-match">match()</a>]
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Matches the objects in the table <code>Tab</code> against the pattern
 <code>Pattern</code>.</p>
@@ -873,9 +843,7 @@ __See also:__ [ets:match/2](ets.md#match-2).
 <pre><code>
 match(Tab::<a href="#type-lets_tab">lets_tab()</a>, Pattern::<a href="#type-match_pattern">match_pattern()</a>, Limit::<a href="#type-limit">limit()</a>) -&gt; {[<a href="#type-match">match()</a>], <a href="#type-cont">cont()</a> | '$end_of_table'} | '$end_of_table'
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Matches the objects in the table <code>Tab</code> against the pattern
 <code>Pattern</code> and returns a limited (<code>Limit</code>) number of matching
@@ -891,9 +859,7 @@ __See also:__ [ets:match/3](ets.md#match-3).
 <pre><code>
 match_delete(Tab::<a href="#type-lets_tab">lets_tab()</a>, Pattern::<a href="#type-match_pattern">match_pattern()</a>) -&gt; true
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Deletes all objects which match the pattern <code>Pattern</code> from the
 table <code>Tab</code>.</p>
@@ -908,9 +874,7 @@ __See also:__ [ets:match_delete/2](ets.md#match_delete-2).
 <pre><code>
 match_object(Cont::<a href="#type-cont">cont()</a> | '$end_of_table') -&gt; {[<a href="#type-match">match()</a>], <a href="#type-cont">cont()</a> | '$end_of_table'} | '$end_of_table'
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Continues a match started with <code>match_object/3</code>.</p>
 
@@ -924,9 +888,7 @@ __See also:__ [ets:match_object/1](ets.md#match_object-1).
 <pre><code>
 match_object(Tab::<a href="#type-lets_tab">lets_tab()</a>, Pattern::<a href="#type-match_pattern">match_pattern()</a>) -&gt; [<a href="#type-match">match()</a>]
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Matches the objects in the table <code>Tab</code> against the pattern
 <code>Pattern</code>.</p>
@@ -941,9 +903,7 @@ __See also:__ [ets:match_object/2](ets.md#match_object-2).
 <pre><code>
 match_object(Tab::<a href="#type-lets_tab">lets_tab()</a>, Pattern::<a href="#type-match_pattern">match_pattern()</a>, Limit::<a href="#type-limit">limit()</a>) -&gt; {[<a href="#type-match">match()</a>], <a href="#type-cont">cont()</a> | '$end_of_table'} | '$end_of_table'
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Matches the objects in the table <code>Tab</code> against the pattern
 <code>Pattern</code> and returns a limited (<code>Limit</code>) number of matching
@@ -959,9 +919,7 @@ __See also:__ [ets:match_object/3](ets.md#match_object-3).
 <pre><code>
 member(Tab::<a href="#type-lets_tab">lets_tab()</a>, Key::<a href="#type-key">key()</a>) -&gt; true | false
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Returns <code>true</code> if one or more elements in the table <code>Tab</code> has
 the key <code>Key</code>, <code>false</code> otherwise.</p>
@@ -976,9 +934,7 @@ __See also:__ [ets:member/2](ets.md#member-2).
 <pre><code>
 new(Name::<a href="#type-name">name()</a>, Opts::<a href="#type-opts">opts()</a>) -&gt; <a href="#type-lets_tab">lets_tab()</a>
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Creates a new table and returns a table identifier which can
 be used in subsequent operations.  The table identifier can be sent
@@ -1189,9 +1145,7 @@ __See also:__ [ets:new/2](ets.md#new-2).
 <pre><code>
 next(Tab::<a href="#type-lets_tab">lets_tab()</a>, Key::<a href="#type-key">key()</a>) -&gt; <a href="#type-key">key()</a> | '$end_of_table'
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Returns the next key <code>Key2</code>, following the key <code>Key1</code> in the
 table <code>Tab</code>.  If there is no next key, <code><em>$end_of_table</em></code> is
@@ -1207,9 +1161,7 @@ __See also:__ [ets:next/2](ets.md#next-2).
 <pre><code>
 prev(Tab::<a href="#type-lets_tab">lets_tab()</a>, Key::<a href="#type-key">key()</a>) -&gt; <a href="#type-key">key()</a> | '$end_of_table'
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Returns the previous key <code>Key2</code>, following the key <code>Key1</code> in
 the table <code>Tab</code>.  If there is no previous key, <code><em>$end_of_table</em></code> is
@@ -1225,9 +1177,7 @@ __See also:__ [ets:prev/2](ets.md#prev-2).
 <pre><code>
 repair(Name::<a href="#type-name">name()</a>, Opts::<a href="#type-opts">opts()</a>) -&gt; true
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>If a table cannot be opened, you may attempt to call this
 method to resurrect as much of the contents of the table as
@@ -1243,9 +1193,7 @@ function only applies to <code>driver</code> and <code>nif</code> implementation
 <pre><code>
 select(Cont::<a href="#type-cont">cont()</a> | '$end_of_table') -&gt; {[<a href="#type-match">match()</a>], <a href="#type-cont">cont()</a> | '$end_of_table'} | '$end_of_table'
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Continues a select started with <code>select/3</code>.</p>
 
@@ -1259,9 +1207,7 @@ __See also:__ [ets:select/1](ets.md#select-1).
 <pre><code>
 select(Tab::<a href="#type-lets_tab">lets_tab()</a>, Spec::<a href="#type-match_spec">match_spec()</a>) -&gt; [<a href="#type-match">match()</a>]
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Matches the objects in the table <code>Tab</code> against the spec
 <code>Spec</code>.</p>
@@ -1276,9 +1222,7 @@ __See also:__ [ets:select/2](ets.md#select-2).
 <pre><code>
 select(Tab::<a href="#type-lets_tab">lets_tab()</a>, Spec::<a href="#type-match_spec">match_spec()</a>, Limit::<a href="#type-limit">limit()</a>) -&gt; {[<a href="#type-match">match()</a>], <a href="#type-cont">cont()</a> | '$end_of_table'} | '$end_of_table'
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Matches the objects in the table <code>Tab</code> against the spec <code>Spec</code>
 and returns a limited (<code>Limit</code>) number of matching objects.</p>
@@ -1293,9 +1237,7 @@ __See also:__ [ets:select/3](ets.md#select-3).
 <pre><code>
 select_count(Tab::<a href="#type-lets_tab">lets_tab()</a>, Spec::<a href="#type-match_spec">match_spec()</a>) -&gt; pos_integer()
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Counts all objects which match the spec <code>Spec</code> from the
 table <code>Tab</code> and returns the number matched.</p>
@@ -1310,9 +1252,7 @@ __See also:__ [ets:select_count/2](ets.md#select_count-2).
 <pre><code>
 select_delete(Tab::<a href="#type-lets_tab">lets_tab()</a>, Spec::<a href="#type-match_spec">match_spec()</a>) -&gt; pos_integer()
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Deletes all objects which match the spec <code>Spec</code> from the
 table <code>Tab</code> and returns the number deleted.</p>
@@ -1327,9 +1267,7 @@ __See also:__ [ets:select_delete/2](ets.md#select_delete-2).
 <pre><code>
 select_reverse(Cont::<a href="#type-cont">cont()</a> | '$end_of_table') -&gt; {[<a href="#type-match">match()</a>], <a href="#type-cont">cont()</a> | '$end_of_table'} | '$end_of_table'
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Continues a select reverse started with <code>select_reverse/3</code>.</p>
 
@@ -1343,9 +1281,7 @@ __See also:__ [ets:select_reverse/1](ets.md#select_reverse-1).
 <pre><code>
 select_reverse(Tab::<a href="#type-lets_tab">lets_tab()</a>, Spec::<a href="#type-match_spec">match_spec()</a>) -&gt; [<a href="#type-match">match()</a>]
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Matches in reverse the objects in the table <code>Tab</code> against the
 spec <code>Spec</code>.</p>
@@ -1360,9 +1296,7 @@ __See also:__ [ets:select_reverse/2](ets.md#select_reverse-2).
 <pre><code>
 select_reverse(Tab::<a href="#type-lets_tab">lets_tab()</a>, Spec::<a href="#type-match_spec">match_spec()</a>, Limit::<a href="#type-limit">limit()</a>) -&gt; {[<a href="#type-match">match()</a>], <a href="#type-cont">cont()</a> | '$end_of_table'} | '$end_of_table'
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Matches in reverse the objects in the table <code>Tab</code> against the
 spec <code>Spec</code> and returns a limited (<code>Limit</code>) number of matching
@@ -1378,9 +1312,7 @@ __See also:__ [ets:select_reverse/3](ets.md#select_reverse-3).
 <pre><code>
 tab2list(Tab::<a href="#type-lets_tab">lets_tab()</a>) -&gt; [<a href="#type-object">object()</a>]
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Returns a list of all objects in the table <code>Tab</code>. The
 operation is <strong>not</strong> guaranteed to be atomic and isolated.</p>
@@ -1395,9 +1327,7 @@ __See also:__ [ets:tab2list/1](ets.md#tab2list-1).
 <pre><code>
 tid(Tab::<a href="#type-lets_tab">lets_tab()</a>) -&gt; <a href="#type-lets_tid">lets_tid()</a>
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Returns a table's identifier.</p>
 
@@ -1409,9 +1339,7 @@ tid(Tab::<a href="#type-lets_tab">lets_tab()</a>) -&gt; <a href="#type-lets_tid"
 <pre><code>
 tid(Tab::<a href="#type-lets_tab">lets_tab()</a>, Opts::undefined | [{db_read, <a href="#type-db_read_opts">db_read_opts()</a>} | {db_write, <a href="#type-db_write_opts">db_write_opts()</a>}]) -&gt; <a href="#type-lets_tid">lets_tid()</a>
 </code></pre>
-
-<br></br>
-
+<br />
 
 <p>Returns a copy of a table's identifier with given LevelDB
 read and write options.  If Opts is not undefined, the given read

@@ -215,6 +215,64 @@ implementations:</p>
 </p>
 </li>
 </ul>
+<p>If desired, all of the five backends can be called directly using the
+table identifier returned by <code>new/2</code>, <code>tid/1</code>, and/or <code>tid/2</code>.  The
+<code>tid/1</code> and <code>tid/2</code> approach must be used for named tables.  The five
+backends implement the <code>gen_ets_ns</code> behaviour to provide batch
+insertion, batch iteration by key, batch iteration by object, and
+other basic table operations.  See the following modules for the
+corresponding backend:</p>
+<ul>
+<li>
+<p>
+<code>drv</code> - <code>src/lets_impl_drv.erl</code>
+</p>
+</li>
+<li>
+<p>
+<code>nif</code> - <code>src/lets_impl_nif.erl</code>
+</p>
+</li>
+<li>
+<p>
+<code>hyper drv</code> - <code>src/hets_impl_drv.erl</code>
+</p>
+</li>
+<li>
+<p>
+<code>hyper nif</code> - <code>src/hets_impl_nif.erl</code>
+</p>
+</li>
+<li>
+<p>
+<code>ets</code> - <code>deps/gen_ets/src/gen_ets_impl_ets.erl</code>
+</p>
+</li>
+</ul>
+<p>The Driver backends are recommended over the NIF backends for two
+reasons:</p>
+<ul>
+<li>
+<p>
+The NIF backends when deleting the table rely on garbage collection
+  of the NIF resource to delete the corresponding C<code> database object.
+  The calling application must manage this carefully to ensure that a
+  call to re-open an existing database is not performed until the C</code>
+  database object is deleted.  The Driver backends do not have this
+  limitation.
+</p>
+</li>
+<li>
+<p>
+The NIF backends are not built as "dirty" NIFs and can easily block
+  the emulator's schedulers.  The Driver backends support the <code>async</code>
+  option for such purpose.  It is recommended to use the Driver
+  backends until the "dirty" NIF functionality is a non-experimental
+  Erlang/OTP feature and the LETS NIF backends are built as "dirty"
+  NIFs.
+</p>
+</li>
+</ul>
 <p><em>This repository is experimental in nature - use at your own risk and
 please contribute if you find LETS useful.</em></p>
 
@@ -246,145 +304,156 @@ OK, passed 500 tests
 
 100.0% {1,attempts}
 
-3.79% {{undefined,[]},{new,2},ok}
-1.29% {{drv,[]},{match_delete,2},ok}
-1.25% {{ets,[]},{select_delete,2},ok}
-1.23% {{drv,[]},{select_count,2},ok}
-1.22% {{drv,[]},{match,2},ok}
-1.22% {{drv,[]},{match_object,2},ok}
-1.22% {{drv,[]},{lookup,2},ok}
-1.21% {{drv,[]},{select_delete,2},ok}
-1.21% {{drv,[]},{delete,1},ok}
-1.19% {{drv,[]},{last,1},ok}
-1.18% {{drv,[]},{insert,2},ok}
-1.18% {{drv,[]},{delete,2},ok}
-1.18% {{ets,[]},{select,2},ok}
-1.18% {{drv,[]},{foldr,3},ok}
-1.17% {{ets,[]},{tab2list,1},ok}
-1.17% {{drv,[]},{new,3},ok}
-1.17% {{drv,[]},{foldl,3},ok}
-1.16% {{ets,[]},{select_reverse31,3},ok}
-1.14% {{drv,[]},{match31,3},ok}
-1.13% {{ets,[]},{insert,2},ok}
-1.13% {{drv,[]},{all,1},ok}
-1.12% {{ets,[]},{select_count,2},ok}
-1.12% {{ets,[]},{match_object,2},ok}
-1.12% {{ets,[]},{match_delete,2},ok}
-1.11% {{drv,[]},{tab2list,1},ok}
-1.11% {{drv,[]},{select,2},ok}
-1.11% {{drv,[]},{member,2},ok}
-1.10% {{ets,[]},{match31,3},ok}
-1.10% {{ets,[]},{first,1},ok}
-1.10% {{drv,[]},{select_reverse31,3},ok}
-1.10% {{drv,[]},{next,2},ok}
-1.10% {{drv,[]},{match_object31,3},ok}
-1.09% {{nif,[]},{match_object,2},ok}
-1.09% {{drv,[]},{select31,3},ok}
-1.09% {{ets,[]},{match_object31,3},ok}
-1.09% {{ets,[]},{lookup,2},ok}
-1.08% {{ets,[]},{select31,3},ok}
-1.08% {{drv,[]},{select_reverse,2},ok}
-1.07% {{ets,[]},{delete,2},ok}
-1.05% {{ets,[]},{select_reverse,2},ok}
-1.05% {{ets,[]},{foldr,3},ok}
-1.05% {{ets,[]},{foldl,3},ok}
-1.03% {{nif,[]},{match,2},ok}
-1.03% {{ets,[]},{all,1},ok}
-1.03% {{drv,[]},{prev,2},ok}
-1.01% {{ets,[]},{member,2},ok}
-1.01% {{ets,[]},{last,1},ok}
-1.01% {{ets,[]},{insert_new,2},ok}
-1.01% {{drv,[]},{first,1},ok}
-0.96% {{nif,[]},{prev,2},ok}
-0.96% {{nif,[]},{match31,3},ok}
-0.96% {{nif,[]},{all,1},ok}
-0.95% {{nif,[]},{tab2list,1},ok}
-0.94% {{drv,[]},{lookup_element,3},{error,badarg}}
-0.93% {{nif,[]},{first,1},ok}
-0.93% {{ets,[]},{delete,1},ok}
-0.92% {{nif,[]},{select31,3},ok}
-0.92% {{nif,[]},{lookup_element,3},{error,badarg}}
-0.92% {{ets,[]},{match,2},ok}
-0.91% {{nif,[]},{select,2},ok}
-0.90% {{nif,[]},{lookup,2},ok}
-0.89% {{nif,[]},{insert,2},ok}
-0.89% {{nif,[]},{foldl,3},ok}
-0.88% {{nif,[]},{match_object31,3},ok}
-0.88% {{ets,[]},{new,3},ok}
-0.88% {{ets,[]},{lookup_element,3},{error,badarg}}
-0.86% {{nif,[]},{delete,2},ok}
-0.84% {{nif,[]},{select_reverse31,3},ok}
-0.84% {{nif,[]},{last,1},ok}
-0.84% {{nif,[]},{select_delete,2},ok}
-0.82% {{nif,[]},{select_reverse,2},ok}
-0.82% {{nif,[]},{foldr,3},ok}
-0.81% {{nif,[]},{next,2},ok}
-0.80% {{nif,[]},{match_delete,2},ok}
-0.77% {{nif,[]},{select_count,2},ok}
-0.77% {{nif,[]},{delete,1},ok}
-0.76% {{nif,[]},{member,2},ok}
-0.73% {{nif,[]},{new,3},ok}
-0.67% {{ets,[]},{next,2},ok}
-0.55% {{ets,[]},{prev,2},{error,badarg}}
-0.52% {{ets,[]},{next,2},{error,badarg}}
-0.50% {{ets,[]},{prev,2},ok}
-0.39% {{drv,[hyper]},{tab2list,1},ok}
-0.38% {{drv,[hyper]},{select_reverse31,3},ok}
-0.38% {{drv,[hyper]},{select_reverse,2},ok}
-0.36% {{drv,[hyper]},{match_object,2},ok}
-0.35% {{drv,[hyper]},{insert,2},ok}
-0.35% {{drv,[hyper]},{foldr,3},ok}
-0.35% {{drv,[hyper]},{delete,1},ok}
-0.34% {{drv,[hyper]},{new,3},ok}
-0.34% {{drv,[hyper]},{lookup,2},ok}
-0.34% {{drv,[hyper]},{delete,2},ok}
-0.33% {{drv,[hyper]},{next,2},ok}
-0.33% {{drv,[hyper]},{match_object31,3},ok}
-0.33% {{drv,[hyper]},{all,1},ok}
-0.31% {{drv,[hyper]},{prev,2},ok}
-0.31% {{drv,[hyper]},{last,1},ok}
-0.31% {{drv,[hyper]},{first,1},ok}
-0.30% {{nif,[hyper]},{insert,2},ok}
-0.30% {{drv,[hyper]},{select_count,2},ok}
-0.30% {{drv,[hyper]},{select,2},ok}
-0.29% {{nif,[hyper]},{select,2},ok}
-0.29% {{nif,[hyper]},{delete,1},ok}
-0.29% {{drv,[hyper]},{foldl,3},ok}
-0.28% {{drv,[hyper]},{match31,3},ok}
-0.27% {{nif,[hyper]},{select_reverse31,3},ok}
-0.27% {{nif,[hyper]},{select31,3},ok}
-0.27% {{nif,[hyper]},{select_reverse,2},ok}
+3.44% {{undefined,[]},{new,2},ok}
+1.41% {{ets,[]},{select_reverse,2},ok}
+1.39% {{ets,[]},{select_reverse31,3},ok}
+1.37% {{ets,[]},{select,2},ok}
+1.33% {{ets,[]},{select_delete,2},ok}
+1.33% {{ets,[]},{member,2},ok}
+1.33% {{ets,[]},{last,1},ok}
+1.31% {{ets,[]},{delete_all_objects,1},ok}
+1.30% {{ets,[]},{delete,2},ok}
+1.29% {{ets,[]},{insert_new,2},ok}
+1.29% {{ets,[]},{delete,1},ok}
+1.28% {{ets,[]},{insert,2},ok}
+1.27% {{ets,[]},{tid,2},ok}
+1.27% {{ets,[]},{match_object,2},ok}
+1.25% {{ets,[]},{select_count,2},ok}
+1.24% {{ets,[]},{tab2list,1},ok}
+1.24% {{ets,[]},{first,1},ok}
+1.24% {{ets,[]},{new,3},ok}
+1.24% {{ets,[]},{match_object31,3},ok}
+1.24% {{ets,[]},{match,2},ok}
+1.23% {{ets,[]},{tid,1},ok}
+1.23% {{ets,[]},{select31,3},ok}
+1.21% {{ets,[]},{lookup,2},ok}
+1.19% {{ets,[]},{all,1},ok}
+1.18% {{ets,[]},{match31,3},ok}
+1.17% {{ets,[]},{foldr,3},ok}
+1.09% {{ets,[]},{foldl,3},ok}
+1.08% {{ets,[]},{lookup_element,3},{error,badarg}}
+1.05% {{ets,[]},{match_delete,2},ok}
+0.92% {{nif,[]},{select_reverse31,3},ok}
+0.88% {{drv,[]},{match,2},ok}
+0.88% {{drv,[]},{all,1},ok}
+0.87% {{drv,[]},{match_delete,2},ok}
+0.85% {{nif,[]},{member,2},ok}
+0.85% {{nif,[]},{last,1},ok}
+0.85% {{drv,[]},{match31,3},ok}
+0.82% {{nif,[]},{first,1},ok}
+0.82% {{nif,[]},{select31,3},ok}
+0.82% {{drv,[]},{select_delete,2},ok}
+0.81% {{nif,[]},{select_reverse,2},ok}
+0.80% {{nif,[]},{prev,2},ok}
+0.79% {{nif,[]},{tid,1},ok}
+0.79% {{nif,[]},{match,2},ok}
+0.79% {{nif,[]},{all,1},ok}
+0.77% {{nif,[]},{match_object31,3},ok}
+0.77% {{drv,[]},{member,2},ok}
+0.77% {{drv,[]},{delete,1},ok}
+0.76% {{nif,[]},{foldr,3},ok}
+0.76% {{drv,[]},{select31,3},ok}
+0.76% {{drv,[]},{first,1},ok}
+0.75% {{drv,[]},{prev,2},ok}
+0.75% {{drv,[]},{new,3},ok}
+0.75% {{drv,[]},{last,1},ok}
+0.75% {{nif,[]},{select_delete,2},ok}
+0.75% {{drv,[]},{select_reverse31,3},ok}
+0.74% {{nif,[]},{next,2},ok}
+0.74% {{nif,[]},{delete,2},ok}
+0.74% {{drv,[]},{next,2},ok}
+0.74% {{drv,[]},{insert,2},ok}
+0.73% {{nif,[]},{tid,2},ok}
+0.73% {{nif,[]},{insert,2},ok}
+0.73% {{drv,[]},{tid,1},ok}
+0.73% {{drv,[]},{match_object31,3},ok}
+0.73% {{drv,[]},{match_object,2},ok}
+0.73% {{drv,[]},{foldl,3},ok}
+0.73% {{drv,[]},{delete,2},ok}
+0.72% {{nif,[]},{select,2},ok}
+0.72% {{nif,[]},{match_object,2},ok}
+0.72% {{nif,[]},{match31,3},ok}
+0.71% {{nif,[]},{lookup,2},ok}
+0.71% {{nif,[]},{foldl,3},ok}
+0.71% {{drv,[]},{select,2},ok}
+0.70% {{nif,[]},{tab2list,1},ok}
+0.68% {{nif,[]},{match_delete,2},ok}
+0.68% {{nif,[]},{new,3},ok}
+0.68% {{nif,[]},{delete,1},ok}
+0.68% {{drv,[]},{lookup_element,3},{error,badarg}}
+0.67% {{drv,[]},{tab2list,1},ok}
+0.67% {{drv,[]},{foldr,3},ok}
+0.66% {{drv,[]},{select_reverse,2},ok}
+0.66% {{drv,[]},{select_count,2},ok}
+0.65% {{nif,[]},{select_count,2},ok}
+0.65% {{drv,[]},{lookup,2},ok}
+0.64% {{nif,[]},{lookup_element,3},{error,badarg}}
+0.62% {{drv,[]},{tid,2},ok}
+0.61% {{ets,[]},{next,2},ok}
+0.58% {{ets,[]},{next,2},{error,badarg}}
+0.56% {{ets,[]},{prev,2},ok}
+0.51% {{ets,[]},{prev,2},{error,badarg}}
+0.43% {{nif,[hyper]},{foldr,3},ok}
+0.41% {{nif,[hyper]},{select_reverse31,3},ok}
+0.41% {{nif,[hyper]},{prev,2},ok}
+0.40% {{nif,[hyper]},{tid,1},ok}
+0.40% {{nif,[hyper]},{match,2},ok}
+0.39% {{nif,[hyper]},{delete,2},ok}
+0.38% {{nif,[hyper]},{tab2list,1},ok}
+0.38% {{nif,[hyper]},{match_delete,2},ok}
+0.37% {{nif,[hyper]},{select_reverse,2},ok}
+0.36% {{nif,[hyper]},{select,2},ok}
+0.36% {{nif,[hyper]},{last,1},ok}
+0.35% {{nif,[hyper]},{insert,2},ok}
+0.35% {{nif,[hyper]},{foldl,3},ok}
+0.35% {{nif,[hyper]},{match_object31,3},ok}
+0.35% {{nif,[hyper]},{first,1},ok}
+0.35% {{drv,[hyper]},{select_count,2},ok}
+0.34% {{nif,[hyper]},{lookup_element,3},{error,badarg}}
+0.33% {{nif,[hyper]},{tid,2},ok}
+0.33% {{nif,[hyper]},{member,2},ok}
+0.31% {{nif,[hyper]},{next,2},ok}
+0.31% {{nif,[hyper]},{lookup,2},ok}
+0.31% {{drv,[hyper]},{select_delete,2},ok}
+0.31% {{drv,[hyper]},{lookup,2},ok}
+0.31% {{drv,[hyper]},{foldr,3},ok}
+0.31% {{drv,[hyper]},{foldl,3},ok}
+0.31% {{nif,[hyper]},{select_delete,2},ok}
+0.31% {{drv,[hyper]},{tid,2},ok}
+0.31% {{drv,[hyper]},{select_reverse31,3},ok}
+0.30% {{nif,[hyper]},{select_count,2},ok}
+0.29% {{nif,[hyper]},{match31,3},ok}
+0.28% {{nif,[hyper]},{select31,3},ok}
+0.28% {{nif,[hyper]},{delete,1},ok}
+0.28% {{drv,[hyper]},{match_delete,2},ok}
+0.28% {{nif,[hyper]},{new,3},ok}
+0.28% {{nif,[hyper]},{match_object,2},ok}
+0.28% {{nif,[hyper]},{all,1},ok}
+0.28% {{drv,[hyper]},{match_object,2},ok}
+0.28% {{drv,[hyper]},{match,2},ok}
+0.27% {{drv,[hyper]},{select_reverse,2},ok}
 0.27% {{drv,[hyper]},{select31,3},ok}
-0.26% {{nif,[hyper]},{tab2list,1},ok}
-0.26% {{nif,[hyper]},{select_count,2},ok}
-0.26% {{nif,[hyper]},{lookup,2},ok}
-0.26% {{nif,[hyper]},{all,1},ok}
-0.26% {{drv,[hyper]},{member,2},ok}
-0.25% {{nif,[hyper]},{new,3},ok}
-0.25% {{nif,[hyper]},{match_object31,3},ok}
-0.24% {{nif,[hyper]},{select_delete,2},ok}
-0.24% {{drv,[hyper]},{select_delete,2},ok}
-0.24% {{drv,[hyper]},{match_delete,2},ok}
-0.24% {{drv,[hyper]},{match,2},ok}
+0.27% {{drv,[hyper]},{last,1},ok}
+0.27% {{drv,[hyper]},{first,1},ok}
+0.26% {{drv,[hyper]},{delete,2},ok}
+0.26% {{drv,[hyper]},{prev,2},ok}
 0.24% {{drv,[hyper]},{lookup_element,3},{error,badarg}}
-0.23% {{nif,[hyper]},{foldr,3},ok}
-0.23% {{nif,[hyper]},{prev,2},ok}
-0.23% {{nif,[hyper]},{member,2},ok}
-0.23% {{nif,[hyper]},{match,2},ok}
-0.22% {{nif,[hyper]},{first,1},ok}
-0.21% {{nif,[hyper]},{match_object,2},ok}
-0.21% {{nif,[hyper]},{last,1},ok}
-0.21% {{nif,[hyper]},{delete,2},ok}
-0.19% {{drv,[]},{lookup_element,3},ok}
-0.18% {{nif,[hyper]},{match31,3},ok}
-0.18% {{nif,[hyper]},{lookup_element,3},{error,badarg}}
-0.18% {{nif,[]},{lookup_element,3},ok}
+0.24% {{drv,[hyper]},{all,1},ok}
+0.24% {{drv,[hyper]},{tid,1},ok}
+0.24% {{drv,[hyper]},{select,2},ok}
+0.24% {{drv,[hyper]},{member,2},ok}
+0.23% {{drv,[hyper]},{delete,1},ok}
+0.22% {{drv,[hyper]},{new,3},ok}
+0.21% {{drv,[hyper]},{next,2},ok}
+0.20% {{drv,[hyper]},{insert,2},ok}
 0.18% {{ets,[]},{lookup_element,3},ok}
-0.18% {{nif,[hyper]},{next,2},ok}
-0.18% {{nif,[hyper]},{match_delete,2},ok}
-0.17% {{nif,[hyper]},{foldl,3},ok}
-0.03% {{nif,[hyper]},{lookup_element,3},ok}
-0.02% {{drv,[hyper]},{lookup_element,3},ok}
+0.18% {{drv,[hyper]},{tab2list,1},ok}
+0.18% {{drv,[hyper]},{match_object31,3},ok}
+0.17% {{nif,[]},{lookup_element,3},ok}
+0.14% {{drv,[hyper]},{match31,3},ok}
+0.13% {{drv,[]},{lookup_element,3},ok}
+0.04% {{nif,[hyper]},{lookup_element,3},ok}
+0.01% {{drv,[hyper]},{lookup_element,3},ok}
 true
 .......</code></pre>
 
@@ -395,6 +464,173 @@ Tip
 </td>
 <td class="content">For testing LevelDB directly using the C bindings, try<code>qc_statemc_lets:qc_run(500)</code>.</td>
 </tr></table>
+
+<p><em>OR</em> if PropEr is available then follow this recipe:</p>
+
+
+<pre><code>$ mkdir working-directory-name
+$ cd working-directory-name
+$ git clone https://github.com/norton/lets.git lets
+$ cd lets
+$ make deps clean compile-for-proper
+$ (cd .qc; erl -smp +A 5 -pz -pz ../deps/{sext,gen_ets,qc}/ebin)
+
+1> qc_statem_lets:qc_run(500).
+.......
+OK: Passed 500 test(s).
+
+8% {{undefined,[]},{new,2},ok}
+1% {{ets,[]},{insert,2},ok}
+1% {{ets,[]},{match31,3},ok}
+1% {{ets,[]},{foldl,3},ok}
+1% {{ets,[]},{first,1},ok}
+1% {{ets,[]},{delete,2},ok}
+1% {{ets,[]},{match,2},ok}
+1% {{ets,[]},{match_object,2},ok}
+1% {{ets,[]},{select31,3},ok}
+1% {{ets,[]},{all,1},ok}
+1% {{ets,[]},{match_delete,2},ok}
+1% {{ets,[]},{tid,1},ok}
+1% {{nif,[]},{match_delete,2},ok}
+0% {{ets,[]},{select_reverse,2},ok}
+0% {{ets,[]},{tab2list,1},ok}
+0% {{ets,[]},{delete,1},ok}
+0% {{ets,[]},{insert_new,2},ok}
+0% {{ets,[]},{member,2},ok}
+0% {{ets,[]},{foldr,3},ok}
+0% {{ets,[]},{last,1},ok}
+0% {{ets,[]},{new,3},ok}
+0% {{ets,[]},{match_object31,3},ok}
+0% {{nif,[]},{all,1},ok}
+0% {{ets,[]},{select_count,2},ok}
+0% {{drv,[]},{first,1},ok}
+0% {{drv,[]},{lookup,2},ok}
+0% {{ets,[]},{select_delete,2},ok}
+0% {{nif,[]},{lookup,2},ok}
+0% {{nif,[]},{tid,2},ok}
+0% {{ets,[]},{delete_all_objects,1},ok}
+0% {{ets,[]},{lookup,2},ok}
+0% {{drv,[]},{prev,2},ok}
+0% {{drv,[]},{select_count,2},ok}
+0% {{drv,[]},{all,1},ok}
+0% {{nif,[]},{delete,2},ok}
+0% {{nif,[]},{match31,3},ok}
+0% {{drv,[]},{member,2},ok}
+0% {{ets,[]},{select,2},ok}
+0% {{nif,[]},{foldr,3},ok}
+0% {{nif,[]},{select_count,2},ok}
+0% {{drv,[]},{match,2},ok}
+0% {{drv,[]},{next,2},ok}
+0% {{ets,[]},{tid,2},ok}
+0% {{nif,[]},{tid,1},ok}
+0% {{drv,[]},{delete,2},ok}
+0% {{drv,[]},{foldl,3},ok}
+0% {{drv,[]},{tid,1},ok}
+0% {{ets,[]},{select_reverse31,3},ok}
+0% {{nif,[]},{match,2},ok}
+0% {{nif,[]},{member,2},ok}
+0% {{drv,[]},{select,2},ok}
+0% {{drv,[]},{select_reverse31,3},ok}
+0% {{drv,[]},{tab2list,1},ok}
+0% {{ets,[]},{lookup_element,3},{error,badarg}}
+0% {{nif,[]},{first,1},ok}
+0% {{nif,[]},{match_object,2},ok}
+0% {{nif,[]},{select,2},ok}
+0% {{nif,[]},{select_reverse,2},ok}
+0% {{drv,[]},{match31,3},ok}
+0% {{drv,[]},{tid,2},ok}
+0% {{nif,[]},{foldl,3},ok}
+0% {{nif,[]},{match_object31,3},ok}
+0% {{nif,[]},{select31,3},ok}
+0% {{nif,[]},{next,2},ok}
+0% {{drv,[]},{select_delete,2},ok}
+0% {{nif,[]},{select_delete,2},ok}
+0% {{drv,[]},{delete,1},ok}
+0% {{drv,[]},{match_object,2},ok}
+0% {{drv,[]},{select31,3},ok}
+0% {{nif,[]},{select_reverse31,3},ok}
+0% {{nif,[]},{prev,2},ok}
+0% {{drv,[]},{last,1},ok}
+0% {{nif,[]},{delete,1},ok}
+0% {{drv,[]},{insert,2},ok}
+0% {{drv,[]},{new,3},ok}
+0% {{nif,[]},{last,1},ok}
+0% {{drv,[]},{foldr,3},ok}
+0% {{ets,[]},{next,2},ok}
+0% {{ets,[]},{prev,2},ok}
+0% {{nif,[]},{insert,2},ok}
+0% {{nif,[]},{lookup_element,3},{error,badarg}}
+0% {{nif,[]},{tab2list,1},ok}
+0% {{nif,[]},{new,3},ok}
+0% {{drv,[]},{match_object31,3},ok}
+0% {{drv,[]},{select_reverse,2},ok}
+0% {{drv,[]},{lookup_element,3},{error,badarg}}
+0% {{drv,[]},{match_delete,2},ok}
+0% {{nif,[hyper]},{match_object31,3},ok}
+0% {{nif,[hyper]},{select31,3},ok}
+0% {{drv,[hyper]},{match_delete,2},ok}
+0% {{drv,[hyper]},{select,2},ok}
+0% {{drv,[hyper]},{tab2list,1},ok}
+0% {{drv,[hyper]},{delete,2},ok}
+0% {{drv,[hyper]},{select_delete,2},ok}
+0% {{drv,[hyper]},{delete,1},ok}
+0% {{drv,[hyper]},{foldl,3},ok}
+0% {{drv,[hyper]},{insert,2},ok}
+0% {{drv,[hyper]},{last,1},ok}
+0% {{drv,[hyper]},{match,2},ok}
+0% {{nif,[hyper]},{select,2},ok}
+0% {{drv,[hyper]},{lookup_element,3},{error,badarg}}
+0% {{drv,[hyper]},{match_object,2},ok}
+0% {{drv,[hyper]},{prev,2},ok}
+0% {{nif,[hyper]},{all,1},ok}
+0% {{nif,[hyper]},{delete,1},ok}
+0% {{nif,[hyper]},{insert,2},ok}
+0% {{nif,[hyper]},{match_object,2},ok}
+0% {{nif,[hyper]},{select_count,2},ok}
+0% {{nif,[hyper]},{select_reverse,2},ok}
+0% {{drv,[hyper]},{first,1},ok}
+0% {{drv,[hyper]},{foldr,3},ok}
+0% {{drv,[hyper]},{match_object31,3},ok}
+0% {{drv,[hyper]},{new,3},ok}
+0% {{drv,[hyper]},{select31,3},ok}
+0% {{drv,[hyper]},{select_reverse,2},ok}
+0% {{nif,[hyper]},{last,1},ok}
+0% {{nif,[hyper]},{match,2},ok}
+0% {{nif,[hyper]},{next,2},ok}
+0% {{nif,[hyper]},{select_reverse31,3},ok}
+0% {{drv,[hyper]},{lookup,2},ok}
+0% {{drv,[hyper]},{select_count,2},ok}
+0% {{nif,[hyper]},{member,2},ok}
+0% {{nif,[hyper]},{new,3},ok}
+0% {{nif,[hyper]},{select_delete,2},ok}
+0% {{drv,[hyper]},{member,2},ok}
+0% {{drv,[hyper]},{next,2},ok}
+0% {{drv,[hyper]},{select_reverse31,3},ok}
+0% {{nif,[hyper]},{first,1},ok}
+0% {{nif,[hyper]},{foldl,3},ok}
+0% {{nif,[hyper]},{lookup,2},ok}
+0% {{drv,[hyper]},{all,1},ok}
+0% {{drv,[hyper]},{tid,1},ok}
+0% {{ets,[]},{next,2},{error,badarg}}
+0% {{nif,[hyper]},{match31,3},ok}
+0% {{drv,[hyper]},{match31,3},ok}
+0% {{nif,[hyper]},{delete,2},ok}
+0% {{nif,[hyper]},{lookup_element,3},{error,badarg}}
+0% {{nif,[hyper]},{match_delete,2},ok}
+0% {{nif,[hyper]},{tab2list,1},ok}
+0% {{drv,[hyper]},{tid,2},ok}
+0% {{nif,[hyper]},{prev,2},ok}
+0% {{ets,[]},{prev,2},{error,badarg}}
+0% {{nif,[hyper]},{foldr,3},ok}
+0% {{nif,[hyper]},{tid,1},ok}
+0% {{nif,[hyper]},{tid,2},ok}
+0% {{drv,[]},{lookup_element,3},ok}
+0% {{ets,[]},{lookup_element,3},ok}
+0% {{nif,[hyper]},{lookup_element,3},ok}
+0% {{nif,[]},{lookup_element,3},ok}
+0% {{drv,[hyper]},{lookup_element,3},ok}
+true
+.......</code></pre>
 
 
 
@@ -493,6 +729,75 @@ Explain how to run QuickCheck tests using a new rebar plugin.
 <p>
 Explain how to build and to run lets with valgrind enabled
     OTP/Erlang virtual machine
+</p>
+</li>
+</ul>
+</li>
+<li>
+<p>
+Backends (TBD)
+</p>
+<ul>
+<li>
+<p>
+Implement the NIF backends as "dirty" NIFs.
+</p>
+</li>
+</ul>
+</li>
+<li>
+<p>
+New APIs (TBD)
+</p>
+<ul>
+<li>
+<p>
+<code>insert_new/2</code>
+    (<a href="http://code.google.com/p/leveldb/issues/detail?id=42">http://code.google.com/p/leveldb/issues/detail?id=42</a>)
+</p>
+</li>
+<li>
+<p>
+<code>delete_all_objects/1</code>
+    (<a href="http://code.google.com/p/leveldb/issues/detail?id=43">http://code.google.com/p/leveldb/issues/detail?id=43</a>)
+</p>
+</li>
+<li>
+<p>
+Add custom (i.e. not supported by native ETS) APIs for providing
+    access to LevelDB's iterators for <code>drv</code> and <code>nif</code> backend
+    implementations.
+</p>
+</li>
+</ul>
+</li>
+<li>
+<p>
+Existing APIs (TBD)
+</p>
+<ul>
+<li>
+<p>
+<code>delete/1</code>
+    (<a href="http://code.google.com/p/leveldb/issues/detail?id=48">http://code.google.com/p/leveldb/issues/detail?id=48</a>)
+</p>
+</li>
+<li>
+<p>
+<code>new/2</code> -
+    (<a href="http://code.google.com/p/leveldb/issues/detail?id=49">http://code.google.com/p/leveldb/issues/detail?id=49</a>)
+</p>
+</li>
+<li>
+<p>
+<code>new/2</code> - investigate if LevelDB's snapshot feature is useful (or
+    not) for LETS
+</p>
+</li>
+<li>
+<p>
+<code>info/2</code> - investigate if LevelDB's implementation can (easily)
+    support size and memory info items
 </p>
 </li>
 </ul>
@@ -619,63 +924,6 @@ File system writes return errors (e.g., disk-full)
 </p>
 </li>
 </ul>
-</li>
-</ul>
-</li>
-<li>
-<p>
-New APIs (TBD)
-</p>
-<ul>
-<li>
-<p>
-<code>insert_new/2</code>
-    (<a href="http://code.google.com/p/leveldb/issues/detail?id=42">http://code.google.com/p/leveldb/issues/detail?id=42</a>)
-</p>
-</li>
-<li>
-<p>
-<code>delete_all_objects/1</code>
-    (<a href="http://code.google.com/p/leveldb/issues/detail?id=43">http://code.google.com/p/leveldb/issues/detail?id=43</a>)
-</p>
-</li>
-<li>
-<p>
-Add custom (i.e. not supported by native ETS) APIs for providing
-    access to LevelDB's iterators for <code>drv</code> and <code>nif</code> backend
-    implementations.
-</p>
-</li>
-</ul>
-</li>
-<li>
-<p>
-Existing APIs (TBD)
-</p>
-<ul>
-<li>
-<p>
-<code>delete/1</code>
-    (<a href="http://code.google.com/p/leveldb/issues/detail?id=48">http://code.google.com/p/leveldb/issues/detail?id=48</a>)
-</p>
-</li>
-<li>
-<p>
-<code>new/2</code> -
-    (<a href="http://code.google.com/p/leveldb/issues/detail?id=49">http://code.google.com/p/leveldb/issues/detail?id=49</a>)
-</p>
-</li>
-<li>
-<p>
-<code>new/2</code> - investigate if LevelDB's snapshot feature is useful (or
-    not) for LETS
-</p>
-</li>
-<li>
-<p>
-<code>info/2</code> - investigate if LevelDB's implementation can (easily)
-    support size and memory info items
-</p>
 </li>
 </ul>
 </li>
