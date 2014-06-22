@@ -111,42 +111,22 @@ delete_all_objects(#gen_tid{impl=Impl, impl_opts=Opts}) ->
 %% @see lets:first/1
 -spec first(tid()) -> key() | '$end_of_table'.
 first(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}) ->
-    case impl_first(Impl, opts(db_read, Opts)) of
-        '$end_of_table' ->
-            '$end_of_table';
-        Key ->
-            decode(Type, Key)
-    end.
+    decode(Type, impl_first(Impl, opts(db_read, Opts), undefined)).
 
 %% @see lets:first/1
 -spec first_iter(tid()) -> object() | '$end_of_table'.
 first_iter(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}) ->
-    case impl_first_iter(Impl, opts(db_read, Opts)) of
-        '$end_of_table' ->
-            '$end_of_table';
-        Key ->
-            decode(Type, Key)
-    end.
+    decode(Type, impl_first_iter(Impl, opts(db_read, Opts), undefined)).
 
 %% @see lets:last/1
 -spec last(tid()) -> key() | '$end_of_table'.
 last(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}) ->
-    case impl_last(Impl, opts(db_read, Opts)) of
-        '$end_of_table' ->
-            '$end_of_table';
-        Key ->
-            decode(Type, Key)
-    end.
+    decode(Type, impl_last(Impl, opts(db_read, Opts), undefined)).
 
 %% @see lets:last/1
 -spec last_iter(tid()) -> object() | '$end_of_table'.
 last_iter(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}) ->
-    case impl_last_iter(Impl, opts(db_read, Opts)) of
-        '$end_of_table' ->
-            '$end_of_table';
-        Key ->
-            decode(Type, Key)
-    end.
+    decode(Type, impl_last_iter(Impl, opts(db_read, Opts), undefined)).
 
 %% @see lets:info/1
 -spec info_memory(tid()) -> non_neg_integer().
@@ -213,42 +193,22 @@ member(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key) ->
 %% @see lets:next/2
 -spec next(#gen_tid{}, key()) -> key() | '$end_of_table'.
 next(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key) ->
-    case impl_next(Impl, opts(db_read, Opts), encode(Type, Key)) of
-        '$end_of_table' ->
-            '$end_of_table';
-        Next ->
-            decode(Type, Next)
-    end.
+    decode(Type, impl_next(Impl, opts(db_read, Opts), encode(Type, Key), undefined)).
 
 %% @see lets:next/2
 -spec next_iter(tid(), key()) -> object() | '$end_of_table'.
 next_iter(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key) ->
-    case impl_next_iter(Impl, opts(db_read, Opts), encode(Type, Key)) of
-        '$end_of_table' ->
-            '$end_of_table';
-        Next ->
-            decode(Type, Next)
-    end.
+    decode(Type, impl_next_iter(Impl, opts(db_read, Opts), encode(Type, Key), undefined)).
 
 %% @see lets:prev/2
 -spec prev(#gen_tid{}, key()) -> key() | '$end_of_table'.
 prev(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key) ->
-    case impl_prev(Impl, opts(db_read, Opts), encode(Type, Key)) of
-        '$end_of_table' ->
-            '$end_of_table';
-        Prev ->
-            decode(Type, Prev)
-    end.
+    decode(Type, impl_prev(Impl, opts(db_read, Opts), encode(Type, Key), undefined)).
 
 %% @see lets:prev/2
 -spec prev_iter(tid(), key()) -> object() | '$end_of_table'.
 prev_iter(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key) ->
-    case impl_prev_iter(Impl, opts(db_read, Opts), encode(Type, Key)) of
-        '$end_of_table' ->
-            '$end_of_table';
-        Prev ->
-            decode(Type, Prev)
-    end.
+    decode(Type, impl_prev_iter(Impl, opts(db_read, Opts), encode(Type, Key), undefined)).
 
 %% @doc Register the specified process to be sent the specified
 %% message when the table is destroyed and return true.  Otherwise,
@@ -257,145 +217,46 @@ prev_iter(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key) ->
 notify(#gen_tid{impl=Impl}, Event, Pid, Msg) ->
     impl_notify(Impl, Event, Pid, Msg).
 
-first(Tid, N) when N > 0 ->
-    case first(Tid) of
-        '$end_of_table' ->
-            '$end_of_table';
-        Key when N==1 ->
-            [Key];
-        Key ->
-            case next(Tid, Key, N-1) of
-                '$end_of_table' ->
-                    [Key];
-                Keys ->
-                    [Key|Keys]
-            end
-    end;
-first(Tid, N) ->
-    erlang:error(badarg, [Tid, N]).
 
-first_iter(Tid, N) when N > 0 ->
-    case first(Tid) of
-        '$end_of_table' ->
-            '$end_of_table';
-        Key when N==1 ->
-            lookup(Tid, Key);
-        Key ->
-            case next_iter(Tid, Key, N-1) of
-                '$end_of_table' ->
-                    lookup(Tid, Key);
-                Objects ->
-                    lookup(Tid, Key)++Objects
-            end
+%% @see lets:first/1
+-spec first(tid(), pos_integer()) -> [key()] | '$end_of_table'.
+first(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, N) ->
+    decode(Type, impl_first(Impl, opts(db_read, Opts), N)).
 
-    end;
-first_iter(Tid, N) ->
-    erlang:error(badarg, [Tid, N]).
+%% @see lets:first/1
+-spec first_iter(tid(), pos_integer()) -> [object()] | '$end_of_table'.
+first_iter(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, N) ->
+    decode(Type, impl_first_iter(Impl, opts(db_read, Opts), N)).
 
-last(Tid, N) when N > 0 ->
-    case last(Tid) of
-        '$end_of_table' ->
-            '$end_of_table';
-        Key when N==1 ->
-            [Key];
-        Key ->
-            case prev(Tid, Key, N-1) of
-                '$end_of_table' ->
-                    [Key];
-                Keys ->
-                    Keys++[Key]
-            end
-    end;
+%% @see lets:last/1
+-spec last(tid(), pos_integer()) -> [key()] | '$end_of_table'.
+last(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, N) ->
+    decode(Type, impl_last(Impl, opts(db_read, Opts), N)).
 
-last(Tid, N) ->
-    erlang:error(badarg, [Tid, N]).
+%% @see lets:last/1
+-spec last_iter(tid(), pos_integer()) -> [object()] | '$end_of_table'.
+last_iter(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, N) ->
+    decode(Type, impl_last_iter(Impl, opts(db_read, Opts), N)).
 
-last_iter(Tid, N) when N > 0 ->
-    case last(Tid) of
-        '$end_of_table' ->
-            '$end_of_table';
-        Key when N==1 ->
-            lookup(Tid, Key);
-        Key ->
-            case prev_iter(Tid, Key, N-1) of
-                '$end_of_table' ->
-                    lookup(Tid, Key);
-                Objects ->
-                    Objects++lookup(Tid, Key)
-            end
+%% @see lets:next/2
+-spec next(#gen_tid{}, key(), pos_integer()) -> [key()] | '$end_of_table'.
+next(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key, N) ->
+    decode(Type, impl_next(Impl, opts(db_read, Opts), encode(Type, Key), N)).
 
-    end;
-last_iter(Tid, N) ->
-    erlang:error(badarg, [Tid, N]).
+%% @see lets:next/2
+-spec next_iter(tid(), key(), pos_integer()) -> [object()] | '$end_of_table'.
+next_iter(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key, N) ->
+    decode(Type, impl_next_iter(Impl, opts(db_read, Opts), encode(Type, Key), N)).
 
-next(Tid, Key, N) when N > 0 ->
-    case next(Tid, Key) of
-        '$end_of_table' ->
-            '$end_of_table';
-        NextKey when N==1 ->
-            [NextKey];
-        NextKey ->
-            case next(Tid, NextKey, N-1) of
-                '$end_of_table' ->
-                    [NextKey];
-                Keys ->
-                    [NextKey|Keys]
-            end
-    end;
-next(Tid, Key, N) ->
-    erlang:error(badarg, [Tid, Key, N]).
+%% @see lets:prev/2
+-spec prev(#gen_tid{}, key(), pos_integer()) -> [key()] | '$end_of_table'.
+prev(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key, N) ->
+    decode(Type, impl_prev(Impl, opts(db_read, Opts), encode(Type, Key), N)).
 
-next_iter(Tid, Key, N) when N > 0 ->
-    case next(Tid, Key) of
-        '$end_of_table' ->
-            '$end_of_table';
-        NextKey when N==1 ->
-            lookup(Tid, NextKey);
-        NextKey ->
-            case next_iter(Tid, NextKey, N-1) of
-                '$end_of_table' ->
-                    lookup(Tid, NextKey);
-                Objects ->
-                    lookup(Tid, NextKey)++Objects
-            end
-    end;
-next_iter(Tid, Key, N) ->
-    erlang:error(badarg, [Tid, Key, N]).
-
-prev(Tid, Key, N) when N > 0 ->
-    case prev(Tid, Key) of
-        '$end_of_table' ->
-            '$end_of_table';
-        PrevKey when N==1 ->
-            [PrevKey];
-        PrevKey ->
-            case prev(Tid, PrevKey, N-1) of
-                '$end_of_table' ->
-                    [PrevKey];
-                Keys ->
-                    Keys++[PrevKey]
-            end
-    end;
-prev(Tid, Key, N) ->
-    erlang:error(badarg, [Tid, Key, N]).
-
-prev_iter(Tid, Key, N) when N > 0 ->
-    case prev(Tid, Key) of
-        '$end_of_table' ->
-            '$end_of_table';
-        PrevKey when N==1 ->
-            lookup(Tid, PrevKey);
-        PrevKey ->
-            case prev_iter(Tid, PrevKey, N-1) of
-                '$end_of_table' ->
-                    lookup(Tid, PrevKey);
-                Objects ->
-                    Objects++lookup(Tid, PrevKey)
-            end
-    end;
-prev_iter(Tid, Key, N) ->
-    erlang:error(badarg, [Tid, Key, N]).
-
+%% @see lets:prev/2
+-spec prev_iter(tid(), key(), pos_integer()) -> [object()] | '$end_of_table'.
+prev_iter(#gen_tid{type=Type, impl=Impl, impl_opts=Opts}, Key, N) ->
+    decode(Type, impl_prev_iter(Impl, opts(db_read, Opts), encode(Type, Key), N)).
 
 %%%----------------------------------------------------------------------
 %%% Internal functions
@@ -428,6 +289,12 @@ encode(set, Term) ->
 encode(ordered_set, Term) ->
     sext:encode(Term).
 
+decode(_, '$end_of_table') ->
+    '$end_of_table';
+decode(set, List) when is_list(List) ->
+    [ binary_to_term(Term) || Term <- List ];
+decode(ordered_set, List) when is_list(List) ->
+    [ sext:decode(Term) || Term <- List ];
 decode(set, Term) ->
     binary_to_term(Term);
 decode(ordered_set, Term) ->
@@ -454,16 +321,16 @@ impl_delete(_Impl, _Opts, _Key) ->
 impl_delete_all_objects(_Impl, _Opts) ->
     ?NIF_STUB.
 
-impl_first(_Impl, _Opts) ->
+impl_first(_Impl, _Opts, _N) ->
     ?NIF_STUB.
 
-impl_first_iter(_Impl, _Opts) ->
+impl_first_iter(_Impl, _Opts, _N) ->
     ?NIF_STUB.
 
-impl_last(_Impl, _Opts) ->
+impl_last(_Impl, _Opts, _N) ->
     ?NIF_STUB.
 
-impl_last_iter(_Impl, _Opts) ->
+impl_last_iter(_Impl, _Opts, _N) ->
     ?NIF_STUB.
 
 impl_info_memory(_Impl) ->
@@ -490,16 +357,16 @@ impl_lookup(_Impl, _Opts, _Key) ->
 impl_member(_Impl, _Opts, _Key) ->
     ?NIF_STUB.
 
-impl_next(_Impl, _Opts, _Key) ->
+impl_next(_Impl, _Opts, _Key, _N) ->
     ?NIF_STUB.
 
-impl_next_iter(_Impl, _Opts, _Key) ->
+impl_next_iter(_Impl, _Opts, _Key, _N) ->
     ?NIF_STUB.
 
-impl_prev(_Impl, _Opts, _Key) ->
+impl_prev(_Impl, _Opts, _Key, _N) ->
     ?NIF_STUB.
 
-impl_prev_iter(_Impl, _Opts, _Key) ->
+impl_prev_iter(_Impl, _Opts, _Key, _N) ->
     ?NIF_STUB.
 
 impl_notify(_Impl, _Event, _Pid, _Msg) ->

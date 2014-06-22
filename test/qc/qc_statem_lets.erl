@@ -81,7 +81,7 @@
           parallel=false :: boolean(),
           type           :: ets_type(),
           impl           :: ets_impl(),
-          hyper=false    :: boolean(),
+          hyper          :: boolean(),
           exists=false   :: boolean(),
           options=[]     :: proplists:proplist(),
           tab            :: atom() | tuple() | pid(),
@@ -133,7 +133,7 @@ command(#state{parallel=false}=S) ->
 command(#state{parallel=true}=S) ->
     parallel_command_gen(S).
 
-serial_command_gen(#state{tab=undefined, type=undefined, impl=undefined}=S) ->
+serial_command_gen(#state{tab=undefined, type=undefined, impl=undefined, hyper=undefined}=S) ->
     {call,?IMPL,new,[?TAB,gen_options(new,S)]};
 serial_command_gen(#state{tab=undefined}=S) ->
     oneof([{call,?IMPL,new,[undefined,?TAB,gen_options(new,S)]}]
@@ -276,7 +276,7 @@ invariant(_S) ->
     true.
 
 -spec precondition(#state{}, tuple()) -> boolean().
-precondition(#state{tab=undefined, type=undefined, impl=undefined}, {call,_,new,[?TAB,Options]}) ->
+precondition(#state{tab=undefined, type=undefined, impl=undefined, hyper=undefined}, {call,_,new,[?TAB,Options]}) ->
     Drv = proplists:get_bool(drv, Options),
     Nif = proplists:get_bool(nif, Options),
     if Drv orelse Nif ->
@@ -287,15 +287,15 @@ precondition(#state{tab=undefined, type=undefined, impl=undefined}, {call,_,new,
     end;
 precondition(#state{tab=_Tab}, {call,_,new,[?TAB,_Options]}) ->
     false;
-precondition(#state{tab=undefined, type=undefined, impl=undefined}, {call,_,new,[_Tab,?TAB,_Options]}) ->
+precondition(#state{tab=undefined, type=undefined, impl=undefined, hyper=undefined}, {call,_,new,[_Tab,?TAB,_Options]}) ->
     false;
 precondition(#state{tab=Tab}, {call,_,new,[_Tab,?TAB,_Options]}) ->
     Tab =:= undefined;
-precondition(#state{tab=undefined, type=undefined, impl=undefined}, {call,_,destroy,[_Tab,?TAB,_Options]}) ->
+precondition(#state{tab=undefined, type=undefined, impl=undefined, hyper=undefined}, {call,_,destroy,[_Tab,?TAB,_Options]}) ->
     false;
 precondition(#state{tab=Tab}, {call,_,destroy,[_Tab,?TAB,_Options]}) ->
     Tab =:= undefined;
-precondition(#state{tab=undefined, type=undefined, impl=undefined}, {call,_,repair,[_Tab,?TAB,_Options]}) ->
+precondition(#state{tab=undefined, type=undefined, impl=undefined, hyper=undefined}, {call,_,repair,[_Tab,?TAB,_Options]}) ->
     false;
 precondition(#state{tab=Tab}, {call,_,repair,[_Tab,?TAB,_Options]}) ->
     Tab =:= undefined;
@@ -359,7 +359,7 @@ postcondition(_S, {call,_,delete,[_Tab]}, Res) ->
 postcondition(_S, {call,_,delete,[_Tab,_Key]}, Res) ->
     Res =:= true;
 postcondition(#state{impl=ets}=_S, {call,_,delete_all_objects,[_Tab]}, Res) ->
-     Res =:= true;
+    Res =:= true;
 postcondition(_S, {call,_,delete_all_objects,[_Tab]}, {'EXIT',{badarg,_}}) ->
     true;
 postcondition(S, {call,_,member,[_Tab,Key]}, Res) ->
@@ -499,7 +499,7 @@ filter_reply(_) ->
 %%% Internal - Generators
 %%%----------------------------------------------------------------------
 
-gen_options(Op,#state{type=undefined, impl=undefined, tab=undefined}=S) ->
+gen_options(Op,#state{type=undefined, impl=undefined, hyper=undefined, tab=undefined}=S) ->
     ?LET({Type,Impl,Hyper}, {lets_type(), lets_impl(), lets_hyper()},
          gen_options(Op,S#state{type=Type, impl=Impl, hyper=if Impl==ets -> false; true -> Hyper end}));
 gen_options(Op,#state{type=Type, impl=drv=Impl, hyper=Hyper}=S) ->
@@ -594,8 +594,8 @@ gen_objs(S) ->
 
 gen_pattern(S) ->
     oneof([{'$1', '$2', '$3'}
-           , #obj{key=oneof(['_',gen_key(S)]), val='$1'}
-           , #obj{key='$1', val=oneof(['_',gen_val()])}
+          , #obj{key=oneof(['_',gen_key(S)]), val='$1'}
+          , #obj{key='$1', val=oneof(['_',gen_val()])}
           ]).
 
 gen_spec(S) ->

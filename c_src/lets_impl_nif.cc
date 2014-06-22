@@ -61,14 +61,14 @@ static ErlNifFunc nif_funcs[] =
         {"impl_delete_all_objects", 2, lets_impl_nif_delete_all_objects2},
         {"impl_lookup", 3, lets_impl_nif_lookup3},
         {"impl_member", 3, lets_impl_nif_member3},
-        {"impl_first", 2, lets_impl_nif_first2},
-        {"impl_first_iter", 2, lets_impl_nif_first_iter2},
-        {"impl_last", 2, lets_impl_nif_last2},
-        {"impl_last_iter", 2, lets_impl_nif_last_iter2},
-        {"impl_next", 3, lets_impl_nif_next3},
-        {"impl_next_iter", 3, lets_impl_nif_next_iter3},
-        {"impl_prev", 3, lets_impl_nif_prev3},
-        {"impl_prev_iter", 3, lets_impl_nif_prev_iter3},
+        {"impl_first", 3, lets_impl_nif_first3},
+        {"impl_first_iter", 3, lets_impl_nif_first_iter3},
+        {"impl_last", 3, lets_impl_nif_last3},
+        {"impl_last_iter", 3, lets_impl_nif_last_iter3},
+        {"impl_next", 4, lets_impl_nif_next4},
+        {"impl_next_iter", 4, lets_impl_nif_next_iter4},
+        {"impl_prev", 4, lets_impl_nif_prev4},
+        {"impl_prev_iter", 4, lets_impl_nif_prev_iter4},
         {"impl_info_memory", 1, lets_impl_nif_info_memory1},
         {"impl_info_size", 1, lets_impl_nif_info_size1},
         {"impl_notify", 4, lets_impl_nif_notify4},
@@ -180,11 +180,210 @@ get_write_options(leveldb::WriteOptions defaults, ErlNifEnv* env, const ERL_NIF_
     return true;
 }
 
+static bool
+get_n_option(ErlNifEnv* env, const ERL_NIF_TERM arg, long* n)
+{
+    if (enif_is_identical(arg, lets_atom_undefined)) {
+        *n = -1;
+        return true;
+    }
+
+    if (!enif_get_long(env, arg, n)) {
+        return false;
+    }
+    if (*n < 0) {
+        return false;
+    }
+
+    return true;
+}
+
+static ERL_NIF_TERM
+lets_get_next(ErlNifEnv* env, long n, leveldb::Iterator* it)
+{
+    ErlNifBinary binary;
+    size_t offset = 0;
+    int length = 0;
+    std::vector<size_t> sizes;
+    ERL_NIF_TERM main;
+    std::vector<ERL_NIF_TERM> binaries;
+
+    assert(n >= 0);
+    assert(it->Valid());
+
+    if (!enif_alloc_binary(it->key().size(), &binary)) {
+        return 0;
+    }
+
+    sizes.reserve(n);
+    while(n > 0 && it->Valid()) {
+        size_t len = it->key().size();
+
+        if (!enif_realloc_binary(&binary, offset+len)) {
+            enif_release_binary(&binary);
+            return 0;
+        }
+
+        memcpy(binary.data+offset, it->key().data(), len);
+        sizes.push_back(len); offset += len; n--;
+        it->Next();
+    }
+
+    main = enif_make_binary(env, &binary);
+    length = sizes.size();
+    binaries.reserve(length);
+    offset = n = 0;
+    while (n < length) {
+        size_t len = sizes[n];
+        ERL_NIF_TERM sub = enif_make_sub_binary(env, main, offset, len);
+        binaries.push_back(sub);
+        offset += len; n++;
+    }
+
+    return enif_make_list_from_array(env, binaries.data(), binaries.size());
+}
+
+static ERL_NIF_TERM
+lets_get_next_iter(ErlNifEnv* env, long n, leveldb::Iterator* it)
+{
+   ErlNifBinary binary;
+    size_t offset = 0;
+    int length = 0;
+    std::vector<size_t> sizes;
+    ERL_NIF_TERM main;
+    std::vector<ERL_NIF_TERM> binaries;
+
+    assert(n >= 0);
+    assert(it->Valid());
+
+    if (!enif_alloc_binary(it->value().size(), &binary)) {
+        return 0;
+    }
+
+    sizes.reserve(n);
+    while(n > 0 && it->Valid()) {
+        size_t len = it->value().size();
+
+        if (!enif_realloc_binary(&binary, offset+len)) {
+            enif_release_binary(&binary);
+            return 0;
+        }
+
+        memcpy(binary.data+offset, it->value().data(), len);
+        sizes.push_back(len); offset += len; n--;
+        it->Next();
+    }
+
+    main = enif_make_binary(env, &binary);
+    length = sizes.size();
+    binaries.reserve(length);
+    offset = n = 0;
+    while (n < length) {
+        size_t len = sizes[n];
+        ERL_NIF_TERM sub = enif_make_sub_binary(env, main, offset, len);
+        binaries.push_back(sub);
+        offset += len; n++;
+    }
+
+    return enif_make_list_from_array(env, binaries.data(), binaries.size());
+}
+
+static ERL_NIF_TERM
+lets_get_prev(ErlNifEnv* env, long n, leveldb::Iterator* it)
+{
+    ErlNifBinary binary;
+    size_t offset = 0;
+    int length = 0;
+    std::vector<size_t> sizes;
+    ERL_NIF_TERM main;
+    std::vector<ERL_NIF_TERM> binaries;
+
+    assert(n >= 0);
+    assert(it->Valid());
+
+    if (!enif_alloc_binary(it->key().size(), &binary)) {
+        return 0;
+    }
+
+    sizes.reserve(n);
+    while(n > 0 && it->Valid()) {
+        size_t len = it->key().size();
+
+        if (!enif_realloc_binary(&binary, offset+len)) {
+            enif_release_binary(&binary);
+            return 0;
+        }
+
+        memcpy(binary.data+offset, it->key().data(), len);
+        sizes.push_back(len); offset += len; n--;
+        it->Prev();
+    }
+
+    main = enif_make_binary(env, &binary);
+    length = sizes.size();
+    binaries.reserve(length);
+    offset = n = 0;
+    while (n < length) {
+        size_t len = sizes[n];
+        ERL_NIF_TERM sub = enif_make_sub_binary(env, main, offset, len);
+        binaries.push_back(sub);
+        offset += len; n++;
+    }
+
+    return enif_make_list_from_array(env, binaries.data(), binaries.size());
+}
+
+static ERL_NIF_TERM
+lets_get_prev_iter(ErlNifEnv* env, long n, leveldb::Iterator* it)
+{
+   ErlNifBinary binary;
+    size_t offset = 0;
+    int length = 0;
+    std::vector<size_t> sizes;
+    ERL_NIF_TERM main;
+    std::vector<ERL_NIF_TERM> binaries;
+
+    assert(n >= 0);
+    assert(it->Valid());
+
+    if (!enif_alloc_binary(it->value().size(), &binary)) {
+        return 0;
+    }
+
+    sizes.reserve(n);
+    while(n > 0 && it->Valid()) {
+        size_t len = it->value().size();
+
+        if (!enif_realloc_binary(&binary, offset+len)) {
+            enif_release_binary(&binary);
+            return 0;
+        }
+
+        memcpy(binary.data+offset, it->value().data(), len);
+        sizes.push_back(len); offset += len; n--;
+        it->Prev();
+    }
+
+    main = enif_make_binary(env, &binary);
+    length = sizes.size();
+    binaries.reserve(length);
+    offset = n = 0;
+    while (n < length) {
+        size_t len = sizes[n];
+        ERL_NIF_TERM sub = enif_make_sub_binary(env, main, offset, len);
+        binaries.push_back(sub);
+        offset += len; n++;
+    }
+
+    return enif_make_list_from_array(env, binaries.data(), binaries.size());
+}
+
 static ERL_NIF_TERM
 db_create6(const char op, ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[], lets_impl_nif_handle** reth)
 {
     (void) argc;
 
+    leveldb::Status status;
     char type;
     char privacy;
     ErlNifBinary path;
@@ -194,7 +393,6 @@ db_create6(const char op, ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[], l
     unsigned read_options_len;
     ERL_NIF_TERM write_options;
     unsigned write_options_len;
-    leveldb::Status status;
 
     if (enif_is_identical(argv[0], lets_atom_set)) {
         type = SET;
@@ -276,9 +474,9 @@ lets_impl_nif_open6(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         return badarg;
     }
 
-    ERL_NIF_TERM result = enif_make_resource(env, h);
+    ERL_NIF_TERM ret = enif_make_resource(env, h);
     enif_release_resource(h);
-    return result;
+    return ret;
 }
 
 ERL_NIF_TERM
@@ -314,7 +512,9 @@ lets_impl_nif_insert3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
+    leveldb::Status status;
     lets_impl_nif_handle* h;
+    leveldb::WriteOptions write_options;
     ERL_NIF_TERM list;
     unsigned list_len;
     ERL_NIF_TERM head, tail;
@@ -322,9 +522,7 @@ lets_impl_nif_insert3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     const ERL_NIF_TERM* tuple;
     ErlNifBinary key;
     ErlNifBinary blob;
-    leveldb::WriteOptions write_options;
     leveldb::WriteBatch batch;
-    leveldb::Status status;
 
     if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);
@@ -372,12 +570,12 @@ lets_impl_nif_insert4(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
+    leveldb::Status status;
     lets_impl_nif_handle* h;
+    leveldb::WriteOptions write_options;
     ErlNifBinary key;
     ErlNifBinary blob;
-    leveldb::WriteOptions write_options;
     leveldb::WriteBatch batch;
-    leveldb::Status status;
 
     if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);
@@ -435,10 +633,10 @@ lets_impl_nif_delete2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
+    leveldb::Status status;
     lets_impl_nif_handle* h;
     leveldb::WriteOptions write_options;
     leveldb::WriteBatch batch;
-    leveldb::Status status;
 
     if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);
@@ -474,11 +672,11 @@ lets_impl_nif_delete3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
-    lets_impl_nif_handle* h;
-    ErlNifBinary key;
-    leveldb::WriteOptions write_options;
-    leveldb::WriteBatch batch;
     leveldb::Status status;
+    lets_impl_nif_handle* h;
+    leveldb::WriteOptions write_options;
+    ErlNifBinary key;
+    leveldb::WriteBatch batch;
 
     if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);
@@ -521,11 +719,11 @@ lets_impl_nif_lookup3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
-    lets_impl_nif_handle* h;
-    ErlNifBinary key;
-    ERL_NIF_TERM blob = 0;
-    leveldb::ReadOptions read_options;
     leveldb::Status status;
+    lets_impl_nif_handle* h;
+    leveldb::ReadOptions read_options;
+    ErlNifBinary key;
+    ERL_NIF_TERM ret = 0;
 
     if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);
@@ -554,7 +752,7 @@ lets_impl_nif_lookup3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     }
 
     size_t size = it->value().size();
-    unsigned char* b = enif_make_new_binary(env, size, &blob);
+    unsigned char* b = enif_make_new_binary(env, size, &ret);
     if (!b) {
         delete it;
         return MAKEBADARG(env, status);
@@ -562,7 +760,7 @@ lets_impl_nif_lookup3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
     memcpy(b, it->value().data(), size);
     delete it;
-    return blob;
+    return ret;
 }
 
 ERL_NIF_TERM
@@ -570,10 +768,10 @@ lets_impl_nif_member3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
-    lets_impl_nif_handle* h;
-    ErlNifBinary key;
-    leveldb::ReadOptions read_options;
     leveldb::Status status;
+    lets_impl_nif_handle* h;
+    leveldb::ReadOptions read_options;
+    ErlNifBinary key;
 
     if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);
@@ -606,19 +804,23 @@ lets_impl_nif_member3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 ERL_NIF_TERM
-lets_impl_nif_first2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+lets_impl_nif_first3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
-    lets_impl_nif_handle* h;
-    ERL_NIF_TERM first = 0;
-    leveldb::ReadOptions read_options;
     leveldb::Status status;
+    lets_impl_nif_handle* h;
+    leveldb::ReadOptions read_options;
+    long n;
+    ERL_NIF_TERM ret = 0;
 
     if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);
     }
     if (!get_read_options(h->impl.db_read_options, env, argv[1], read_options)) {
+        return MAKEBADARG(env, status);
+    }
+    if (!get_n_option(env, argv[2], &n)) {
         return MAKEBADARG(env, status);
     }
 
@@ -637,32 +839,45 @@ lets_impl_nif_first2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         return lets_atom_end_of_table;
     }
 
-    size_t size = it->key().size();
-    unsigned char* k = enif_make_new_binary(env, size, &first);
-    if (!k) {
-        delete it;
-        return MAKEBADARG(env, status);
+    if (n < 0) {
+        size_t size = it->key().size();
+        unsigned char* k = enif_make_new_binary(env, size, &ret);
+        if (!k) {
+            delete it;
+            return MAKEBADARG(env, status);
+        }
+
+        memcpy(k, it->key().data(), size);
+    } else {
+        ret = lets_get_next(env, n, it);
+        if (!ret) {
+            delete it;
+            return MAKEBADARG(env, status);
+        }
     }
 
-    memcpy(k, it->key().data(), size);
     delete it;
-    return first;
+    return ret;
 }
 
 ERL_NIF_TERM
-lets_impl_nif_first_iter2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+lets_impl_nif_first_iter3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
-    lets_impl_nif_handle* h;
-    ERL_NIF_TERM first = 0;
-    leveldb::ReadOptions read_options;
     leveldb::Status status;
+    leveldb::ReadOptions read_options;
+    lets_impl_nif_handle* h;
+    long n;
+    ERL_NIF_TERM ret = 0;
 
     if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);
     }
     if (!get_read_options(h->impl.db_read_options, env, argv[1], read_options)) {
+        return MAKEBADARG(env, status);
+    }
+    if (!get_n_option(env, argv[2], &n)) {
         return MAKEBADARG(env, status);
     }
 
@@ -681,32 +896,45 @@ lets_impl_nif_first_iter2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         return lets_atom_end_of_table;
     }
 
-    size_t size = it->value().size();
-    unsigned char* k = enif_make_new_binary(env, size, &first);
-    if (!k) {
-        delete it;
-        return MAKEBADARG(env, status);
+    if (n < 0) {
+        size_t size = it->value().size();
+        unsigned char* k = enif_make_new_binary(env, size, &ret);
+        if (!k) {
+            delete it;
+            return MAKEBADARG(env, status);
+        }
+
+        memcpy(k, it->value().data(), size);
+    } else {
+        ret = lets_get_next_iter(env, n, it);
+        if (!ret) {
+            delete it;
+            return MAKEBADARG(env, status);
+        }
     }
 
-    memcpy(k, it->value().data(), size);
     delete it;
-    return first;
+    return ret;
 }
 
 ERL_NIF_TERM
-lets_impl_nif_last2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+lets_impl_nif_last3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
-    lets_impl_nif_handle* h;
-    ERL_NIF_TERM last = 0;
-    leveldb::ReadOptions read_options;
     leveldb::Status status;
+    lets_impl_nif_handle* h;
+    leveldb::ReadOptions read_options;
+    long n;
+    ERL_NIF_TERM ret = 0;
 
     if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);
     }
     if (!get_read_options(h->impl.db_read_options, env, argv[1], read_options)) {
+        return MAKEBADARG(env, status);
+    }
+    if (!get_n_option(env, argv[2], &n)) {
         return MAKEBADARG(env, status);
     }
 
@@ -725,32 +953,45 @@ lets_impl_nif_last2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         return lets_atom_end_of_table;
     }
 
-    size_t size = it->key().size();
-    unsigned char* k = enif_make_new_binary(env, size, &last);
-    if (!k) {
-        delete it;
-        return MAKEBADARG(env, status);
+    if (n < 0) {
+        size_t size = it->key().size();
+        unsigned char* k = enif_make_new_binary(env, size, &ret);
+        if (!k) {
+            delete it;
+            return MAKEBADARG(env, status);
+        }
+
+        memcpy(k, it->key().data(), size);
+    } else {
+        ret = lets_get_prev(env, n, it);
+        if (!ret) {
+            delete it;
+            return MAKEBADARG(env, status);
+        }
     }
 
-    memcpy(k, it->key().data(), size);
     delete it;
-    return last;
+    return ret;
 }
 
 ERL_NIF_TERM
-lets_impl_nif_last_iter2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+lets_impl_nif_last_iter3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
-    lets_impl_nif_handle* h;
-    ERL_NIF_TERM last = 0;
-    leveldb::ReadOptions read_options;
     leveldb::Status status;
+    lets_impl_nif_handle* h;
+    leveldb::ReadOptions read_options;
+    long n;
+    ERL_NIF_TERM ret = 0;
 
     if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);
     }
     if (!get_read_options(h->impl.db_read_options, env, argv[1], read_options)) {
+        return MAKEBADARG(env, status);
+    }
+    if (!get_n_option(env, argv[2], &n)) {
         return MAKEBADARG(env, status);
     }
 
@@ -769,28 +1010,38 @@ lets_impl_nif_last_iter2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         return lets_atom_end_of_table;
     }
 
-    size_t size = it->value().size();
-    unsigned char* k = enif_make_new_binary(env, size, &last);
-    if (!k) {
-        delete it;
-        return MAKEBADARG(env, status);
+    if (n < 0) {
+        size_t size = it->value().size();
+        unsigned char* k = enif_make_new_binary(env, size, &ret);
+        if (!k) {
+            delete it;
+            return MAKEBADARG(env, status);
+        }
+
+        memcpy(k, it->value().data(), size);
+    } else {
+        ret = lets_get_prev_iter(env, n, it);
+        if (!ret) {
+            delete it;
+            return MAKEBADARG(env, status);
+        }
     }
 
-    memcpy(k, it->value().data(), size);
     delete it;
-    return last;
+    return ret;
 }
 
 ERL_NIF_TERM
-lets_impl_nif_next3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+lets_impl_nif_next4(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
+    leveldb::Status status;
     lets_impl_nif_handle* h;
+    leveldb::ReadOptions read_options;
     ErlNifBinary key;
-    ERL_NIF_TERM next = 0;
-    leveldb::ReadOptions read_options;
-    leveldb::Status status;
+    long n;
+    ERL_NIF_TERM ret = 0;
 
     if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);
@@ -799,6 +1050,9 @@ lets_impl_nif_next3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         return MAKEBADARG(env, status);
     }
     if (!enif_inspect_binary(env, argv[2], &key)) {
+        return MAKEBADARG(env, status);
+    }
+    if (!get_n_option(env, argv[3], &n)) {
         return MAKEBADARG(env, status);
     }
 
@@ -826,28 +1080,38 @@ lets_impl_nif_next3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         }
     }
 
-    size_t size = it->key().size();
-    unsigned char* k = enif_make_new_binary(env, size, &next);
-    if (!k) {
-        delete it;
-        return MAKEBADARG(env, status);
+    if (n < 0) {
+        size_t size = it->key().size();
+        unsigned char* k = enif_make_new_binary(env, size, &ret);
+        if (!k) {
+            delete it;
+            return MAKEBADARG(env, status);
+        }
+
+        memcpy(k, it->key().data(), size);
+    } else {
+        ret = lets_get_next(env, n, it);
+        if (!ret) {
+            delete it;
+            return MAKEBADARG(env, status);
+        }
     }
 
-    memcpy(k, it->key().data(), size);
     delete it;
-    return next;
+    return ret;
 }
 
 ERL_NIF_TERM
-lets_impl_nif_next_iter3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+lets_impl_nif_next_iter4(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
-    lets_impl_nif_handle* h;
-    ErlNifBinary key;
-    ERL_NIF_TERM next = 0;
-    leveldb::ReadOptions read_options;
     leveldb::Status status;
+    lets_impl_nif_handle* h;
+    leveldb::ReadOptions read_options;
+    ErlNifBinary key;
+    long n;
+    ERL_NIF_TERM ret = 0;
 
     if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);
@@ -856,6 +1120,9 @@ lets_impl_nif_next_iter3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         return MAKEBADARG(env, status);
     }
     if (!enif_inspect_binary(env, argv[2], &key)) {
+        return MAKEBADARG(env, status);
+    }
+    if (!get_n_option(env, argv[3], &n)) {
         return MAKEBADARG(env, status);
     }
 
@@ -883,28 +1150,38 @@ lets_impl_nif_next_iter3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         }
     }
 
-    size_t size = it->value().size();
-    unsigned char* k = enif_make_new_binary(env, size, &next);
-    if (!k) {
-        delete it;
-        return MAKEBADARG(env, status);
+    if (n < 0) {
+        size_t size = it->value().size();
+        unsigned char* k = enif_make_new_binary(env, size, &ret);
+        if (!k) {
+            delete it;
+            return MAKEBADARG(env, status);
+        }
+
+        memcpy(k, it->value().data(), size);
+    } else {
+        ret = lets_get_next_iter(env, n, it);
+        if (!ret) {
+            delete it;
+            return MAKEBADARG(env, status);
+        }
     }
 
-    memcpy(k, it->value().data(), size);
     delete it;
-    return next;
+    return ret;
 }
 
 ERL_NIF_TERM
-lets_impl_nif_prev3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+lets_impl_nif_prev4(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
-    lets_impl_nif_handle* h;
-    ErlNifBinary key;
-    ERL_NIF_TERM prev = 0;
-    leveldb::ReadOptions read_options;
     leveldb::Status status;
+    lets_impl_nif_handle* h;
+    leveldb::ReadOptions read_options;
+    ErlNifBinary key;
+    long n;
+    ERL_NIF_TERM ret = 0;
 
     if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);
@@ -913,6 +1190,9 @@ lets_impl_nif_prev3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         return MAKEBADARG(env, status);
     }
     if (!enif_inspect_binary(env, argv[2], &key)) {
+        return MAKEBADARG(env, status);
+    }
+    if (!get_n_option(env, argv[3], &n)) {
         return MAKEBADARG(env, status);
     }
 
@@ -938,28 +1218,38 @@ lets_impl_nif_prev3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         return lets_atom_end_of_table;
     }
 
-    size_t size = it->key().size();
-    unsigned char* k = enif_make_new_binary(env, size, &prev);
-    if (!k) {
-        delete it;
-        return MAKEBADARG(env, status);
+    if (n < 0) {
+        size_t size = it->key().size();
+        unsigned char* k = enif_make_new_binary(env, size, &ret);
+        if (!k) {
+            delete it;
+            return MAKEBADARG(env, status);
+        }
+
+        memcpy(k, it->key().data(), size);
+    } else {
+        ret = lets_get_prev(env, n, it);
+        if (!ret) {
+            delete it;
+            return MAKEBADARG(env, status);
+        }
     }
 
-    memcpy(k, it->key().data(), size);
     delete it;
-    return prev;
+    return ret;
 }
 
 ERL_NIF_TERM
-lets_impl_nif_prev_iter3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+lets_impl_nif_prev_iter4(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
-    lets_impl_nif_handle* h;
-    ErlNifBinary key;
-    ERL_NIF_TERM prev = 0;
-    leveldb::ReadOptions read_options;
     leveldb::Status status;
+    lets_impl_nif_handle* h;
+    leveldb::ReadOptions read_options;
+    ErlNifBinary key;
+    long n;
+    ERL_NIF_TERM ret = 0;
 
     if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);
@@ -968,6 +1258,9 @@ lets_impl_nif_prev_iter3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         return MAKEBADARG(env, status);
     }
     if (!enif_inspect_binary(env, argv[2], &key)) {
+        return MAKEBADARG(env, status);
+    }
+    if (!get_n_option(env, argv[3], &n)) {
         return MAKEBADARG(env, status);
     }
 
@@ -993,16 +1286,24 @@ lets_impl_nif_prev_iter3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         return lets_atom_end_of_table;
     }
 
-    size_t size = it->value().size();
-    unsigned char* k = enif_make_new_binary(env, size, &prev);
-    if (!k) {
-        delete it;
-        return MAKEBADARG(env, status);
-    }
+    if (n < 0) {
+        size_t size = it->value().size();
+        unsigned char* k = enif_make_new_binary(env, size, &ret);
+        if (!k) {
+            delete it;
+            return MAKEBADARG(env, status);
+        }
 
-    memcpy(k, it->value().data(), size);
+        memcpy(k, it->value().data(), size);
+    } else {
+        ret = lets_get_prev_iter(env, n, it);
+        if (!ret) {
+            delete it;
+            return MAKEBADARG(env, status);
+        }
+    }
     delete it;
-    return prev;
+    return ret;
 }
 
 ERL_NIF_TERM
@@ -1010,9 +1311,9 @@ lets_impl_nif_info_memory1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
+    leveldb::Status status;
     lets_impl_nif_handle* h;
     // ERL_NIF_TERM info;
-    leveldb::Status status;
 
     if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);
@@ -1034,9 +1335,9 @@ lets_impl_nif_info_size1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
+    leveldb::Status status;
     lets_impl_nif_handle* h;
     // ERL_NIF_TERM info;
-    leveldb::Status status;
 
     if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);
@@ -1058,11 +1359,11 @@ lets_impl_nif_notify4(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     (void) argc;
 
+    leveldb::Status status;
     lets_impl_nif_handle* h;
     ErlNifPid pid;
     ErlNifEnv* msgenv;
     ERL_NIF_TERM msg;
-    leveldb::Status status;
 
     if (!enif_get_resource(env, argv[0], lets_impl_nif_RESOURCE, (void**)&h)) {
         return MAKEBADARG(env, status);

@@ -55,21 +55,21 @@ extern "C" {
     ERL_NIF_TERM
     lets_impl_nif_member3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
     ERL_NIF_TERM
-    lets_impl_nif_first2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+    lets_impl_nif_first3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
     ERL_NIF_TERM
-    lets_impl_nif_first_iter2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+    lets_impl_nif_first_iter3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
     ERL_NIF_TERM
-    lets_impl_nif_last2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+    lets_impl_nif_last3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
     ERL_NIF_TERM
-    lets_impl_nif_last_iter2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+    lets_impl_nif_last_iter3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
     ERL_NIF_TERM
-    lets_impl_nif_next3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+    lets_impl_nif_next4(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
     ERL_NIF_TERM
-    lets_impl_nif_next_iter3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+    lets_impl_nif_next_iter4(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
     ERL_NIF_TERM
-    lets_impl_nif_prev3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+    lets_impl_nif_prev4(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
     ERL_NIF_TERM
-    lets_impl_nif_prev_iter3(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+    lets_impl_nif_prev_iter4(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
     ERL_NIF_TERM
     lets_impl_nif_info_memory1(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
     ERL_NIF_TERM

@@ -37,6 +37,7 @@
 #define LETS_FALSE               0x02
 #define LETS_END_OF_TABLE        0x03
 #define LETS_BINARY              0x04
+#define LETS_SPEC                0x05
 
 #define LETS_OPEN6               0x00  // same as OPEN
 #define LETS_DESTROY6            0x01  // same as DESTROY
@@ -44,22 +45,22 @@
 #define LETS_DELETE2             0x03
 #define LETS_DELETE3             0x04
 #define LETS_DELETE_ALL_OBJECTS2 0x05
-#define LETS_FIRST2              0x06
-#define LETS_FIRST_ITER2         0x07
+#define LETS_FIRST3              0x06
+#define LETS_FIRST_ITER3         0x07
 #define LETS_INFO_MEMORY1        0x08
 #define LETS_INFO_SIZE1          0x09
 #define LETS_INSERT3             0x0A
 #define LETS_INSERT4             0x0B
 #define LETS_INSERT_NEW3         0x0C
 #define LETS_INSERT_NEW4         0x0D
-#define LETS_LAST2               0x0E
-#define LETS_LAST_ITER2          0x0F
+#define LETS_LAST3               0x0E
+#define LETS_LAST_ITER3          0x0F
 #define LETS_LOOKUP3             0x10
 #define LETS_MEMBER3             0x11
-#define LETS_NEXT3               0x12
-#define LETS_NEXT_ITER3          0x13
-#define LETS_PREV3               0x14
-#define LETS_PREV_ITER3          0x15
+#define LETS_NEXT4               0x12
+#define LETS_NEXT_ITER4          0x13
+#define LETS_PREV4               0x14
+#define LETS_PREV_ITER4          0x15
 #define LETS_NOTIFY4             0x16
 
 // DrvData
@@ -73,32 +74,34 @@ struct DrvAsync {
     ErlDrvTermData caller;
     int command;
 
-    // outputs
-    ErlDrvBinary* binary;
-    int reply;
-
     // inputs
     leveldb::ReadOptions read_options;
     leveldb::WriteOptions write_options;
     leveldb::WriteBatch batch;
 
+    // outputs
+    ErlDrvBinary* binary;
+    long n;
+    std::vector<ErlDrvTermData> spec;
+    int reply;
+
     DrvAsync(DrvData* d, ErlDrvTermData c, int cmd) :
-        drvdata(d), caller(c), command(cmd), binary(NULL), reply(LETS_TRUE) {
+        drvdata(d), caller(c), command(cmd), binary(NULL), n(-1), reply(LETS_TRUE) {
     }
-    DrvAsync(DrvData* d, ErlDrvTermData c, int cmd, leveldb::ReadOptions options) :
-        drvdata(d), caller(c), command(cmd), binary(NULL), reply(LETS_TRUE), read_options(options) {
+    DrvAsync(DrvData* d, ErlDrvTermData c, int cmd, leveldb::ReadOptions options, int n=-1) :
+        drvdata(d), caller(c), command(cmd), read_options(options), binary(NULL), n(n), reply(LETS_TRUE) {
     }
     DrvAsync(DrvData* d, ErlDrvTermData c, int cmd, leveldb::WriteOptions options) :
-        drvdata(d), caller(c), command(cmd), binary(NULL), reply(LETS_TRUE), write_options(options) {
+        drvdata(d), caller(c), command(cmd), write_options(options), binary(NULL), reply(LETS_TRUE) {
     }
-    DrvAsync(DrvData* d, ErlDrvTermData c, int cmd, leveldb::ReadOptions options, const char* key, int keylen) :
-        drvdata(d), caller(c), command(cmd), binary(NULL), reply(LETS_TRUE), read_options(options) {
+    DrvAsync(DrvData* d, ErlDrvTermData c, int cmd, leveldb::ReadOptions options, const char* key, int keylen, int n=-1) :
+        drvdata(d), caller(c), command(cmd), read_options(options), binary(NULL), n(n), reply(LETS_TRUE) {
         binary = driver_alloc_binary(keylen);
         assert(binary);
         memcpy(binary->orig_bytes, key, binary->orig_size);
     }
     DrvAsync(DrvData* d, ErlDrvTermData c, int cmd, leveldb::WriteOptions options, const char* key, int keylen) :
-        drvdata(d), caller(c), command(cmd), binary(NULL), reply(LETS_TRUE), write_options(options) {
+        drvdata(d), caller(c), command(cmd), write_options(options), binary(NULL), reply(LETS_TRUE) {
         binary = driver_alloc_binary(keylen);
         assert(binary);
         memcpy(binary->orig_bytes, key, binary->orig_size);
@@ -145,22 +148,22 @@ static void lets_output_lookup3(DrvData* d, char* buf, ErlDrvSizeT len, int* ind
 static void lets_async_lookup3(void* async_data);
 static void lets_output_member3(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 static void lets_async_member3(void* async_data);
-static void lets_output_first2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
-static void lets_async_first2(void* async_data);
-static void lets_output_first_iter2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
-static void lets_async_first_iter2(void* async_data);
-static void lets_output_last2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
-static void lets_async_last2(void* async_data);
-static void lets_output_last_iter2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
-static void lets_async_last_iter2(void* async_data);
-static void lets_output_next3(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
-static void lets_async_next3(void* async_data);
-static void lets_output_next_iter3(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
-static void lets_async_next_iter3(void* async_data);
-static void lets_output_prev3(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
-static void lets_async_prev3(void* async_data);
-static void lets_output_prev_iter3(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
-static void lets_async_prev_iter3(void* async_data);
+static void lets_output_first3(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
+static void lets_async_first3(void* async_data);
+static void lets_output_first_iter3(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
+static void lets_async_first_iter3(void* async_data);
+static void lets_output_last3(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
+static void lets_async_last3(void* async_data);
+static void lets_output_last_iter3(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
+static void lets_async_last_iter3(void* async_data);
+static void lets_output_next4(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
+static void lets_async_next4(void* async_data);
+static void lets_output_next_iter4(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
+static void lets_async_next_iter4(void* async_data);
+static void lets_output_prev4(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
+static void lets_async_prev4(void* async_data);
+static void lets_output_prev_iter4(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
+static void lets_async_prev_iter4(void* async_data);
 // static void lets_output_info_memory1(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
 // static void lets_async_info_memory1(void* async_data);
 // static void lets_output_info_size1(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items);
@@ -214,6 +217,24 @@ driver_send_buf(DrvData* d, const char *buf, const ErlDrvUInt len, ErlDrvTermDat
     erl_drv_send_term(port, caller, spec, sizeof(spec) / sizeof(spec[0]));
 }
 
+static void
+driver_send_spec(DrvData* d, std::vector<ErlDrvTermData>& spec, ErlDrvTermData caller=0)
+{
+    ErlDrvTermData port = driver_mk_port(d->port);
+    ErlDrvTermData spec_header[] = {
+        ERL_DRV_PORT, port,
+        ERL_DRV_INT, LETS_SPEC
+    };
+    ErlDrvTermData spec_footer[] = {
+        ERL_DRV_TUPLE, 3,
+    };
+    spec.insert(spec.begin(), spec_header, spec_header + (sizeof(spec_header) / sizeof(spec_header[0])));
+    spec.insert(spec.end(), spec_footer, spec_footer + (sizeof(spec_footer) / sizeof(spec_footer[0])));
+    if (!caller) {
+        caller = driver_caller(d->port);
+    }
+    erl_drv_send_term(port, caller, spec.data(), spec.size());
+}
 
 //
 // Callbacks
@@ -422,45 +443,45 @@ drv_output(ErlDrvData handle, char* buf, ErlDrvSizeT len)
         if (ng) GOTOBADARG;
         lets_output_member3(d, buf, len, &index, items);
         break;
-    case LETS_FIRST2:
-        ng = (items != 1 || !d->impl.alive);
-        if (ng) GOTOBADARG;
-        lets_output_first2(d, buf, len, &index, items);
-        break;
-    case LETS_FIRST_ITER2:
-        ng = (items != 1 || !d->impl.alive);
-        if (ng) GOTOBADARG;
-        lets_output_first_iter2(d, buf, len, &index, items);
-        break;
-    case LETS_LAST2:
-        ng = (items != 1 || !d->impl.alive);
-        if (ng) GOTOBADARG;
-        lets_output_last2(d, buf, len, &index, items);
-        break;
-    case LETS_LAST_ITER2:
-        ng = (items != 1 || !d->impl.alive);
-        if (ng) GOTOBADARG;
-        lets_output_last_iter2(d, buf, len, &index, items);
-        break;
-    case LETS_NEXT3:
+    case LETS_FIRST3:
         ng = (items != 2 || !d->impl.alive);
         if (ng) GOTOBADARG;
-        lets_output_next3(d, buf, len, &index, items);
+        lets_output_first3(d, buf, len, &index, items);
         break;
-    case LETS_NEXT_ITER3:
+    case LETS_FIRST_ITER3:
         ng = (items != 2 || !d->impl.alive);
         if (ng) GOTOBADARG;
-        lets_output_next_iter3(d, buf, len, &index, items);
+        lets_output_first_iter3(d, buf, len, &index, items);
         break;
-    case LETS_PREV3:
+    case LETS_LAST3:
         ng = (items != 2 || !d->impl.alive);
         if (ng) GOTOBADARG;
-        lets_output_prev3(d, buf, len, &index, items);
+        lets_output_last3(d, buf, len, &index, items);
         break;
-    case LETS_PREV_ITER3:
+    case LETS_LAST_ITER3:
         ng = (items != 2 || !d->impl.alive);
         if (ng) GOTOBADARG;
-        lets_output_prev_iter3(d, buf, len, &index, items);
+        lets_output_last_iter3(d, buf, len, &index, items);
+        break;
+    case LETS_NEXT4:
+        ng = (items != 3 || !d->impl.alive);
+        if (ng) GOTOBADARG;
+        lets_output_next4(d, buf, len, &index, items);
+        break;
+    case LETS_NEXT_ITER4:
+        ng = (items != 3 || !d->impl.alive);
+        if (ng) GOTOBADARG;
+        lets_output_next_iter4(d, buf, len, &index, items);
+        break;
+    case LETS_PREV4:
+        ng = (items != 3 || !d->impl.alive);
+        if (ng) GOTOBADARG;
+        lets_output_prev4(d, buf, len, &index, items);
+        break;
+    case LETS_PREV_ITER4:
+        ng = (items != 3 || !d->impl.alive);
+        if (ng) GOTOBADARG;
+        lets_output_prev_iter4(d, buf, len, &index, items);
         break;
     case LETS_INFO_MEMORY1:
         ng = (items != 0 || !d->impl.alive);
@@ -509,6 +530,9 @@ drv_ready_async(ErlDrvData handle, ErlDrvThreadData async_data)
         break;
     case LETS_BINARY:
         driver_send_binary(d, a->binary, a->caller);
+        break;
+    case LETS_SPEC:
+        driver_send_spec(d, a->spec, a->caller);
         break;
     default:
         driver_send_int(d, LETS_BADARG, a->caller);
@@ -588,6 +612,232 @@ decode_write_options(leveldb::WriteOptions defaults, char* buf, int* index, int&
 
  badarg:
     return -1;
+}
+
+static int
+decode_n_option(char* buf, int* index, int& items, long* n)
+{
+    int ng;
+    char atom[MAXATOMLEN];
+
+    ng = ei_decode_atom(buf, index, atom);
+    if (!ng && strcmp(atom, "undefined") == 0) {
+        *n = -1;
+        items--;
+        return 0;
+    }
+
+    ng = ei_decode_long(buf, index, n);
+    if (ng) GOTOBADARG;
+
+    items--;
+    if (*n < 0) {
+        return -1;
+    }
+    return 0;
+
+ badarg:
+    return -1;
+}
+
+static ErlDrvBinary*
+lets_get_next(long n, leveldb::Iterator* it, std::vector<ErlDrvTermData>& spec) {
+    ErlDrvBinary* binary = NULL;
+    ErlDrvUInt offset = 0;
+    int length = 0;
+
+    assert(n >= 0);
+    assert(it->Valid());
+
+    binary = driver_alloc_binary(it->key().size());
+    if (!binary) { return NULL; }
+
+    spec.clear();
+    spec.reserve(4+(4*n)+3+3);
+    while (n > 0 && it->Valid()) {
+        ErlDrvUInt len = it->key().size();
+        ErlDrvBinary* temp = driver_realloc_binary(binary, offset+len);
+
+        if (!temp) {
+            driver_free_binary(binary);
+            spec.clear();
+            return NULL;
+        } else {
+            binary = temp;
+        }
+
+        memcpy(binary->orig_bytes+offset, it->key().data(), len);
+        ErlDrvTermData spec_binary[] = {
+            ERL_DRV_BINARY, (ErlDrvTermData) NULL, len, offset
+        };
+        spec.insert(spec.end(), spec_binary, spec_binary + (sizeof(spec_binary) / sizeof(spec_binary[0])));
+
+        offset += len; length++; n--;
+        it->Next();
+    }
+
+    n = 0;
+    while (n < length) {
+        spec[1 + n*4] = (ErlDrvTermData) binary;
+        n++;
+    }
+
+    ErlDrvTermData spec_list[] = {
+        ERL_DRV_NIL, ERL_DRV_LIST, length+1
+    };
+    spec.insert(spec.end(), spec_list, spec_list + (sizeof(spec_list) / sizeof(spec_list[0])));
+
+    return binary;
+}
+
+static ErlDrvBinary*
+lets_get_next_iter(long n, leveldb::Iterator* it, std::vector<ErlDrvTermData>& spec) {
+    ErlDrvBinary* binary = NULL;
+    ErlDrvUInt offset = 0;
+    int length = 0;
+
+    assert(n >= 0);
+    assert(it->Valid());
+
+    binary = driver_alloc_binary(it->value().size());
+    if (!binary) { return NULL; }
+
+    spec.clear();
+    spec.reserve(4+(4*n)+3+3);
+    while (n > 0 && it->Valid()) {
+        ErlDrvUInt len = it->value().size();
+        ErlDrvBinary* temp = driver_realloc_binary(binary, offset+len);
+
+        if (!temp) {
+            driver_free_binary(binary);
+            spec.clear();
+            return NULL;
+        } else {
+            binary = temp;
+        }
+
+        memcpy(binary->orig_bytes+offset, it->value().data(), len);
+        ErlDrvTermData spec_binary[] = {
+            ERL_DRV_BINARY, (ErlDrvTermData) NULL, len, offset
+        };
+        spec.insert(spec.end(), spec_binary, spec_binary + (sizeof(spec_binary) / sizeof(spec_binary[0])));
+
+        offset += len; length++; n--;
+        it->Next();
+    }
+
+    n = 0;
+    while (n < length) {
+        spec[1 + n*4] = (ErlDrvTermData) binary;
+        n++;
+    }
+
+    ErlDrvTermData spec_list[] = {
+        ERL_DRV_NIL, ERL_DRV_LIST, length+1
+    };
+    spec.insert(spec.end(), spec_list, spec_list + (sizeof(spec_list) / sizeof(spec_list[0])));
+
+    return binary;
+}
+
+static ErlDrvBinary*
+lets_get_prev(long n, leveldb::Iterator* it, std::vector<ErlDrvTermData>& spec) {
+    ErlDrvBinary* binary = NULL;
+    ErlDrvUInt offset = 0;
+    int length = 0;
+
+    assert(n >= 0);
+    assert(it->Valid());
+
+    binary = driver_alloc_binary(it->key().size());
+    if (!binary) { return NULL; }
+
+    spec.clear();
+    spec.reserve(4+(4*n)+3+3);
+    while (n > 0 && it->Valid()) {
+        ErlDrvUInt len = it->key().size();
+        ErlDrvBinary* temp = driver_realloc_binary(binary, offset+len);
+
+        if (!temp) {
+            driver_free_binary(binary);
+            spec.clear();
+            return NULL;
+        } else {
+            binary = temp;
+        }
+
+        memcpy(binary->orig_bytes+offset, it->key().data(), len);
+        ErlDrvTermData spec_binary[] = {
+            ERL_DRV_BINARY, (ErlDrvTermData) NULL, len, offset
+        };
+        spec.insert(spec.end(), spec_binary, spec_binary + (sizeof(spec_binary) / sizeof(spec_binary[0])));
+
+        offset += len; length++; n--;
+        it->Prev();
+    }
+
+    n = 0;
+    while (n < length) {
+        spec[1 + n*4] = (ErlDrvTermData) binary;
+        n++;
+    }
+
+    ErlDrvTermData spec_list[] = {
+        ERL_DRV_NIL, ERL_DRV_LIST, length+1
+    };
+    spec.insert(spec.end(), spec_list, spec_list + (sizeof(spec_list) / sizeof(spec_list[0])));
+
+    return binary;
+}
+
+static ErlDrvBinary*
+lets_get_prev_iter(long n, leveldb::Iterator* it, std::vector<ErlDrvTermData>& spec) {
+    ErlDrvBinary* binary = NULL;
+    ErlDrvUInt offset = 0;
+    int length = 0;
+
+    assert(n >= 0);
+    assert(it->Valid());
+
+    binary = driver_alloc_binary(it->value().size());
+    if (!binary) { return NULL; }
+
+    spec.clear();
+    spec.reserve(4+(4*n)+3+3);
+    while (n > 0 && it->Valid()) {
+        ErlDrvUInt len = it->value().size();
+        ErlDrvBinary* temp = driver_realloc_binary(binary, offset+len);
+
+        if (!temp) {
+            driver_free_binary(binary);
+            spec.clear();
+            return NULL;
+        } else {
+            binary = temp;
+        }
+
+        memcpy(binary->orig_bytes+offset, it->value().data(), len);
+        ErlDrvTermData spec_binary[] = {
+            ERL_DRV_BINARY, (ErlDrvTermData) NULL, len, offset
+        };
+        spec.insert(spec.end(), spec_binary, spec_binary + (sizeof(spec_binary) / sizeof(spec_binary[0])));
+
+        offset += len; length++; n--;
+        it->Prev();
+    }
+
+    n = 0;
+    while (n < length) {
+        spec[1 + n*4] = (ErlDrvTermData) binary;
+        n++;
+    }
+
+    ErlDrvTermData spec_list[] = {
+        ERL_DRV_NIL, ERL_DRV_LIST, length+1
+    };
+    spec.insert(spec.end(), spec_list, spec_list + (sizeof(spec_list) / sizeof(spec_list[0])));
+
+    return binary;
 }
 
 //
@@ -1018,9 +1268,9 @@ lets_output_lookup3(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int item
 
     DrvAsync* drv_async = NULL;
     int ng;
+    leveldb::ReadOptions read_options;
     char *key;
     long keylen;
-    leveldb::ReadOptions read_options;
 
     ng = decode_read_options(d->impl.db_read_options, buf, index, items, read_options);
     if (ng) GOTOBADARG;
@@ -1098,9 +1348,9 @@ lets_output_member3(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int item
 
     DrvAsync* drv_async = NULL;
     int ng;
+    leveldb::ReadOptions read_options;
     char *key;
     long keylen;
-    leveldb::ReadOptions read_options;
 
     ng = decode_read_options(d->impl.db_read_options, buf, index, items, read_options);
     if (ng) GOTOBADARG;
@@ -1164,23 +1414,26 @@ lets_async_member3(void* async_data)
 }
 
 static void
-lets_output_first2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
+lets_output_first3(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
     (void) len;
 
     DrvAsync* drv_async = NULL;
     int ng;
     leveldb::ReadOptions read_options;
+    long n;
 
     ng = decode_read_options(d->impl.db_read_options, buf, index, items, read_options);
     if (ng) GOTOBADARG;
+    ng = decode_n_option(buf, index, items, &n);
+    if (ng) GOTOBADARG;
 
     if (d->impl.async) {
-        drv_async = new DrvAsync(d, driver_caller(d->port), LETS_FIRST2, read_options);
+        drv_async = new DrvAsync(d, driver_caller(d->port), LETS_FIRST3, read_options, n);
         if (!drv_async) {
             GOTOBADARG;
         }
-        driver_async(d->port, NULL, lets_async_first2, drv_async, drv_async_free);
+        driver_async(d->port, NULL, lets_async_first3, drv_async, drv_async_free);
     } else  {
         leveldb::Iterator* it = d->impl.db->NewIterator(read_options);
         if (!it) {
@@ -1194,7 +1447,19 @@ lets_output_first2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items
             return;
         }
 
-        driver_send_buf(d, it->key().data(), it->key().size());
+        if (n < 0) {
+            driver_send_buf(d, it->key().data(), it->key().size());
+        } else {
+            std::vector<ErlDrvTermData> spec;
+            ErlDrvBinary* binary = lets_get_next(n, it, spec);
+            if (!binary) {
+                GOTOBADARG;
+            }
+
+            driver_send_spec(d, spec);
+            driver_free_binary(binary);
+        }
+
         delete it;
     }
     return;
@@ -1206,7 +1471,7 @@ lets_output_first2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items
 }
 
 static void
-lets_async_first2(void* async_data)
+lets_async_first3(void* async_data)
 {
     DrvAsync* a = (DrvAsync*) async_data;
     assert(a != NULL);
@@ -1225,36 +1490,49 @@ lets_async_first2(void* async_data)
         return;
     }
 
-    ErlDrvBinary* binary = driver_alloc_binary(it->key().size());
-    if (binary) {
-        memcpy(binary->orig_bytes, it->key().data(), binary->orig_size);
-        a->binary = binary;
-        a->reply = LETS_BINARY;
+    if (a->n < 0) {
+        ErlDrvBinary* binary = driver_alloc_binary(it->key().size());
+        if (binary) {
+            memcpy(binary->orig_bytes, it->key().data(), binary->orig_size);
+            a->binary = binary;
+            a->reply = LETS_BINARY;
+        } else {
+            a->reply = LETS_BADARG;
+        }
     } else {
-        a->reply = LETS_BADARG;
+        ErlDrvBinary* binary = lets_get_next(a->n, it, a->spec);
+        if (binary) {
+            a->binary = binary;
+            a->reply = LETS_SPEC;
+        } else {
+            a->reply = LETS_BADARG;
+        }
     }
 
     delete it;
 }
 
 static void
-lets_output_first_iter2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
+lets_output_first_iter3(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
     (void) len;
 
     DrvAsync* drv_async = NULL;
     int ng;
     leveldb::ReadOptions read_options;
+    long n;
 
     ng = decode_read_options(d->impl.db_read_options, buf, index, items, read_options);
     if (ng) GOTOBADARG;
+    ng = decode_n_option(buf, index, items, &n);
+    if (ng) GOTOBADARG;
 
     if (d->impl.async) {
-        drv_async = new DrvAsync(d, driver_caller(d->port), LETS_FIRST_ITER2, read_options);
+        drv_async = new DrvAsync(d, driver_caller(d->port), LETS_FIRST_ITER3, read_options, n);
         if (!drv_async) {
             GOTOBADARG;
         }
-        driver_async(d->port, NULL, lets_async_first_iter2, drv_async, drv_async_free);
+        driver_async(d->port, NULL, lets_async_first_iter3, drv_async, drv_async_free);
     } else  {
         leveldb::Iterator* it = d->impl.db->NewIterator(read_options);
         if (!it) {
@@ -1268,7 +1546,19 @@ lets_output_first_iter2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int 
             return;
         }
 
-        driver_send_buf(d, it->value().data(), it->value().size());
+        if (n < 0) {
+            driver_send_buf(d, it->value().data(), it->value().size());
+        } else {
+            std::vector<ErlDrvTermData> spec;
+            ErlDrvBinary* binary = lets_get_next_iter(n, it, spec);
+            if (!binary) {
+                GOTOBADARG;
+            }
+
+            driver_send_spec(d, spec);
+            driver_free_binary(binary);
+        }
+
         delete it;
     }
     return;
@@ -1280,7 +1570,7 @@ lets_output_first_iter2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int 
 }
 
 static void
-lets_async_first_iter2(void* async_data)
+lets_async_first_iter3(void* async_data)
 {
     DrvAsync* a = (DrvAsync*) async_data;
     assert(a != NULL);
@@ -1299,36 +1589,49 @@ lets_async_first_iter2(void* async_data)
         return;
     }
 
-    ErlDrvBinary* binary = driver_alloc_binary(it->value().size());
-    if (binary) {
-        memcpy(binary->orig_bytes, it->value().data(), binary->orig_size);
-        a->binary = binary;
-        a->reply = LETS_BINARY;
+    if (a->n < 0) {
+        ErlDrvBinary* binary = driver_alloc_binary(it->value().size());
+        if (binary) {
+            memcpy(binary->orig_bytes, it->value().data(), binary->orig_size);
+            a->binary = binary;
+            a->reply = LETS_BINARY;
+        } else {
+            a->reply = LETS_BADARG;
+        }
     } else {
-        a->reply = LETS_BADARG;
+        ErlDrvBinary* binary = lets_get_next_iter(a->n, it, a->spec);
+        if (binary) {
+            a->binary = binary;
+            a->reply = LETS_SPEC;
+        } else {
+            a->reply = LETS_BADARG;
+        }
     }
 
     delete it;
 }
 
 static void
-lets_output_last2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
+lets_output_last3(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
     (void) len;
 
     DrvAsync* drv_async = NULL;
     int ng;
     leveldb::ReadOptions read_options;
+    long n;
 
     ng = decode_read_options(d->impl.db_read_options, buf, index, items, read_options);
     if (ng) GOTOBADARG;
+    ng = decode_n_option(buf, index, items, &n);
+    if (ng) GOTOBADARG;
 
     if (d->impl.async) {
-        drv_async = new DrvAsync(d, driver_caller(d->port), LETS_LAST2, read_options);
+        drv_async = new DrvAsync(d, driver_caller(d->port), LETS_LAST3, read_options, n);
         if (!drv_async) {
             GOTOBADARG;
         }
-        driver_async(d->port, NULL, lets_async_last2, drv_async, drv_async_free);
+        driver_async(d->port, NULL, lets_async_last3, drv_async, drv_async_free);
     } else  {
         leveldb::Iterator* it = d->impl.db->NewIterator(read_options);
         if (!it) {
@@ -1342,7 +1645,19 @@ lets_output_last2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
             return;
         }
 
-        driver_send_buf(d, it->key().data(), it->key().size());
+        if (n < 0) {
+            driver_send_buf(d, it->key().data(), it->key().size());
+        } else {
+            std::vector<ErlDrvTermData> spec;
+            ErlDrvBinary* binary = lets_get_prev(n, it, spec);
+            if (!binary) {
+                GOTOBADARG;
+            }
+
+            driver_send_spec(d, spec);
+            driver_free_binary(binary);
+        }
+
         delete it;
     }
     return;
@@ -1354,7 +1669,7 @@ lets_output_last2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 }
 
 static void
-lets_async_last2(void* async_data)
+lets_async_last3(void* async_data)
 {
     DrvAsync* a = (DrvAsync*) async_data;
     assert(a != NULL);
@@ -1373,37 +1688,49 @@ lets_async_last2(void* async_data)
         return;
     }
 
-    ErlDrvBinary* binary = driver_alloc_binary(it->key().size());
-    if (binary) {
-        memcpy(binary->orig_bytes, it->key().data(), binary->orig_size);
-        a->binary = binary;
-        a->reply = LETS_BINARY;
+    if (a->n < 0) {
+        ErlDrvBinary* binary = driver_alloc_binary(it->key().size());
+        if (binary) {
+            memcpy(binary->orig_bytes, it->key().data(), binary->orig_size);
+            a->binary = binary;
+            a->reply = LETS_BINARY;
+        } else {
+            a->reply = LETS_BADARG;
+        }
     } else {
-        a->reply = LETS_BADARG;
+        ErlDrvBinary* binary = lets_get_prev(a->n, it, a->spec);
+        if (binary) {
+            a->binary = binary;
+            a->reply = LETS_SPEC;
+        } else {
+            a->reply = LETS_BADARG;
+        }
     }
 
     delete it;
 }
 
-
 static void
-lets_output_last_iter2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
+lets_output_last_iter3(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
     (void) len;
 
     DrvAsync* drv_async = NULL;
     int ng;
     leveldb::ReadOptions read_options;
+    long n;
 
     ng = decode_read_options(d->impl.db_read_options, buf, index, items, read_options);
     if (ng) GOTOBADARG;
+    ng = decode_n_option(buf, index, items, &n);
+    if (ng) GOTOBADARG;
 
     if (d->impl.async) {
-        drv_async = new DrvAsync(d, driver_caller(d->port), LETS_LAST_ITER2, read_options);
+        drv_async = new DrvAsync(d, driver_caller(d->port), LETS_LAST_ITER3, read_options, n);
         if (!drv_async) {
             GOTOBADARG;
         }
-        driver_async(d->port, NULL, lets_async_last_iter2, drv_async, drv_async_free);
+        driver_async(d->port, NULL, lets_async_last_iter3, drv_async, drv_async_free);
     } else  {
         leveldb::Iterator* it = d->impl.db->NewIterator(read_options);
         if (!it) {
@@ -1417,7 +1744,19 @@ lets_output_last_iter2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int i
             return;
         }
 
-        driver_send_buf(d, it->value().data(), it->value().size());
+        if (n < 0) {
+            driver_send_buf(d, it->value().data(), it->value().size());
+        } else {
+            std::vector<ErlDrvTermData> spec;
+            ErlDrvBinary* binary = lets_get_prev_iter(n, it, spec);
+            if (!binary) {
+                GOTOBADARG;
+            }
+
+            driver_send_spec(d, spec);
+            driver_free_binary(binary);
+        }
+
         delete it;
     }
     return;
@@ -1429,7 +1768,7 @@ lets_output_last_iter2(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int i
 }
 
 static void
-lets_async_last_iter2(void* async_data)
+lets_async_last_iter3(void* async_data)
 {
     DrvAsync* a = (DrvAsync*) async_data;
     assert(a != NULL);
@@ -1448,40 +1787,53 @@ lets_async_last_iter2(void* async_data)
         return;
     }
 
-    ErlDrvBinary* binary = driver_alloc_binary(it->value().size());
-    if (binary) {
-        memcpy(binary->orig_bytes, it->value().data(), binary->orig_size);
-        a->binary = binary;
-        a->reply = LETS_BINARY;
+    if (a->n < 0) {
+        ErlDrvBinary* binary = driver_alloc_binary(it->value().size());
+        if (binary) {
+            memcpy(binary->orig_bytes, it->value().data(), binary->orig_size);
+            a->binary = binary;
+            a->reply = LETS_BINARY;
+        } else {
+            a->reply = LETS_BADARG;
+        }
     } else {
-        a->reply = LETS_BADARG;
+        ErlDrvBinary* binary = lets_get_prev_iter(a->n, it, a->spec);
+        if (binary) {
+            a->binary = binary;
+            a->reply = LETS_SPEC;
+        } else {
+            a->reply = LETS_BADARG;
+        }
     }
 
     delete it;
 }
 
 static void
-lets_output_next3(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
+lets_output_next4(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
     (void) len;
 
     DrvAsync* drv_async = NULL;
     int ng;
+    leveldb::ReadOptions read_options;
     char *key;
     long keylen;
-    leveldb::ReadOptions read_options;
+    long n;
 
     ng = decode_read_options(d->impl.db_read_options, buf, index, items, read_options);
     if (ng) GOTOBADARG;
     ng = ei_inspect_binary(buf, index, (void**) &key, &keylen);
     if (ng) GOTOBADARG;
+    ng = decode_n_option(buf, index, items, &n);
+    if (ng) GOTOBADARG;
 
     if (d->impl.async) {
-        drv_async = new DrvAsync(d, driver_caller(d->port), LETS_NEXT3, read_options, (const char*) key, keylen);
+        drv_async = new DrvAsync(d, driver_caller(d->port), LETS_NEXT4, read_options, (const char*) key, keylen, n);
         if (!drv_async) {
             GOTOBADARG;
         }
-        driver_async(d->port, NULL, lets_async_next3, drv_async, drv_async_free);
+        driver_async(d->port, NULL, lets_async_next4, drv_async, drv_async_free);
     } else {
         leveldb::Iterator* it = d->impl.db->NewIterator(read_options);
         if (!it) {
@@ -1505,7 +1857,19 @@ lets_output_next3(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
             }
         }
 
-        driver_send_buf(d, it->key().data(), it->key().size());
+        if (n < 0) {
+            driver_send_buf(d, it->key().data(), it->key().size());
+        } else {
+            std::vector<ErlDrvTermData> spec;
+            ErlDrvBinary* binary = lets_get_next(n, it, spec);
+            if (!binary) {
+                GOTOBADARG;
+            }
+
+            driver_send_spec(d, spec);
+            driver_free_binary(binary);
+        }
+
         delete it;
     }
     return;
@@ -1516,7 +1880,7 @@ lets_output_next3(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 }
 
 static void
-lets_async_next3(void* async_data)
+lets_async_next4(void* async_data)
 {
     DrvAsync* a = (DrvAsync*) async_data;
     assert(a != NULL);
@@ -1545,13 +1909,23 @@ lets_async_next3(void* async_data)
         }
     }
 
-    ErlDrvBinary* binary = driver_realloc_binary(a->binary, it->key().size());
-    if (binary) {
-        memcpy(binary->orig_bytes, it->key().data(), binary->orig_size);
-        a->binary = binary;
-        a->reply = LETS_BINARY;
+    if (a->n < 0) {
+        ErlDrvBinary* binary = driver_alloc_binary(it->key().size());
+        if (binary) {
+            memcpy(binary->orig_bytes, it->key().data(), binary->orig_size);
+            a->binary = binary;
+            a->reply = LETS_BINARY;
+        } else {
+            a->reply = LETS_BADARG;
+        }
     } else {
-        a->reply = LETS_BADARG;
+        ErlDrvBinary* binary = lets_get_next(a->n, it, a->spec);
+        if (binary) {
+            a->binary = binary;
+            a->reply = LETS_SPEC;
+        } else {
+            a->reply = LETS_BADARG;
+        }
     }
 
     delete it;
@@ -1559,27 +1933,30 @@ lets_async_next3(void* async_data)
 
 
 static void
-lets_output_next_iter3(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
+lets_output_next_iter4(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
     (void) len;
 
     DrvAsync* drv_async = NULL;
     int ng;
+    leveldb::ReadOptions read_options;
     char *key;
     long keylen;
-    leveldb::ReadOptions read_options;
+    long n;
 
     ng = decode_read_options(d->impl.db_read_options, buf, index, items, read_options);
     if (ng) GOTOBADARG;
     ng = ei_inspect_binary(buf, index, (void**) &key, &keylen);
     if (ng) GOTOBADARG;
+    ng = decode_n_option(buf, index, items, &n);
+    if (ng) GOTOBADARG;
 
     if (d->impl.async) {
-        drv_async = new DrvAsync(d, driver_caller(d->port), LETS_NEXT_ITER3, read_options, (const char*) key, keylen);
+        drv_async = new DrvAsync(d, driver_caller(d->port), LETS_NEXT_ITER4, read_options, (const char*) key, keylen, n);
         if (!drv_async) {
             GOTOBADARG;
         }
-        driver_async(d->port, NULL, lets_async_next_iter3, drv_async, drv_async_free);
+        driver_async(d->port, NULL, lets_async_next_iter4, drv_async, drv_async_free);
     } else {
         leveldb::Iterator* it = d->impl.db->NewIterator(read_options);
         if (!it) {
@@ -1603,7 +1980,19 @@ lets_output_next_iter3(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int i
             }
         }
 
-        driver_send_buf(d, it->value().data(), it->value().size());
+        if (n < 0) {
+            driver_send_buf(d, it->value().data(), it->value().size());
+        } else {
+            std::vector<ErlDrvTermData> spec;
+            ErlDrvBinary* binary = lets_get_next_iter(n, it, spec);
+            if (!binary) {
+                GOTOBADARG;
+            }
+
+            driver_send_spec(d, spec);
+            driver_free_binary(binary);
+        }
+
         delete it;
     }
     return;
@@ -1614,7 +2003,7 @@ lets_output_next_iter3(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int i
 }
 
 static void
-lets_async_next_iter3(void* async_data)
+lets_async_next_iter4(void* async_data)
 {
     DrvAsync* a = (DrvAsync*) async_data;
     assert(a != NULL);
@@ -1643,40 +2032,53 @@ lets_async_next_iter3(void* async_data)
         }
     }
 
-    ErlDrvBinary* binary = driver_realloc_binary(a->binary, it->value().size());
-    if (binary) {
-        memcpy(binary->orig_bytes, it->value().data(), binary->orig_size);
-        a->binary = binary;
-        a->reply = LETS_BINARY;
+    if (a->n < 0) {
+        ErlDrvBinary* binary = driver_alloc_binary(it->value().size());
+        if (binary) {
+            memcpy(binary->orig_bytes, it->value().data(), binary->orig_size);
+            a->binary = binary;
+            a->reply = LETS_BINARY;
+        } else {
+            a->reply = LETS_BADARG;
+        }
     } else {
-        a->reply = LETS_BADARG;
+        ErlDrvBinary* binary = lets_get_next_iter(a->n, it, a->spec);
+        if (binary) {
+            a->binary = binary;
+            a->reply = LETS_SPEC;
+        } else {
+            a->reply = LETS_BADARG;
+        }
     }
 
     delete it;
 }
 
 static void
-lets_output_prev3(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
+lets_output_prev4(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
     (void) len;
 
     DrvAsync* drv_async = NULL;
     int ng;
+    leveldb::ReadOptions read_options;
     char *key;
     long keylen;
-    leveldb::ReadOptions read_options;
+    long n;
 
     ng = decode_read_options(d->impl.db_read_options, buf, index, items, read_options);
     if (ng) GOTOBADARG;
     ng = ei_inspect_binary(buf, index, (void**) &key, &keylen);
     if (ng) GOTOBADARG;
+    ng = decode_n_option(buf, index, items, &n);
+    if (ng) GOTOBADARG;
 
     if (d->impl.async) {
-        drv_async = new DrvAsync(d, driver_caller(d->port), LETS_PREV3, read_options, (const char*) key, keylen);
+        drv_async = new DrvAsync(d, driver_caller(d->port), LETS_PREV4, read_options, (const char*) key, keylen, n);
         if (!drv_async) {
             GOTOBADARG;
         }
-        driver_async(d->port, NULL, lets_async_prev3, drv_async, drv_async_free);
+        driver_async(d->port, NULL, lets_async_prev4, drv_async, drv_async_free);
     } else {
         leveldb::Iterator* it = d->impl.db->NewIterator(read_options);
         if (!it) {
@@ -1697,7 +2099,19 @@ lets_output_prev3(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
             return;
         }
 
-        driver_send_buf(d, it->key().data(), it->key().size());
+        if (n < 0) {
+            driver_send_buf(d, it->key().data(), it->key().size());
+        } else {
+            std::vector<ErlDrvTermData> spec;
+            ErlDrvBinary* binary = lets_get_prev(n, it, spec);
+            if (!binary) {
+                GOTOBADARG;
+            }
+
+            driver_send_spec(d, spec);
+            driver_free_binary(binary);
+        }
+
         delete it;
     }
     return;
@@ -1708,7 +2122,7 @@ lets_output_prev3(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 }
 
 static void
-lets_async_prev3(void* async_data)
+lets_async_prev4(void* async_data)
 {
     DrvAsync* a = (DrvAsync*) async_data;
     assert(a != NULL);
@@ -1734,40 +2148,53 @@ lets_async_prev3(void* async_data)
         return;
     }
 
-    ErlDrvBinary* binary = driver_realloc_binary(a->binary, it->key().size());
-    if (binary) {
-        memcpy(binary->orig_bytes, it->key().data(), binary->orig_size);
-        a->binary = binary;
-        a->reply = LETS_BINARY;
+    if (a->n < 0) {
+        ErlDrvBinary* binary = driver_alloc_binary(it->key().size());
+        if (binary) {
+            memcpy(binary->orig_bytes, it->key().data(), binary->orig_size);
+            a->binary = binary;
+            a->reply = LETS_BINARY;
+        } else {
+            a->reply = LETS_BADARG;
+        }
     } else {
-        a->reply = LETS_BADARG;
+        ErlDrvBinary* binary = lets_get_prev(a->n, it, a->spec);
+        if (binary) {
+            a->binary = binary;
+            a->reply = LETS_SPEC;
+        } else {
+            a->reply = LETS_BADARG;
+        }
     }
 
     delete it;
 }
 
 static void
-lets_output_prev_iter3(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
+lets_output_prev_iter4(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int items)
 {
     (void) len;
 
     DrvAsync* drv_async = NULL;
     int ng;
+    leveldb::ReadOptions read_options;
     char *key;
     long keylen;
-    leveldb::ReadOptions read_options;
+    long n;
 
     ng = decode_read_options(d->impl.db_read_options, buf, index, items, read_options);
     if (ng) GOTOBADARG;
     ng = ei_inspect_binary(buf, index, (void**) &key, &keylen);
     if (ng) GOTOBADARG;
+    ng = decode_n_option(buf, index, items, &n);
+    if (ng) GOTOBADARG;
 
     if (d->impl.async) {
-        drv_async = new DrvAsync(d, driver_caller(d->port), LETS_PREV_ITER3, read_options, (const char*) key, keylen);
+        drv_async = new DrvAsync(d, driver_caller(d->port), LETS_PREV_ITER4, read_options, (const char*) key, keylen, n);
         if (!drv_async) {
             GOTOBADARG;
         }
-        driver_async(d->port, NULL, lets_async_prev_iter3, drv_async, drv_async_free);
+        driver_async(d->port, NULL, lets_async_prev_iter4, drv_async, drv_async_free);
     } else {
         leveldb::Iterator* it = d->impl.db->NewIterator(read_options);
         if (!it) {
@@ -1788,7 +2215,19 @@ lets_output_prev_iter3(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int i
             return;
         }
 
-        driver_send_buf(d, it->value().data(), it->value().size());
+        if (n < 0) {
+            driver_send_buf(d, it->value().data(), it->value().size());
+        } else {
+            std::vector<ErlDrvTermData> spec;
+            ErlDrvBinary* binary = lets_get_prev_iter(n, it, spec);
+            if (!binary) {
+                GOTOBADARG;
+            }
+
+            driver_send_spec(d, spec);
+            driver_free_binary(binary);
+        }
+
         delete it;
     }
     return;
@@ -1799,7 +2238,7 @@ lets_output_prev_iter3(DrvData* d, char* buf, ErlDrvSizeT len, int* index, int i
 }
 
 static void
-lets_async_prev_iter3(void* async_data)
+lets_async_prev_iter4(void* async_data)
 {
     DrvAsync* a = (DrvAsync*) async_data;
     assert(a != NULL);
@@ -1825,13 +2264,23 @@ lets_async_prev_iter3(void* async_data)
         return;
     }
 
-    ErlDrvBinary* binary = driver_realloc_binary(a->binary, it->value().size());
-    if (binary) {
-        memcpy(binary->orig_bytes, it->value().data(), binary->orig_size);
-        a->binary = binary;
-        a->reply = LETS_BINARY;
+    if (a->n < 0) {
+        ErlDrvBinary* binary = driver_alloc_binary(it->value().size());
+        if (binary) {
+            memcpy(binary->orig_bytes, it->value().data(), binary->orig_size);
+            a->binary = binary;
+            a->reply = LETS_BINARY;
+        } else {
+            a->reply = LETS_BADARG;
+        }
     } else {
-        a->reply = LETS_BADARG;
+        ErlDrvBinary* binary = lets_get_prev_iter(a->n, it, a->spec);
+        if (binary) {
+            a->binary = binary;
+            a->reply = LETS_SPEC;
+        } else {
+            a->reply = LETS_BADARG;
+        }
     }
 
     delete it;
