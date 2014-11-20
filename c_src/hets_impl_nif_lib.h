@@ -31,6 +31,9 @@
 #include "hyperleveldb/slice.h"
 #include "hyperleveldb/write_batch.h"
 #include "hyperleveldb/filter_policy.h"
+#ifdef ROCKSDB
+#include "rocksdb/table.h"
+#endif
 
 #include "erl_nif.h"
 
@@ -70,6 +73,9 @@ extern "C" {
         leveldb::Options db_options;
         leveldb::ReadOptions db_read_options;
         leveldb::WriteOptions db_write_options;
+#ifdef ROCKSDB
+        rocksdb::BlockBasedTableOptions db_table_options;
+#endif
         size_t db_block_cache_size;
         leveldb::Cache* db_block_cache;
         int db_filter_policy_bloom_bits_per_key;

@@ -73,15 +73,15 @@
          }).
 
 -type obj() :: #obj{}.
--type ets_type() :: set | ordered_set.       % default is set
--type ets_impl() :: drv | nif | hyper | ets. % default is drv
+-type ets_type() :: set | ordered_set. % default is set
+-type ets_impl() :: drv | nif | ets.   % default is drv
 -type proplist() :: proplists:proplist().
 
 -record(state, {
           parallel=false :: boolean(),
           type           :: ets_type(),
           impl           :: ets_impl(),
-          hyper          :: boolean(),
+          flavor         :: original | hyper | rocks,
           exists=false   :: boolean(),
           options=[]     :: proplists:proplist(),
           tab            :: atom() | tuple() | pid(),
@@ -133,7 +133,7 @@ command(#state{parallel=false}=S) ->
 command(#state{parallel=true}=S) ->
     parallel_command_gen(S).
 
-serial_command_gen(#state{tab=undefined, type=undefined, impl=undefined, hyper=undefined}=S) ->
+serial_command_gen(#state{tab=undefined, type=undefined, impl=undefined, flavor=undefined}=S) ->
     {call,?IMPL,new,[?TAB,gen_options(new,S)]};
 serial_command_gen(#state{tab=undefined}=S) ->
     oneof([{call,?IMPL,new,[undefined,?TAB,gen_options(new,S)]}]
@@ -148,10 +148,10 @@ serial_command_gen(#state{tab=Tab, type=Type, impl=Impl, options=Options}=S) ->
           ++ [{call,?IMPL,tid,[Tab]}]
           ++ [{call,?IMPL,tid,[Tab, oneof([undefined, [ Opts || {RW, _}=Opts <- Options, RW==db_read orelse RW==db_write ]])]}]
           ++ [{call,?IMPL,insert,[Tab,oneof([gen_obj(S),gen_objs(S)])]}]
-          ++ [{call,?IMPL,insert_new,[Tab,oneof([gen_obj(S),gen_objs(S)])]} || Impl==ets]
+          ++ [{call,?IMPL,insert_new,[Tab,oneof([gen_obj(S),gen_objs(S)])]} || Impl==ets ]
           ++ [{call,?IMPL,delete,[Tab]}]
           ++ [{call,?IMPL,delete,[Tab,gen_key(S)]}]
-          ++ [{call,?IMPL,delete_all_objects,[Tab]} || Impl==ets]
+          ++ [{call,?IMPL,delete_all_objects,[Tab]} || Impl==ets ]
           ++ [{call,?IMPL,member,[Tab,gen_key(S)]}]
           ++ [{call,?IMPL,lookup,[Tab,gen_key(S)]}]
           ++ [{call,?IMPL,lookup_element,[Tab,gen_key(S),choose(1,record_info(size,obj))]}]
@@ -182,7 +182,7 @@ parallel_command_gen(#state{tab=Tab, impl=Impl}=S) ->
     %% @TODO gen_db_read_options/2
     oneof([{call,?IMPL,all,[Tab]}]
           ++ [{call,?IMPL,insert,[Tab,oneof([gen_obj(S),gen_objs(S)])]}]
-          ++ [{call,?IMPL,insert_new,[Tab,oneof([gen_obj(S),gen_objs(S)])]} || Impl =:= ets]
+          ++ [{call,?IMPL,insert_new,[Tab,oneof([gen_obj(S),gen_objs(S)])]} || Impl == ets]
           ++ [{call,?IMPL,delete,[Tab,gen_key(S)]}]
           ++ [{call,?IMPL,member,[Tab,gen_key(S)]}]
           ++ [{call,?IMPL,lookup,[Tab,gen_key(S)]}]
@@ -209,7 +209,7 @@ next_state(S, V, {call,_,tid,[_Tab]}) ->
     S#state{tab=V};
 next_state(S, V, {call,_,tid,[_Tab,_Options]}) ->
     S#state{tab=V};
-next_state(#state{tab=undefined, type=undefined, impl=undefined}=S, V, {call,_,new,[?TAB,Options]}) ->
+next_state(#state{tab=undefined, type=undefined, impl=undefined, flavor=undefined}=S, V, {call,_,new,[?TAB,Options]}) ->
     case [proplists:get_bool(X, Options) || X <- [set, ordered_set]] of
         [_, false] ->
             Type = set;
@@ -224,8 +224,16 @@ next_state(#state{tab=undefined, type=undefined, impl=undefined}=S, V, {call,_,n
         [false, false, true] ->
             Impl = ets
     end,
-    S#state{type=Type, impl=Impl, exists=true, options=Options, tab=V, tab_orig=V};
-next_state(#state{type=Type, impl=Impl, tab=undefined}=S, V, {call,_,new,[_Tab,?TAB,Options]}) ->
+    case [proplists:get_bool(X, Options) || X <- [hyper, rocks]] of
+        [false, false] ->
+            Flavor = original;
+        [false, true] ->
+            Flavor = rocks;
+        [true, false] ->
+            Flavor = hyper
+    end,
+    S#state{type=Type, impl=Impl, flavor=Flavor, exists=true, options=Options, tab=V, tab_orig=V};
+next_state(#state{type=Type, impl=Impl, flavor=Flavor, tab=undefined}=S, V, {call,_,new,[_Tab,?TAB,Options]}) ->
     case [proplists:get_bool(X, Options) || X <- [set, ordered_set]] of
         [_, false] ->
             Type = set;
@@ -240,9 +248,17 @@ next_state(#state{type=Type, impl=Impl, tab=undefined}=S, V, {call,_,new,[_Tab,?
         [false, false, true] ->
             Impl = ets
     end,
-    S#state{type=Type, impl=Impl, exists=true, options=Options, tab=V, tab_orig=V};
+    case [proplists:get_bool(X, Options) || X <- [hyper, rocks]] of
+        [false, false] ->
+            Flavor = original;
+        [false, true] ->
+            Flavor = rocks;
+        [true, false] ->
+            Flavor = hyper
+    end,
+    S#state{type=Type, impl=Impl, flavor=Flavor, exists=true, options=Options, tab=V, tab_orig=V};
 next_state(#state{impl=Impl}=S, _V, {call,_,destroy,[_Tab,?TAB,_Options]})
-  when Impl =/= ets ->
+  when Impl /= ets ->
     S#state{tab=undefined, tab_orig=undefined, exists=false, objs=[]};
 next_state(S, _V, {call,_,insert,[_Tab,Objs]}) when is_list(Objs) ->
     insert_objs(S, Objs);
@@ -276,7 +292,7 @@ invariant(_S) ->
     true.
 
 -spec precondition(#state{}, tuple()) -> boolean().
-precondition(#state{tab=undefined, type=undefined, impl=undefined, hyper=undefined}, {call,_,new,[?TAB,Options]}) ->
+precondition(#state{tab=undefined, type=undefined, impl=undefined, flavor=undefined}, {call,_,new,[?TAB,Options]}) ->
     Drv = proplists:get_bool(drv, Options),
     Nif = proplists:get_bool(nif, Options),
     if Drv orelse Nif ->
@@ -287,18 +303,18 @@ precondition(#state{tab=undefined, type=undefined, impl=undefined, hyper=undefin
     end;
 precondition(#state{tab=_Tab}, {call,_,new,[?TAB,_Options]}) ->
     false;
-precondition(#state{tab=undefined, type=undefined, impl=undefined, hyper=undefined}, {call,_,new,[_Tab,?TAB,_Options]}) ->
+precondition(#state{tab=undefined, type=undefined, impl=undefined, flavor=undefined}, {call,_,new,[_Tab,?TAB,_Options]}) ->
     false;
 precondition(#state{tab=Tab}, {call,_,new,[_Tab,?TAB,_Options]}) ->
-    Tab =:= undefined;
-precondition(#state{tab=undefined, type=undefined, impl=undefined, hyper=undefined}, {call,_,destroy,[_Tab,?TAB,_Options]}) ->
+    Tab == undefined;
+precondition(#state{tab=undefined, type=undefined, impl=undefined, flavor=undefined}, {call,_,destroy,[_Tab,?TAB,_Options]}) ->
     false;
 precondition(#state{tab=Tab}, {call,_,destroy,[_Tab,?TAB,_Options]}) ->
-    Tab =:= undefined;
-precondition(#state{tab=undefined, type=undefined, impl=undefined, hyper=undefined}, {call,_,repair,[_Tab,?TAB,_Options]}) ->
+    Tab == undefined;
+precondition(#state{tab=undefined, type=undefined, impl=undefined, flavor=undefined}, {call,_,repair,[_Tab,?TAB,_Options]}) ->
     false;
 precondition(#state{tab=Tab}, {call,_,repair,[_Tab,?TAB,_Options]}) ->
-    Tab =:= undefined;
+    Tab == undefined;
 precondition(_S, {call,_,_,_}) ->
     true.
 
@@ -487,7 +503,7 @@ stop(_State0, _State) ->
 -spec aggregate([{integer(), term(), term(), #state{}}])
                -> [{{atom(), atom()}, {atom(), integer()}, term()}].
 aggregate(L) ->
-    [ {{Impl,[ hyper || {hyper,true} <- Opts ]},{Cmd,length(Args)},filter_reply(Reply)} || {_N,{set,_,{call,_,Cmd,Args}},Reply,#state{impl=Impl, options=Opts}} <- L ].
+    [ {{Impl,[ X || X <- Opts, X==hyper orelse X==rocks ]},{Cmd,length(Args)},filter_reply(Reply)} || {_N,{set,_,{call,_,Cmd,Args}},Reply,#state{impl=Impl, options=Opts}} <- L ].
 
 filter_reply({'EXIT',{Err,_}}) ->
     {error,Err};
@@ -499,16 +515,19 @@ filter_reply(_) ->
 %%% Internal - Generators
 %%%----------------------------------------------------------------------
 
-gen_options(Op,#state{type=undefined, impl=undefined, hyper=undefined, tab=undefined}=S) ->
-    ?LET({Type,Impl,Hyper}, {lets_type(), lets_impl(), lets_hyper()},
-         gen_options(Op,S#state{type=Type, impl=Impl, hyper=if Impl==ets -> false; true -> Hyper end}));
-gen_options(Op,#state{type=Type, impl=drv=Impl, hyper=Hyper}=S) ->
-    Defaults = [Type, Impl, {hyper, Hyper}]
+gen_options(Op,#state{type=undefined, impl=undefined, flavor=undefined, tab=undefined}=S) ->
+    ?LET({Type,Impl}, {lets_type(), lets_impl()},
+         ?LET(Flavor, lets_flavor(Impl),
+              gen_options(Op,S#state{type=Type, impl=Impl, flavor=Flavor})));
+gen_options(Op,#state{type=Type, impl=drv=Impl, flavor=Flavor}=S) ->
+    Defaults = [Type, Impl]
+        ++ [ Flavor || Flavor/=original ]
         ++ [public, {keypos,#obj.key}, {compressed, gen_boolean()}, {async, gen_boolean()}]
         ++ gen_leveldb_options(Op,S),
     oneof([Defaults, [named_table|Defaults]]);
-gen_options(Op,#state{type=Type, impl=nif=Impl, hyper=Hyper}=S) ->
-    Defaults = [Type, Impl, {hyper, Hyper}]
+gen_options(Op,#state{type=Type, impl=nif=Impl, flavor=Flavor}=S) ->
+    Defaults = [Type, Impl]
+        ++ [ Flavor || Flavor/=original ]
         ++ [public, {keypos,#obj.key}, {compressed, gen_boolean()}]
         ++ gen_leveldb_options(Op,S),
     oneof([Defaults, [named_table|Defaults]]);
@@ -555,8 +574,10 @@ lets_impl() ->
     %% implementation.
     noshrink(oneof([drv,nif,ets])).
 
-lets_hyper() ->
-    noshrink(gen_boolean()).
+lets_flavor(ets) ->
+    original;
+lets_flavor(_) ->
+    noshrink(oneof([original,hyper,rocks])).
 
 gen_integer_key() ->
     oneof(?INT_KEYS).
@@ -705,7 +726,7 @@ select(S, Spec, Limit) ->
     case select1(S, sort(S), Spec) of
         [] ->
             [];
-        Match when Limit =:= undefined ->
+        Match when Limit == undefined ->
             Match;
         Match ->
             lists:sublist(Match, Limit)
@@ -728,7 +749,7 @@ select_reverse(S, Spec, Limit) ->
     case select1(S, rsort(S), Spec) of
         [] ->
             [];
-        Match when Limit =:= undefined ->
+        Match when Limit == undefined ->
             Match;
         Match ->
             lists:sublist(Match, Limit)

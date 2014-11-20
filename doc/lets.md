@@ -75,7 +75,7 @@ ets_opt() = set | ordered_set | named_table | {keypos, pos_integer()} | public |
 
 
 <pre><code>
-impl_opt() = drv | nif | hyper | ets
+impl_opt() = drv | nif | hyper | rocks | ets
 </code></pre>
 
 
@@ -385,6 +385,14 @@ LevelDB backend via an Erlang NIF.
 <li>
 <p>
 <code>hyper</code> If this option is present, the HyperLeveDB version of the
+LevelDB implementation is used as the backend.  The original
+LevelDB implementation is the default backend.<em>not applicable
+to the ets implementation</em>
+</p>
+</li>
+<li>
+<p>
+<code>rocks</code> If this option is present, the RocksDB version of the
 LevelDB implementation is used as the backend.  The original
 LevelDB implementation is the default backend.<em>not applicable
 to the ets implementation</em>
@@ -1017,6 +1025,14 @@ LevelDB backend via an Erlang NIF.
 <li>
 <p>
 <code>hyper</code> If this option is present, the HyperLeveDB version of the
+LevelDB implementation is used as the backend.  The original
+LevelDB implementation is the default backend.<em>not applicable
+to the ets implementation</em>
+</p>
+</li>
+<li>
+<p>
+<code>rocks</code> If this option is present, the RocksDB version of the
 LevelDB implementation is used as the backend.  The original
 LevelDB implementation is the default backend.<em>not applicable
 to the ets implementation</em>

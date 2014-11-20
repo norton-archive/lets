@@ -110,6 +110,9 @@ lets_init(lets_impl& impl,
     impl.db_options = leveldb::Options();
     impl.db_read_options = leveldb::ReadOptions();
     impl.db_write_options = leveldb::WriteOptions();
+#ifdef ROCKSDB
+    impl.db_table_options = rocksdb::BlockBasedTableOptions();
+#endif
 
     return true;
 }
@@ -202,6 +205,7 @@ lets_parse_options(ErlNifEnv* env, lets_impl& impl,
                 impl.db_options.max_open_files = val;
             } else if (enif_is_identical(tuple[0], lets_atom_block_cache_size) &&
                        enif_get_uint(env, tuple[1], &val)) {
+#ifndef ROCKSDB
                 impl.db_block_cache_size = val;
                 delete impl.db_block_cache;
                 impl.db_block_cache = leveldb::NewLRUCache(impl.db_block_cache_size);
@@ -209,12 +213,17 @@ lets_parse_options(ErlNifEnv* env, lets_impl& impl,
                 if (!impl.db_options.block_cache) {
                     return FALSE;
                 }
+#endif
             } else if (enif_is_identical(tuple[0], lets_atom_block_size) &&
                        enif_get_uint(env, tuple[1], &val)) {
+#ifndef ROCKSDB
                 impl.db_options.block_size = val;
+#endif
             } else if (enif_is_identical(tuple[0], lets_atom_block_restart_interval) &&
                        enif_get_uint(env, tuple[1], &val)) {
+#ifndef ROCKSDB
                 impl.db_options.block_restart_interval = val;
+#endif
             } else if (enif_is_identical(tuple[0], lets_atom_compression)) {
                 if (enif_is_identical(tuple[1], lets_atom_no)) {
                     impl.db_options.compression = leveldb::kNoCompression;
@@ -227,10 +236,13 @@ lets_parse_options(ErlNifEnv* env, lets_impl& impl,
                 if (enif_is_identical(tuple[1], lets_atom_no)) {
                     delete impl.db_filter_policy;
                     impl.db_filter_policy = NULL;
+#ifndef ROCKSDB
                     impl.db_options.filter_policy = NULL;
+#endif
                 } else if (enif_get_tuple(env, tuple[1], &arity, &tuple) && arity == 2) {
                     if (enif_is_identical(tuple[0], lets_atom_bloom) &&
                         enif_get_uint(env, tuple[1], &val)) {
+#ifndef ROCKSDB
                         impl.db_filter_policy_bloom_bits_per_key = val;
                         delete impl.db_filter_policy;
                         impl.db_filter_policy = leveldb::NewBloomFilterPolicy(impl.db_filter_policy_bloom_bits_per_key);
@@ -238,6 +250,7 @@ lets_parse_options(ErlNifEnv* env, lets_impl& impl,
                         if (!impl.db_options.filter_policy) {
                             return FALSE;
                         }
+#endif
                     }
                 } else {
                     return FALSE;

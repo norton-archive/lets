@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "hets_impl_nif_lib.h"
+#include "rets_impl_nif_lib.h"
 
 
 #if 0
@@ -107,9 +107,9 @@ lets_init(lets_impl& impl,
         return FALSE;
     }
 
-    impl.db_options = leveldb::Options();
-    impl.db_read_options = leveldb::ReadOptions();
-    impl.db_write_options = leveldb::WriteOptions();
+    impl.db_options = rocksdb::Options();
+    impl.db_read_options = rocksdb::ReadOptions();
+    impl.db_write_options = rocksdb::WriteOptions();
 #ifdef ROCKSDB
     impl.db_table_options = rocksdb::BlockBasedTableOptions();
 #endif
@@ -121,12 +121,12 @@ bool
 lets_create(lets_impl& impl,
             const char op)
 {
-    leveldb::Status status;
+    rocksdb::Status status;
 
     // db
     switch (op) {
     case OPEN:
-        status = leveldb::DB::Open(impl.db_options, impl.name->c_str(), &(impl.db));
+        status = rocksdb::DB::Open(impl.db_options, impl.name->c_str(), &(impl.db));
         if (!status.ok()) {
             return FALSE;
         } else {
@@ -208,7 +208,7 @@ lets_parse_options(ErlNifEnv* env, lets_impl& impl,
 #ifndef ROCKSDB
                 impl.db_block_cache_size = val;
                 delete impl.db_block_cache;
-                impl.db_block_cache = leveldb::NewLRUCache(impl.db_block_cache_size);
+                impl.db_block_cache = rocksdb::NewLRUCache(impl.db_block_cache_size);
                 impl.db_options.block_cache = impl.db_block_cache;
                 if (!impl.db_options.block_cache) {
                     return FALSE;
@@ -226,9 +226,9 @@ lets_parse_options(ErlNifEnv* env, lets_impl& impl,
 #endif
             } else if (enif_is_identical(tuple[0], lets_atom_compression)) {
                 if (enif_is_identical(tuple[1], lets_atom_no)) {
-                    impl.db_options.compression = leveldb::kNoCompression;
+                    impl.db_options.compression = rocksdb::kNoCompression;
                 } else if (enif_is_identical(tuple[1], lets_atom_snappy)) {
-                    impl.db_options.compression = leveldb::kSnappyCompression;
+                    impl.db_options.compression = rocksdb::kSnappyCompression;
                 } else {
                     return FALSE;
                 }
@@ -245,7 +245,7 @@ lets_parse_options(ErlNifEnv* env, lets_impl& impl,
 #ifndef ROCKSDB
                         impl.db_filter_policy_bloom_bits_per_key = val;
                         delete impl.db_filter_policy;
-                        impl.db_filter_policy = leveldb::NewBloomFilterPolicy(impl.db_filter_policy_bloom_bits_per_key);
+                        impl.db_filter_policy = rocksdb::NewBloomFilterPolicy(impl.db_filter_policy_bloom_bits_per_key);
                         impl.db_options.filter_policy = impl.db_filter_policy;
                         if (!impl.db_options.filter_policy) {
                             return FALSE;
@@ -276,7 +276,7 @@ lets_parse_options(ErlNifEnv* env, lets_impl& impl,
 }
 
 bool
-lets_parse_read_options(ErlNifEnv* env, leveldb::ReadOptions& opts,
+lets_parse_read_options(ErlNifEnv* env, rocksdb::ReadOptions& opts,
                         ERL_NIF_TERM& options, const ERL_NIF_TERM& options_len)
 {
     (void) options_len;
@@ -321,7 +321,7 @@ lets_parse_read_options(ErlNifEnv* env, leveldb::ReadOptions& opts,
 }
 
 bool
-lets_parse_write_options(ErlNifEnv* env, leveldb::WriteOptions& opts,
+lets_parse_write_options(ErlNifEnv* env, rocksdb::WriteOptions& opts,
                          ERL_NIF_TERM& options, const ERL_NIF_TERM& options_len)
 {
     (void) options_len;

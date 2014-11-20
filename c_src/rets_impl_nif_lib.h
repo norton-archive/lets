@@ -20,17 +20,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef LETS_NIF_LIB_H
-#define LETS_NIF_LIB_H
+#ifndef RETS_NIF_LIB_H
+#define RETS_NIF_LIB_H
 
 #include <string>
 #include <vector>
 
-#include "leveldb/db.h"
-#include "leveldb/cache.h"
-#include "leveldb/slice.h"
-#include "leveldb/write_batch.h"
-#include "leveldb/filter_policy.h"
+#include "rocksdb/db.h"
+#include "rocksdb/cache.h"
+#include "rocksdb/slice.h"
+#include "rocksdb/write_batch.h"
+#include "rocksdb/filter_policy.h"
 #ifdef ROCKSDB
 #include "rocksdb/table.h"
 #endif
@@ -70,17 +70,17 @@ extern "C" {
         char type;
         char privacy;
         std::string* name;
-        leveldb::Options db_options;
-        leveldb::ReadOptions db_read_options;
-        leveldb::WriteOptions db_write_options;
+        rocksdb::Options db_options;
+        rocksdb::ReadOptions db_read_options;
+        rocksdb::WriteOptions db_write_options;
 #ifdef ROCKSDB
         rocksdb::BlockBasedTableOptions db_table_options;
 #endif
         size_t db_block_cache_size;
-        leveldb::Cache* db_block_cache;
+        rocksdb::Cache* db_block_cache;
         int db_filter_policy_bloom_bits_per_key;
-        const leveldb::FilterPolicy* db_filter_policy;
-        leveldb::DB* db;
+        const rocksdb::FilterPolicy* db_filter_policy;
+        rocksdb::DB* db;
         ErlNifUInt64 db_memory;
         ErlNifUInt64 db_size;
         std::vector<std::pair<ErlNifPid,std::pair<ErlNifEnv*,ERL_NIF_TERM> > > notify_when_destroyed;
@@ -124,13 +124,13 @@ extern "C" {
 
     extern bool lets_parse_options(ErlNifEnv* env, lets_impl& impl,
                                    ERL_NIF_TERM& options, const ERL_NIF_TERM& options_len);
-    extern bool lets_parse_read_options(ErlNifEnv* env, leveldb::ReadOptions& opts,
+    extern bool lets_parse_read_options(ErlNifEnv* env, rocksdb::ReadOptions& opts,
                                         ERL_NIF_TERM& options, const ERL_NIF_TERM& options_len);
-    extern bool lets_parse_write_options(ErlNifEnv* env, leveldb::WriteOptions& opts,
+    extern bool lets_parse_write_options(ErlNifEnv* env, rocksdb::WriteOptions& opts,
                                          ERL_NIF_TERM& options, const ERL_NIF_TERM& options_len);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* LETS_NIF_LIB_H */
+#endif /* RETS_NIF_LIB_H */

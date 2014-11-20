@@ -78,7 +78,7 @@
 
 -type opts()          :: [ets_opt() | impl_opt() | {db, db_opts()} | {db_read, db_read_opts()} | {db_write, db_write_opts()}].
 -type ets_opt()       :: set | ordered_set | named_table | {keypos,pos_integer()} | public | protected | private | compressed | async.
--type impl_opt()      :: drv | nif | hyper | ets.
+-type impl_opt()      :: drv | nif | hyper | rocks | ets.
 
 -type db_opts()       :: [{path,file:filename()} | create_if_missing | {create_if_missing,boolean()} | error_if_exists | {error_if_exists,boolean()} | paranoid_checks | {paranoid_checks,boolean()} | {write_buffer_size,pos_integer()} | {max_open_files,pos_integer()} | {block_cache_size,pos_integer()} | {block_size,pos_integer()} | {block_restart_interval,pos_integer()} | {filter_policy,no | {bloom,pos_integer()}}].
 -type db_read_opts()  :: [verify_checksums | {verify_checksums,boolean()} | fill_cache | {fill_cache,boolean()}].
@@ -180,6 +180,11 @@ tid(Tab, Opts) ->
 %%   LevelDB backend via an Erlang NIF.
 %%
 %% - +hyper+ If this option is present, the HyperLeveDB version of the
+%%   LevelDB implementation is used as the backend.  The original
+%%   LevelDB implementation is the default backend.  _not applicable
+%%   to the ets implementation_
+%%
+%% - +rocks+ If this option is present, the RocksDB version of the
 %%   LevelDB implementation is used as the backend.  The original
 %%   LevelDB implementation is the default backend.  _not applicable
 %%   to the ets implementation_
@@ -612,6 +617,7 @@ create(Op, Name, Opts) ->
     Drv = proplists:get_bool(drv, POpts),
     Nif = proplists:get_bool(nif, POpts),
     Hyper = proplists:get_bool(hyper, POpts),
+    Rocks = proplists:get_bool(rocks, POpts),
     Ets = proplists:get_bool(ets, POpts),
 
     DBOptions = fix_db_options(Name, Compressed, Async, proplists:get_value(db, POpts, [])),
@@ -625,19 +631,22 @@ create(Op, Name, Opts) ->
     DBOpts = [{db, DBOptions}, {db_read, DBReadOptions}, {db_write, DBWriteOptions}],
 
     if Drv ->
-            Impl = if Hyper -> hets_impl_drv; true -> lets_impl_drv end,
+            _ = if Hyper andalso Rocks -> erlang:error(badarg, [Name, [proplists:get_value(hyper, POpts), proplists:get_value(rocks, POpts)]]); true -> true end,
+            Impl = if Hyper -> hets_impl_drv; Rocks -> rets_impl_drv; true -> lets_impl_drv end,
             DrvOpts = [{impl, {Impl, DBOpts}} | GenOpts],
             gen_ets_ns:Op(?NS, Name, DrvOpts);
        Nif ->
-            Impl = if Hyper -> hets_impl_nif; true -> lets_impl_nif end,
+            _ = if Hyper andalso Rocks -> erlang:error(badarg, [Name, [proplists:get_value(hyper, POpts), proplists:get_value(rocks, POpts)]]); true -> true end,
+            Impl = if Hyper -> hets_impl_nif; Rocks -> rets_impl_nif; true -> lets_impl_nif end,
             NifOpts = [{impl, {Impl, DBOpts}} | GenOpts],
             gen_ets_ns:Op(?NS, Name, NifOpts);
        Ets ->
             _ = if Hyper -> erlang:error(badarg, [Name, [proplists:get_value(hyper, POpts)]]); true -> true end,
+            _ = if Rocks -> erlang:error(badarg, [Name, [proplists:get_value(rocks, POpts)]]); true -> true end,
             EtsOpts = [{impl, {gen_ets_impl_ets, []}} | GenOpts],
             gen_ets_ns:Op(?NS, Name, EtsOpts);
        true ->
-            Impl = if Hyper -> hets_impl_drv; true -> lets_impl_drv end,
+            Impl = if Hyper -> hets_impl_drv; Rocks -> rets_impl_drv; true -> lets_impl_drv end,
             DrvOpts = [{impl, {Impl, DBOpts}} | GenOpts],
             gen_ets_ns:Op(?NS, Name, DrvOpts)
     end.
@@ -674,7 +683,7 @@ binify(X) when is_binary(X) ->
     X.
 
 options(Options) ->
-    Keys = [set, ordered_set, named_table, keypos, public, protected, private, compressed, async, drv, nif, hyper, ets, db, db_read, db_write],
+    Keys = [set, ordered_set, named_table, keypos, public, protected, private, compressed, async, drv, nif, hyper, rocks, ets, db, db_read, db_write],
     options(Options, Keys).
 
 options(Options, Keys) when is_list(Options) ->

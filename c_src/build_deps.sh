@@ -27,6 +27,7 @@ set -eo pipefail
 SNAPPY_VSN=HEAD
 LEVELDB_VSN=HEAD
 HYPERLEVELDB_VSN=HEAD
+ROCKSDB_VSN=HEAD
 
 if [ `basename $PWD` != "c_src" ]; then
     pushd c_src > /dev/null 2>&1
@@ -40,6 +41,7 @@ case "$1" in
         rm -rf snappy snappy-$SNAPPY_VSN
         rm -rf leveldb leveldb-$LEVELDB_VSN
         rm -rf hyperleveldb hyperleveldb-$HYPERLEVELDB_VSN
+        rm -rf rocksdb rocksdb-$ROCKSDB_VSN
         ;;
     get_deps)
         ;;
@@ -79,6 +81,7 @@ case "$1" in
                 --with-pic \
                 --prefix=$BASEDIR/snappy &&  \
                 make install)
+            rm -f $BASEDIR/snappy/lib/libsnappy.la
         fi
         # leveldb
         if [ ! -f $BASEDIR/leveldb/lib/libleveldb.a ]; then
@@ -114,6 +117,20 @@ case "$1" in
                 install include/hyperleveldb/*.h $BASEDIR/hyperleveldb/include/hyperleveldb && \
                 mkdir -p $BASEDIR/hyperleveldb/lib && \
                 install libhyperleveldb.a $BASEDIR/hyperleveldb/lib)
+        fi
+        # rocksdb
+        if [ ! -f $BASEDIR/rocksdb/lib/librocksdb.a ]; then
+            (cd $REBAR_DEPS_DIR/rocksdb && git archive --format=tar --prefix=rocksdb-$ROCKSDB_VSN/ $ROCKSDB_VSN) \
+                | tar xf -
+            (cd rocksdb-$ROCKSDB_VSN && \
+                echo "echo \"PLATFORM_CFLAGS+=-DSNAPPY -I$BASEDIR/snappy/include\" >> build_config.mk" >> build_tools/build_detect_platform &&
+                echo "echo \"PLATFORM_CXXFLAGS+=-DSNAPPY -I$BASEDIR/snappy/include\" >> build_config.mk" >> build_tools/build_detect_platform &&
+                echo "echo \"PLATFORM_LDFLAGS+=-L $BASEDIR/snappy/lib -lsnappy\" >> build_config.mk" >> build_tools/build_detect_platform &&
+                make static_lib && \
+                mkdir -p $BASEDIR/rocksdb/include/rocksdb && \
+                install include/rocksdb/*.h $BASEDIR/rocksdb/include/rocksdb && \
+                mkdir -p $BASEDIR/rocksdb/lib && \
+                install librocksdb.a $BASEDIR/rocksdb/lib)
         fi
         ;;
 esac

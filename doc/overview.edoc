@@ -57,6 +57,8 @@ implementations:
 - +nif+ CPP NIF with LevelDB backend
 - +hyper drv+ CPP Driver with HyperLevelDB backend
 - +hyper nif+ CPP NIF with HyperLevelDB backend
+- +rocks drv+ CPP Driver with RocksDB backend
+- +rocks nif+ CPP NIF with RocksDB backend
 - +ets+ Erlang ETS backend
 
 If desired, all of the five backends can be called directly using the
@@ -71,6 +73,8 @@ corresponding backend:
 - +nif+ - src/lets_impl_nif.erl
 - +hyper drv+ - src/hets_impl_drv.erl
 - +hyper nif+ - src/hets_impl_nif.erl
+- +rocks drv+ - src/rets_impl_drv.erl
+- +rocks nif+ - src/rets_impl_nif.erl
 - +ets+ - deps/gen_ets/src/gen_ets_impl_ets.erl
 
 The Driver backends are recommended over the NIF backends for two
@@ -480,6 +484,13 @@ HyperLevelDB was forked from Google\'s LevelDB and adapted to more
 closely meet the needs of HyperDex.
 
 See https://github.com/rescrv/HyperLevelDB for further details.
+
+=== What is RocksDB?
+
+RocksDB is a persistent Key-Value Store for Flash and RAM Storage.
+RocksDB is built on earlier work from Google\'s LevelDB.
+
+See https://github.com/facebook/rocksdb for further details.
 
 === What is Snappy?
 

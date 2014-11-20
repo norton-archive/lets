@@ -20,22 +20,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef HETS_DRV_LIB_H
-#define HETS_DRV_LIB_H
+#ifndef RETS_DRV_LIB_H
+#define RETS_DRV_LIB_H
 
 #include <string>
 #include <vector>
 
-#include "hyperleveldb/db.h"
-#include "hyperleveldb/cache.h"
-#include "hyperleveldb/slice.h"
-#include "hyperleveldb/write_batch.h"
-#include "hyperleveldb/filter_policy.h"
+#include "rocksdb/db.h"
+#include "rocksdb/cache.h"
+#include "rocksdb/slice.h"
+#include "rocksdb/write_batch.h"
+#include "rocksdb/filter_policy.h"
 #ifdef ROCKSDB
 #include "rocksdb/table.h"
 #endif
 
-#include "hets_impl_drv.h"
+#include "rets_impl_drv.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -70,17 +70,17 @@ extern "C" {
         char type;
         char privacy;
         std::string* name;
-        leveldb::Options db_options;
-        leveldb::ReadOptions db_read_options;
-        leveldb::WriteOptions db_write_options;
+        rocksdb::Options db_options;
+        rocksdb::ReadOptions db_read_options;
+        rocksdb::WriteOptions db_write_options;
 #ifdef ROCKSDB
         rocksdb::BlockBasedTableOptions db_table_options;
 #endif
         size_t db_block_cache_size;
-        leveldb::Cache* db_block_cache;
+        rocksdb::Cache* db_block_cache;
         int db_filter_policy_bloom_bits_per_key;
-        const leveldb::FilterPolicy* db_filter_policy;
-        leveldb::DB* db;
+        const rocksdb::FilterPolicy* db_filter_policy;
+        rocksdb::DB* db;
         ErlDrvUInt64 db_memory;
         ErlDrvUInt64 db_size;
         std::vector<std::pair<ErlDrvTermData,ErlDrvBinary*> > notify_when_destroyed;
@@ -96,9 +96,9 @@ extern "C" {
 
     extern bool lets_parse_options(lets_impl& impl,
                                    const char* buf, ErlDrvSizeT len);
-    extern bool lets_parse_read_options(leveldb::ReadOptions& opts,
+    extern bool lets_parse_read_options(rocksdb::ReadOptions& opts,
                                         const char* buf, ErlDrvSizeT len);
-    extern bool lets_parse_write_options(leveldb::WriteOptions& opts,
+    extern bool lets_parse_write_options(rocksdb::WriteOptions& opts,
                                          const char* buf, ErlDrvSizeT len);
 
     // helpers
@@ -109,4 +109,4 @@ extern "C" {
 }
 #endif
 
-#endif /* HETS_DRV_LIB_H */
+#endif /* RETS_DRV_LIB_H */

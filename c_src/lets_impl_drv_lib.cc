@@ -57,6 +57,9 @@ lets_init(lets_impl& impl,
     impl.db_options = leveldb::Options();
     impl.db_read_options = leveldb::ReadOptions();
     impl.db_write_options = leveldb::WriteOptions();
+#ifdef ROCKSDB
+    impl.db_table_options = rocksdb::BlockBasedTableOptions();
+#endif
 
     return true;
 }
@@ -181,6 +184,7 @@ lets_parse_options(lets_impl& impl,
             } else if (strcmp(atom, "block_cache_size") == 0) {
                 ng = ei_decode_ulong(buf, &index, &val);
                 if (ng) return FALSE;
+#ifndef ROCKSDB
                 impl.db_block_cache_size = val;
                 delete impl.db_block_cache;
                 impl.db_block_cache = leveldb::NewLRUCache(impl.db_block_cache_size);
@@ -188,14 +192,19 @@ lets_parse_options(lets_impl& impl,
                 if (!impl.db_options.block_cache) {
                     return FALSE;
                 }
+#endif
             } else if (strcmp(atom, "block_size") == 0) {
                 ng = ei_decode_ulong(buf, &index, &val);
                 if (ng) return FALSE;
+#ifndef ROCKSDB
                 impl.db_options.block_size = val;
+#endif
             } else if (strcmp(atom, "block_restart_interval") == 0) {
                 ng = ei_decode_ulong(buf, &index, &val);
                 if (ng) return FALSE;
+#ifndef ROCKSDB
                 impl.db_options.block_restart_interval = val;
+#endif
             } else if (strcmp(atom, "compression") == 0) {
                 ng = ei_decode_atom(buf, &index, atom);
                 if (ng) return FALSE;
@@ -218,6 +227,7 @@ lets_parse_options(lets_impl& impl,
                     if (strcmp(atom, "bloom") == 0) {
                         ng = ei_decode_ulong(buf, &index, &val);
                         if (ng) return FALSE;
+#ifndef ROCKSDB
                         impl.db_filter_policy_bloom_bits_per_key = val;
                         delete impl.db_filter_policy;
                         impl.db_filter_policy = leveldb::NewBloomFilterPolicy(impl.db_filter_policy_bloom_bits_per_key);
@@ -225,13 +235,16 @@ lets_parse_options(lets_impl& impl,
                         if (!impl.db_options.filter_policy) {
                             return FALSE;
                         }
+#endif
                     } else {
                         return FALSE;
                     }
                 } else if (strcmp(atom, "no") == 0) {
                     delete impl.db_filter_policy;
                     impl.db_filter_policy = NULL;
+#ifndef ROCKSDB
                     impl.db_options.filter_policy = NULL;
+#endif
                 } else {
                     return FALSE;
                 }

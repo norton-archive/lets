@@ -211,6 +211,16 @@ implementations:</p>
 </li>
 <li>
 <p>
+<code>rocks drv</code> CPP Driver with RocksDB backend
+</p>
+</li>
+<li>
+<p>
+<code>rocks nif</code> CPP NIF with RocksDB backend
+</p>
+</li>
+<li>
+<p>
 <code>ets</code> Erlang ETS backend
 </p>
 </li>
@@ -241,6 +251,16 @@ corresponding backend:</p>
 <li>
 <p>
 <code>hyper nif</code> - src/hets_impl_nif.erl
+</p>
+</li>
+<li>
+<p>
+<code>rocks drv</code> - src/rets_impl_drv.erl
+</p>
+</li>
+<li>
+<p>
+<code>rocks nif</code> - src/rets_impl_nif.erl
 </p>
 </li>
 <li>
@@ -667,6 +687,12 @@ closely meet the needs of HyperDex.</p>
 <p>See <a href="https://github.com/rescrv/HyperLevelDB">https://github.com/rescrv/HyperLevelDB</a> for further details.</p>
 
 
+<h3 id="_what_is_rocksdb">What is RocksDB?</h3>
+<p>RocksDB is a persistent Key-Value Store for Flash and RAM Storage.
+RocksDB is built on earlier work from Google's LevelDB.</p>
+<p>See <a href="https://github.com/facebook/rocksdb">https://github.com/facebook/rocksdb</a> for further details.</p>
+
+
 <h3 id="_what_is_snappy">What is Snappy?</h3>
 <p>Snappy is a fast compression/decompression library written at Google.</p>
 <p>See <a href="http://code.google.com/p/snappy/">http://code.google.com/p/snappy/</a> for further details.</p>
@@ -940,5 +966,7 @@ File system writes return errors (e.g., disk-full)
 <tr><td><a href="hets_impl_nif.md" class="module">hets_impl_nif</a></td></tr>
 <tr><td><a href="lets.md" class="module">lets</a></td></tr>
 <tr><td><a href="lets_impl_drv.md" class="module">lets_impl_drv</a></td></tr>
-<tr><td><a href="lets_impl_nif.md" class="module">lets_impl_nif</a></td></tr></table>
+<tr><td><a href="lets_impl_nif.md" class="module">lets_impl_nif</a></td></tr>
+<tr><td><a href="rets_impl_drv.md" class="module">rets_impl_drv</a></td></tr>
+<tr><td><a href="rets_impl_nif.md" class="module">rets_impl_nif</a></td></tr></table>
 

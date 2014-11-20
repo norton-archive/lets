@@ -1,4 +1,5 @@
 %% encoding: UTF-8
 {application,lets}.
 {packages,[]}.
-{modules,[hets_impl_drv,hets_impl_nif,lets,lets_impl_drv,lets_impl_nif]}.
+{modules,[hets_impl_drv,hets_impl_nif,lets,lets_impl_drv,lets_impl_nif,
+          rets_impl_drv,rets_impl_nif]}.
