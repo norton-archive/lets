@@ -329,7 +329,7 @@ drv_stop(ErlDrvData handle)
         ErlDrvTermData port = driver_mk_port(d->port);
         ErlDrvTermData receiver = d->impl.notify_when_destroyed.back().first;
         ErlDrvBinary* msg = d->impl.notify_when_destroyed.back().second;
-        ErlDrvTermData spec[] = {ERL_DRV_EXT2TERM, (ErlDrvTermData) msg->orig_bytes, msg->orig_size};
+        ErlDrvTermData spec[] = {ERL_DRV_EXT2TERM, (ErlDrvTermData) msg->orig_bytes, (ErlDrvTermData) msg->orig_size};
         if (erl_drv_send_term(port, receiver, spec, sizeof(spec) / sizeof(spec[0]))) {
             // TODO? driver_failure_atom(d->port, (char*) "notify_when_destroyed");
         }
@@ -683,7 +683,7 @@ lets_get_next(long n, leveldb::Iterator* it, std::vector<ErlDrvTermData>& spec) 
     }
 
     ErlDrvTermData spec_list[] = {
-        ERL_DRV_NIL, ERL_DRV_LIST, length+1
+        ERL_DRV_NIL, ERL_DRV_LIST, (ErlDrvTermData) length+1
     };
     spec.insert(spec.end(), spec_list, spec_list + (sizeof(spec_list) / sizeof(spec_list[0])));
 
@@ -733,7 +733,7 @@ lets_get_next_iter(long n, leveldb::Iterator* it, std::vector<ErlDrvTermData>& s
     }
 
     ErlDrvTermData spec_list[] = {
-        ERL_DRV_NIL, ERL_DRV_LIST, length+1
+        ERL_DRV_NIL, ERL_DRV_LIST, (ErlDrvTermData) length+1
     };
     spec.insert(spec.end(), spec_list, spec_list + (sizeof(spec_list) / sizeof(spec_list[0])));
 
@@ -783,7 +783,7 @@ lets_get_prev(long n, leveldb::Iterator* it, std::vector<ErlDrvTermData>& spec) 
     }
 
     ErlDrvTermData spec_list[] = {
-        ERL_DRV_NIL, ERL_DRV_LIST, length+1
+        ERL_DRV_NIL, ERL_DRV_LIST, (ErlDrvTermData) length+1
     };
     spec.insert(spec.end(), spec_list, spec_list + (sizeof(spec_list) / sizeof(spec_list[0])));
 
@@ -833,7 +833,7 @@ lets_get_prev_iter(long n, leveldb::Iterator* it, std::vector<ErlDrvTermData>& s
     }
 
     ErlDrvTermData spec_list[] = {
-        ERL_DRV_NIL, ERL_DRV_LIST, length+1
+        ERL_DRV_NIL, ERL_DRV_LIST, (ErlDrvTermData) length+1
     };
     spec.insert(spec.end(), spec_list, spec_list + (sizeof(spec_list) / sizeof(spec_list[0])));
 
