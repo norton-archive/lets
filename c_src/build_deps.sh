@@ -48,19 +48,19 @@ case "$1" in
     update_deps)
         ;;
     *)
+        LIBTOOLIZE=libtoolize
+        ($LIBTOOLIZE --version) < /dev/null > /dev/null 2>&1 || {
+            LIBTOOLIZE=glibtoolize
+            ($LIBTOOLIZE --version) < /dev/null > /dev/null 2>&1 || {
+                echo
+                echo "You must have libtool (& friends) installed to compile LETS."
+                echo
+                exit -1
+            }
+        }
+
         # snappy
         if [ ! -f $BASEDIR/snappy/lib/libsnappy.a ]; then
-            LIBTOOLIZE=libtoolize
-            ($LIBTOOLIZE --version) < /dev/null > /dev/null 2>&1 || {
-                LIBTOOLIZE=glibtoolize
-                ($LIBTOOLIZE --version) < /dev/null > /dev/null 2>&1 || {
-                    echo
-                    echo "You must have libtool (& friends) installed to compile LETS."
-                    echo
-                    exit -1
-                }
-            }
-
             (cd $REBAR_DEPS_DIR/snappy && git archive --format=tar --prefix=snappy-$SNAPPY_VSN/ $SNAPPY_VSN) \
                 | tar xf -
             (cd snappy-$SNAPPY_VSN && \
@@ -69,9 +69,9 @@ case "$1" in
             )
             (cd snappy-$SNAPPY_VSN && \
                 rm -rf autom4te.cache && \
+                $LIBTOOLIZE --copy && \
                 aclocal -I m4 && \
                 autoheader && \
-                $LIBTOOLIZE --copy && \
                 automake --add-missing --copy && \
                 autoconf)
             (cd snappy-$SNAPPY_VSN && \
@@ -102,11 +102,17 @@ case "$1" in
             (cd $REBAR_DEPS_DIR/hyperleveldb && git archive --format=tar --prefix=hyperleveldb-$HYPERLEVELDB_VSN/ $HYPERLEVELDB_VSN) \
                 | tar xf -
             (cd hyperleveldb-$HYPERLEVELDB_VSN && \
-             perl -ibak1 -pe 's/leveldb\.la/leveldb.a/g;' Makefile.am && \
-             perl -ibak2 -pe 's/leveldb_la/leveldb_a/g;' Makefile.am && \
-             perl -ibak3 -pe 's/lib_LTLIBARIES/lib_LIBRARIES/g;' Makefile.am)
+                perl -ibak1 -pe 's/leveldb\.la/leveldb.a/g;' Makefile.am && \
+                perl -ibak2 -pe 's/leveldb_la/leveldb_a/g;' Makefile.am && \
+                perl -ibak3 -pe 's/lib_LTLIBARIES/lib_LIBRARIES/g;' Makefile.am)
             (cd hyperleveldb-$HYPERLEVELDB_VSN && \
-                autoreconf -i && \
+                rm -rf autom4te.cache && \
+                $LIBTOOLIZE --copy && \
+                aclocal -I m4 && \
+                autoheader && \
+                automake --add-missing --copy && \
+                autoconf)
+            (cd hyperleveldb-$HYPERLEVELDB_VSN && \
                 env CPPFLAGS="-fPIC -I$BASEDIR/snappy/include $CPPFLAGS" \
                     CFLAGS="-fPIC -I$BASEDIR/snappy/include $CFLAGS" \
                     CXXFLAGS="-fPIC -I$BASEDIR/snappy/include $CXXFLAGS" \
