@@ -105,7 +105,8 @@ case "$1" in
                 perl -ibak1 -pe 's/\.la/.a/g;' Makefile.am && \
                 perl -ibak2 -pe 's/_la_/_a_/g;' Makefile.am && \
                 perl -ibak3 -pe 's/lib_LTLIBRARIES/lib_LIBRARIES/g;' Makefile.am && \
-                perl -ibak4 -pe 's/libhyperleveldb_a_LIBADD/#libhyperleveldb_a_LIBADD/g;' Makefile.am)
+                perl -ibak4 -pe 's/libhyperleveldb_a_LIBADD/#libhyperleveldb_a_LIBADD/g;' Makefile.am && \
+                perl -ibak5 -pe 's!.*_PROGRAMS.*!#!g;' Makefile.am)
             (cd hyperleveldb-$HYPERLEVELDB_VSN && \
                 rm -rf autom4te.cache && \
                 $LIBTOOLIZE --copy && \
