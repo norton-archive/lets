@@ -131,9 +131,9 @@ case "$1" in
             (cd $REBAR_DEPS_DIR/rocksdb && git archive --format=tar --prefix=rocksdb-$ROCKSDB_VSN/ $ROCKSDB_VSN) \
                 | tar xf -
             (cd rocksdb-$ROCKSDB_VSN && \
-                echo "echo \"PLATFORM_CFLAGS+=-DSNAPPY -I$BASEDIR/snappy/include\" >> build_config.mk" >> build_tools/build_detect_platform &&
-                echo "echo \"PLATFORM_CXXFLAGS+=-DSNAPPY -I$BASEDIR/snappy/include\" >> build_config.mk" >> build_tools/build_detect_platform &&
-                echo "echo \"PLATFORM_LDFLAGS+=-L $BASEDIR/snappy/lib -lsnappy\" >> build_config.mk" >> build_tools/build_detect_platform &&
+                echo "echo \"PLATFORM_CCFLAGS+=-fPIC -DSNAPPY -I$BASEDIR/snappy/include\" >> make_config.mk" >> build_tools/build_detect_platform &&
+                echo "echo \"PLATFORM_CXXFLAGS+=-fPIC -DSNAPPY -I$BASEDIR/snappy/include\" >> make_config.mk" >> build_tools/build_detect_platform &&
+                echo "echo \"PLATFORM_LDFLAGS+=-L $BASEDIR/snappy/lib -lsnappy\" >> make_config.mk" >> build_tools/build_detect_platform &&
                 make static_lib && \
                 mkdir -p $BASEDIR/rocksdb/include/rocksdb && \
                 install include/rocksdb/*.h $BASEDIR/rocksdb/include/rocksdb && \
