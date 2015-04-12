@@ -293,6 +293,8 @@ The NIF backends are not built as "dirty" NIFs and can easily block
 </p>
 </li>
 </ul>
+<p><em>Development and testing of LETS is done solely on Mac OS X.  Feedback
+and/or bug reports on other operating systems is welcome.</em></p>
 <p><em>This repository is experimental in nature - use at your own risk and
 please contribute if you find LETS useful.</em></p>
 
@@ -792,7 +794,7 @@ disk-based implementation.</p>
 <h3 id="_what_is_leveldb">What is LevelDB?</h3>
 <p>LevelDB is a fast key-value storage library written at Google that
 provides an ordered mapping from string keys to string values.</p>
-<p>See <a href="http://code.google.com/p/leveldb/">http://code.google.com/p/leveldb/</a> for further details.</p>
+<p>See <a href="https://github.com/google/leveldb">https://github.com/google/leveldb</a> for further details.</p>
 
 
 <h3 id="_what_is_hyperleveldb">What is HyperLevelDB?</h3>
@@ -810,7 +812,7 @@ RocksDB is built on earlier work from Google's LevelDB.</p>
 
 <h3 id="_what_is_snappy">What is Snappy?</h3>
 <p>Snappy is a fast compression/decompression library written at Google.</p>
-<p>See <a href="http://code.google.com/p/snappy/">http://code.google.com/p/snappy/</a> for further details.</p>
+<p>See <a href="https://github.com/google/snappy">https://github.com/google/snappy</a> for further details.</p>
 
 
 
@@ -827,7 +829,7 @@ Erlang - <a href="http://www.erlang.org/">http://www.erlang.org/</a>
 <ul>
 <li>
 <p>
-<strong>R16B or newer, 17.4 has been tested most recently</strong>
+<strong>R16B or newer, 17.5 has been tested most recently</strong>
 </p>
 </li>
 </ul>
@@ -839,7 +841,7 @@ Git - <a href="http://git-scm.com/">http://git-scm.com/</a>
 <ul>
 <li>
 <p>
-<strong>Git 1.5.4 or newer, Git 2.1.4 has been tested most recently</strong>
+<strong>Git 1.5.4 or newer, Git 2.3.5 has been tested most recently</strong>
 </p>
 </li>
 </ul>
