@@ -2,6 +2,7 @@
 .eunit/
 .qc/
 .rebar/
+c_src/*.d
 c_src/*.o
 c_src/hyperleveldb-*/
 c_src/hyperleveldb/
