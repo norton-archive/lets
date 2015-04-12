@@ -94,6 +94,9 @@ reasons:
   Erlang/OTP feature and the LETS NIF backends are built as "dirty"
   NIFs.
 
+_Development and testing of LETS is done solely on Mac OS X.  Feedback
+and/or bug reports on other operating systems is welcome._
+
 _This repository is experimental in nature - use at your own risk and
 please contribute if you find LETS useful._
 
@@ -590,7 +593,7 @@ http://www.erlang.org/doc/man/dets.html for further details.
 LevelDB is a fast key-value storage library written at Google that
 provides an ordered mapping from string keys to string values.
 
-See http://code.google.com/p/leveldb/ for further details.
+See https://github.com/google/leveldb for further details.
 
 === What is HyperLevelDB?
 
@@ -611,7 +614,7 @@ See https://github.com/facebook/rocksdb for further details.
 
 Snappy is a fast compression/decompression library written at Google.
 
-See http://code.google.com/p/snappy/ for further details.
+See https://github.com/google/snappy for further details.
 
 == Tools
 
@@ -619,9 +622,9 @@ For further information and help for related tools, please refer to
 the following links:
 
 - Erlang - http://www.erlang.org/
-  * *R16B or newer, 17.4 has been tested most recently*
+  * *R16B or newer, 17.5 has been tested most recently*
 - Git - http://git-scm.com/
-  * *Git 1.5.4 or newer, Git 2.1.4 has been tested most recently*
+  * *Git 1.5.4 or newer, Git 2.3.5 has been tested most recently*
 - GitHub - https://github.com
 
 == Roadmap
