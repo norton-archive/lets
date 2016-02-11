@@ -95,7 +95,7 @@ case "$1" in
                 mkdir -p $BASEDIR/leveldb/include/leveldb && \
                 install include/leveldb/*.h $BASEDIR/leveldb/include/leveldb && \
                 mkdir -p $BASEDIR/leveldb/lib && \
-                install libleveldb.a $BASEDIR/leveldb/lib)
+                install out-static/libleveldb.a $BASEDIR/leveldb/lib)
         fi
         # hyperleveldb
         if [ ! -f $BASEDIR/hyperleveldb/lib/libhyperleveldb.a ]; then
