@@ -52,7 +52,7 @@ compile-for-eqc: $(lets_erl_files) $(lets_cxx_files) $(rets_erl_files) $(rets_cx
 	$(REBAR) -D QC -D QC_EQC compile eqc compile_only=true
 
 compile-for-proper: $(lets_erl_files) $(lets_cxx_files) $(rets_erl_files) $(rets_cxx_files)
-	$(REBAR) -D QC -D QC_PROPER compile eqc compile_only=true
+	$(REBAR) -D QC -D QC_PROPER compile qc compile_only=true
 
 realclean: clean
 	rm -f $(lets_erl_files) $(lets_cxx_files) $(rets_erl_files) $(rets_cxx_files)
